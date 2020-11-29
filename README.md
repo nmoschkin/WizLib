@@ -1,7 +1,7 @@
 # WizLib
 WiZ Color &amp; Tunable White Light Bulb .NET API Library
 
-This library is in active development.
+This library is in active development, and it's brand new so things will undoubtedly change while I consider next steps.
 
 Internal UDP protocol workings adapted from Python and Java source (https://github.com/sbidy/pywizlight) and also (https://github.com/SRGDamia1/openhab2-addons).
 
