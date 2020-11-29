@@ -217,7 +217,7 @@ namespace WizBulb
             {
                 if (SetProperty(ref selHome, value))
                 {
-                    Rooms = value.Rooms;
+                    Rooms = value?.Rooms;
                 }
             }
         }
