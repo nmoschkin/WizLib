@@ -767,7 +767,7 @@ namespace WizLib
         /// <param name="callback">Callback function that is called for each discovered bulb.</param>
         /// <returns></returns>
         public static async Task<List<Bulb>> ScanForBulbs(
-            ScanMode mode = ScanMode.Registration,
+            ScanMode mode = ScanMode.GetSystemConfig,
             int timeout = 5,
             BulbScanCallback callback = null)
         {
@@ -786,7 +786,7 @@ namespace WizLib
         public static async Task<List<Bulb>> ScanForBulbs(
             IPAddress localAddr, 
             PhysicalAddress macAddr, 
-            ScanMode mode = ScanMode.Registration, 
+            ScanMode mode = ScanMode.GetSystemConfig, 
             int timeout = 5, 
             BulbScanCallback callback = null)
         {
