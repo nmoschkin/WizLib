@@ -19,6 +19,7 @@ namespace WizLib
     /// </summary>
     public sealed class BulbParams : ViewModelBase, ICloneable
     {
+        #region Bulb Type Catalog
 
         public static readonly ReadOnlyDictionary<(int, int), string> BulbTypeCatalog
             = new ReadOnlyDictionary<(int, int), string>(new Dictionary<(int, int), string>()
@@ -29,7 +30,9 @@ namespace WizLib
                 { (60, 1), "Philips Color & Tunable-White A19" },
                 { (20, 2), "Philips Color & Tunable-White A21" }
             });
+        #endregion
 
+        #region Fields
         private bool? state;
 
         private byte? r;
@@ -87,7 +90,13 @@ namespace WizLib
         private int[] ewf;
 
         private string moduleName;
+        #endregion
 
+        #region Settings Rules Enforcement, Copying, Clearing, Configuring, Cloning
+        /// <summary>
+        /// Set the configurate with the settings from the specified light mode and enforce rules.
+        /// </summary>
+        /// <param name="lm"></param>
         public void SetLightMode(LightMode lm)
         {
             if (lm.Settings != null)
@@ -98,12 +107,22 @@ namespace WizLib
             EnforceRules(lm.Type);
         }
 
+        /// <summary>
+        /// Copy this set of parameters to another object.
+        /// </summary>
+        /// <param name="other"></param>
         public void CopyTo(BulbParams other)
         {
             var json = JsonConvert.SerializeObject(this);
             JsonConvert.PopulateObject(json, other);
         }
 
+        /// <summary>
+        /// Attempt to automatically enforce rules given the available current settings.
+        /// </summary>
+        /// <remarks>
+        /// Accurate enforcement should not be considered guaranteed.
+        /// </remarks>
         public void EnforceRules()
         {
             if (Scene == null || Scene == 0)
@@ -117,6 +136,10 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Enforce the rules of the specified light mode type.
+        /// </summary>
+        /// <param name="type"></param>
         public void EnforceRules(LightModeType type)
         {
             switch (type)
@@ -202,6 +225,9 @@ namespace WizLib
             return p;
         }
 
+        /// <summary>
+        /// Enforce rules for simple lighting modes (currently only 'Nightlight' applies.)
+        /// </summary>
         public void EnforceSimpleLightRules()
         {
 
@@ -219,6 +245,9 @@ namespace WizLib
             Duration = null;
         }
 
+        /// <summary>
+        /// Enforce rules for white light modes (Warm Light, Cold Light, Daylight, etc.)
+        /// </summary>
         public void EnforceWhiteLightRules()
         {
             //State = null;
@@ -235,6 +264,9 @@ namespace WizLib
             Duration = null;
         }
 
+        /// <summary>
+        /// Enforce rules for custom color configuration.
+        /// </summary>
         public void EnforceCustomColorRules()
         {
             //State = null;
@@ -251,6 +283,9 @@ namespace WizLib
             Duration = null;
         }
 
+        /// <summary>
+        /// Enforce rules for static light modes.
+        /// </summary>
         public void EnforceStaticSceneRules()
         {
 
@@ -268,6 +303,9 @@ namespace WizLib
             Duration = null;
         }
 
+        /// <summary>
+        /// Enforce rules for dynamic light modes.
+        /// </summary>
         public void EnforceDynamicSceneRules()
         {
 
@@ -285,6 +323,9 @@ namespace WizLib
             Duration = null;
         }
 
+        /// <summary>
+        /// Enforce rules for the pulse/ping.
+        /// </summary>
         public void EnforcePulseRules()
         {
             //State = null;
@@ -301,6 +342,9 @@ namespace WizLib
             Duration = null;
         }
 
+        #endregion
+
+        #region Pilot
         [JsonProperty("dimming")]
         public byte? Brightness
         {
@@ -502,9 +546,10 @@ namespace WizLib
                 SetProperty(ref duration, value);
             }
         }
-                
-        #region Returned Information
 
+        #endregion
+
+        #region Returned Information
 
         [JsonProperty("phoneMac")]
         public string PhoneMac
@@ -694,6 +739,7 @@ namespace WizLib
 
         #endregion
 
+        #region Overrides and Operators
         public override string ToString()
         {
             var s = TypeDescription;
@@ -752,51 +798,8 @@ namespace WizLib
 
             return !v1.Equals(v2);
         }
+        #endregion
 
     }
 
-
-    internal class TupleConverter : JsonConverter<(int, int)?>
-    {
-        public override (int, int)? ReadJson(JsonReader reader, Type objectType, [AllowNull] (int, int)? existingValue, bool hasExistingValue, JsonSerializer serializer)
-        {
-            if (reader is JsonTextReader jr)
-            {
-
-                int x1 = 0;
-                int x2 = 0;
-
-                if (jr.Read() && jr.Value is long i)
-                {
-                    x1 = (int)i;
-                    
-                    if (jr.Read() && jr.Value is long j)
-                    {
-                        x2 = (int)j;
-                    }
-
-                }
-
-                jr.Read();
-
-                return (x1, x2);
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public override void WriteJson(JsonWriter writer, [AllowNull] (int, int)? value, JsonSerializer serializer)
-        {
-            if (value == null)
-            {
-                writer.WriteNull();
-            }
-            else
-            {
-                writer.WriteValue(new int[] { value.Value.Item1, value.Value.Item2 });
-            }
-        }
-    }
 }

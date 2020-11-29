@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 using WizLib.Localization;
+using System.Collections.ObjectModel;
 
 namespace WizLib
 {
@@ -30,15 +32,15 @@ namespace WizLib
 
         protected static Dictionary<int, LightMode> modes = new Dictionary<int, LightMode>();
 
+        protected static ReadOnlyDictionary<LightModeType, string> almts;
+
         private int code;
         private LightModeType type;
 
         private string name;
 
         private BulbParams settings;
-
         private bool jsonInit = false;
-
 
         static LightMode()
         {
@@ -129,6 +131,14 @@ namespace WizLib
                 if (type == value) return;
                 type = value;
             }
+        }
+
+        /// <summary>
+        /// Gets the descriptive name for the type in the local language.
+        /// </summary>
+        public string TypeDescription
+        {
+            get => GetLightModeTypeDescription(type);
         }
 
         /// <summary>
@@ -253,10 +263,9 @@ namespace WizLib
         /// <summary>
         /// Returns all user-defined light modes in the global catalog.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A <see cref="List{LightMode}"/> collection.</returns>
         public static List<LightMode> GetUserLightModes()
         {
-
             List<LightMode> ret = new List<LightMode>();
 
             foreach (var l in modes)
@@ -269,6 +278,79 @@ namespace WizLib
             }
 
             return ret;
+        }
+
+        /// <summary>
+        /// Returns all light modes in the global catalog of the specified type.
+        /// </summary>
+        /// <param name="type">Type of light modes to return.</param>
+        /// <returns>A <see cref="List{LightMode}"/> collection.</returns>
+        public static List<LightMode> GetLightModesByType(LightModeType type)
+        {
+            List<LightMode> ret = new List<LightMode>();
+
+            foreach (var l in modes)
+            {
+
+                if (l.Value.Type == type)
+                {
+                    ret.Add(l.Value);
+                }
+            }
+
+            return ret;
+        }
+
+        public static string GetLightModeTypeDescription(LightModeType type)
+        {
+            switch (type)
+            {
+                case LightModeType.Simple:
+                    return AppResources.Simple;
+
+                case LightModeType.Dynamic:
+                    return AppResources.Dynamic;
+
+                case LightModeType.Static:
+                    return AppResources.Static;
+
+                case LightModeType.Celebrations:
+                    return AppResources.Celebrations;
+
+                case LightModeType.CustomColor:
+                    return AppResources.CustomColor;
+
+                case LightModeType.WhiteLight:
+                    return AppResources.WhiteLight;
+
+                case LightModeType.Progressive:
+                    return AppResources.Progressive;
+
+                default:
+                    return type.ToString();
+            }
+        }
+
+        public static ReadOnlyDictionary<LightModeType, string> AllLightModeTypes
+        {
+            get
+            {
+                if (almts == null)
+                {
+                    var d = new Dictionary<LightModeType, string>();
+                    var fs = typeof(LightModeType).GetFields(bindingAttr: BindingFlags.Public | BindingFlags.Static);
+
+                    foreach (var f in fs)
+                    {
+                        var lmt = (LightModeType)f.GetValue(null);
+
+                        d.Add(lmt, GetLightModeTypeDescription(lmt));
+                    }
+                    almts = new ReadOnlyDictionary<LightModeType, string>(d);
+                }
+
+                return almts;
+            }
         }
 
         /// <summary>

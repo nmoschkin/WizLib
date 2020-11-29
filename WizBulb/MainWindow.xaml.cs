@@ -225,7 +225,7 @@ namespace WizBulb
         private void Sort(string sortBy, ListSortDirection direction)
         {
             var dataView =
-              CollectionViewSource.GetDefaultView(BulbList.ItemsSource) as ListCollectionView;
+              CollectionViewSource.GetDefaultView(BulbList.ItemsSource);
 
             //if (sortBy == "Scene")
             //{

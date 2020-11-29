@@ -337,20 +337,48 @@ namespace WizBulb
         public virtual void PopulateLightModesMenu(MenuItem mi)
         {
             MenuItem mis;
-            List<MenuItem> miln = new List<MenuItem>();
+            ObservableCollection<MenuItem> miln = new ObservableCollection<MenuItem>();
 
             var lms = LightMode.LightModes.Values;
+            var lmts = LightMode.AllLightModeTypes;
 
-            foreach (var lm in lms)
+
+            ObservableCollection<MenuItem> subBowers = new ObservableCollection<MenuItem>();
+
+            foreach (var lmt in lmts)
             {
                 mis = new MenuItem()
                 {
-                    Header = lm.Name,
-                    Tag = lm
+                    Header = lmt.Value,
+                    Tag = lmt.Key
                 };
 
-                mis.Click += LightModeItemClicked;
+                mis.ItemsSource = new ObservableCollection<MenuItem>();
                 miln.Add(mis);
+            }
+
+            foreach (var lm in lms)
+            {
+                foreach (var sm in miln)
+                {
+                    if ((LightModeType)sm.Tag == lm.Type)
+                    {
+                        mis = new MenuItem()
+                        {
+                            Header = lm.Name,
+                            Tag = lm
+                        };
+
+                        mis.Click += LightModeItemClicked;
+
+                        if (sm.ItemsSource is ObservableCollection<MenuItem> lsm)
+                        {
+                            lsm.Add(mis);
+                        }
+
+                        break;
+                    }
+                }
             }
 
             mi.ItemsSource = miln;

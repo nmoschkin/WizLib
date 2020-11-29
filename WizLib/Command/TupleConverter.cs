@@ -1,0 +1,56 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Newtonsoft.Json;
+
+namespace WizLib
+{
+
+    internal class TupleConverter : JsonConverter<(int, int)?>
+    {
+        public override (int, int)? ReadJson(JsonReader reader, Type objectType, [AllowNull] (int, int)? existingValue, bool hasExistingValue, JsonSerializer serializer)
+        {
+            if (reader is JsonTextReader jr)
+            {
+
+                int x1 = 0;
+                int x2 = 0;
+
+                if (jr.Read() && jr.Value is long i)
+                {
+                    x1 = (int)i;
+
+                    if (jr.Read() && jr.Value is long j)
+                    {
+                        x2 = (int)j;
+                    }
+
+                }
+
+                jr.Read();
+
+                return (x1, x2);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public override void WriteJson(JsonWriter writer, [AllowNull] (int, int)? value, JsonSerializer serializer)
+        {
+            if (value == null)
+            {
+                writer.WriteNull();
+            }
+            else
+            {
+                writer.WriteValue(new int[] { value.Value.Item1, value.Value.Item2 });
+            }
+        }
+    }
+}

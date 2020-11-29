@@ -61,6 +61,15 @@ namespace WizLib.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Celebrations.
+        /// </summary>
+        internal static string Celebrations {
+            get {
+                return ResourceManager.GetString("Celebrations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 0048BA|Absolute Zero
         ///B0BF1A|Acid green
         ///7CB9E8|Aero
@@ -104,6 +113,15 @@ namespace WizLib.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dynamic.
+        /// </summary>
+        internal static string Dynamic {
+            get {
+                return ResourceManager.GetString("Dynamic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Off.
         /// </summary>
         internal static string Off {
@@ -122,11 +140,47 @@ namespace WizLib.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Progressive.
+        /// </summary>
+        internal static string Progressive {
+            get {
+                return ResourceManager.GetString("Progressive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Simple.
+        /// </summary>
+        internal static string Simple {
+            get {
+                return ResourceManager.GetString("Simple", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Static.
+        /// </summary>
+        internal static string Static {
+            get {
+                return ResourceManager.GetString("Static", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unknown State.
         /// </summary>
         internal static string UnknownState {
             get {
                 return ResourceManager.GetString("UnknownState", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to White Light.
+        /// </summary>
+        internal static string WhiteLight {
+            get {
+                return ResourceManager.GetString("WhiteLight", resourceCulture);
             }
         }
     }

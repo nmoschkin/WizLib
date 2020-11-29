@@ -133,4 +133,19 @@
   <data name="UnknownState" xml:space="preserve">
     <value>Unknown State</value>
   </data>
+  <data name="CustomColor" xml:space="preserve">
+    <value>Custom Color</value>
+  </data><data name="Static" xml:space="preserve">
+    <value>Static</value>
+  </data><data name="Dynamic" xml:space="preserve">
+    <value>Dynamic</value>
+  </data><data name="WhiteLight" xml:space="preserve">
+    <value>White Light</value>
+  </data><data name="Simple" xml:space="preserve">
+    <value>Simple</value>
+  </data><data name="Progressive" xml:space="preserve">
+    <value>Progressive</value>
+  </data><data name="Celebrations" xml:space="preserve">
+    <value>Celebrations</value>
+  </data>
 </root>
