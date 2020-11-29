@@ -613,7 +613,6 @@ namespace WizLib
             };
 
             _ = SendCommand(cmd);
-            // TurnOn();
         }
 
         /// <summary>
