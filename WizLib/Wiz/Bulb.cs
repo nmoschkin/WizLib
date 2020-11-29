@@ -603,7 +603,7 @@ namespace WizLib
         /// <summary>
         /// Pulse the bulb
         /// </summary>
-        public void Pulse(int delta = -70, int pulseTime = 500)
+        public void Pulse(int delta = -50, int pulseTime = 250)
         {
             var cmd = new BulbCommand(BulbMethod.Pulse);
             cmd.Params = new BulbParams()
