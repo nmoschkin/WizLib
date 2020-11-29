@@ -760,7 +760,7 @@ namespace WizLib
         }
 
         /// <summary>
-        /// Scan for bulbs on the specified network.
+        /// Scan for bulbs on the default network.
         /// </summary>
         /// <param name="mode">The broadcast <see cref="ScanMode"/> to use when scanning.</param>
         /// <param name="timeout">Timeout for scan, in whole seconds.</param>
@@ -771,7 +771,7 @@ namespace WizLib
             int timeout = 5,
             BulbScanCallback callback = null)
         {
-            return await ScanForBulbs(null, null, mode, timeout, callback);
+            return await ScanForBulbs(NetworkHelper.DefaultLocalIP, NetworkHelper.DefaultLocalMAC, mode, timeout, callback);
         }
 
         /// <summary>
