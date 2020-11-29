@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Hardware", "..\Da
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Win32Api", "..\DataTools5\DataTools.Win32Api\DataTools.Win32Api.csproj", "{CFAA4414-9A00-4F9B-B13D-15EB205CCF4F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.ColorControls", "..\DataTools5\ColorControls\DataTools.ColorControls.csproj", "{2A39E5B1-BA5B-4AEC-8077-27CBBBDC3014}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.ColorControls", "..\DataTools5\DataTools.ColorControls\DataTools.ColorControls.csproj", "{2A39E5B1-BA5B-4AEC-8077-27CBBBDC3014}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
