@@ -9,8 +9,10 @@ using Newtonsoft.Json;
 
 namespace WizLib
 {
-
-    internal class TupleConverter : JsonConverter<(int, int)?>
+    /// <summary>
+    /// 2-element <see cref="int[]"/> to nullable tuple <see cref="JsonConverter{T}"/>.
+    /// </summary>
+    internal sealed class TupleConverter : JsonConverter<(int, int)?>
     {
         public override (int, int)? ReadJson(JsonReader reader, Type objectType, [AllowNull] (int, int)? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {

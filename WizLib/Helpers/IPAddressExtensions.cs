@@ -7,6 +7,9 @@ using System.Net;
 
 namespace System.Net
 {
+    /// <summary>
+    /// <see cref="IPAddress"/> extensions.
+    /// </summary>
     public static class IPAddressExtensions
     {
         /// <summary>

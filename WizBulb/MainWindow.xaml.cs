@@ -54,6 +54,7 @@ namespace WizBulb
             
             Width = size.Width;
             Height = size.Height;
+            var ip = NetworkHelper.DefaultLocalIP;
 
             //var b = new Bulb("192.168.1.12");
             //var b2 = new Bulb("192.168.1.8");

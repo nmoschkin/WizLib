@@ -133,7 +133,15 @@ namespace WizLib.Helpers
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write(t + ": ");
 
-            Console.ForegroundColor = ConsoleColor.Green;
+            if (inp)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+            }
+
             Console.WriteLine(text);
         }
     }

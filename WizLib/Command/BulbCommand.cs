@@ -10,6 +10,9 @@ using Newtonsoft.Json;
 
 namespace WizLib
 {
+    /// <summary>
+    /// Bulb command structure root object.
+    /// </summary>
     public sealed class BulbCommand : ViewModelBase
     {
 
@@ -20,6 +23,9 @@ namespace WizLib
         
         private string env;
 
+        /// <summary>
+        /// The <see cref="BulbMethod"/> of this instance.
+        /// </summary>
         [JsonProperty("method")]
         public BulbMethod Method
         {
@@ -30,6 +36,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Outbound paramters.
+        /// </summary>
         [JsonProperty("params")]
         public BulbParams Params
         {
@@ -40,6 +49,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Inbound results.
+        /// </summary>
         [JsonProperty("result")]
         public BulbParams Result
         {
@@ -50,6 +62,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Environment.
+        /// </summary>
         [JsonProperty("env")]
         public string Environment
         {
@@ -60,6 +75,10 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Assemble and return the JSON string for this command.
+        /// </summary>
+        /// <returns></returns>
         public string AssembleCommand()
         {
             JsonSerializerSettings settings = new JsonSerializerSettings()
@@ -72,17 +91,28 @@ namespace WizLib
             return JsonConvert.SerializeObject(this, settings);
         }
 
+        /// <summary>
+        /// Create a new, blank instance.
+        /// </summary>
         public BulbCommand()
         {
             Params = new BulbParams();
         }
 
+        /// <summary>
+        /// Create a new instance initialized to the specified <see cref="BulbMethod"/>.
+        /// </summary>
+        /// <param name="mtd"></param>
         public BulbCommand(BulbMethod mtd)
         {
             Method = mtd;
             Params = new BulbParams();
         }
 
+        /// <summary>
+        /// Create a new instance initialzed with a JSON string object.
+        /// </summary>
+        /// <param name="json"></param>
         public BulbCommand(string json)
         {
             try

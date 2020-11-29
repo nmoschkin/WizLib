@@ -11,6 +11,10 @@ using System.Threading.Tasks;
 
 namespace WizLib
 {
+    /// <summary>
+    /// Keyed observable collection.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class KeyedObservableCollection<T> : IList<T>, INotifyPropertyChanged, INotifyCollectionChanged where T : class
     {
 

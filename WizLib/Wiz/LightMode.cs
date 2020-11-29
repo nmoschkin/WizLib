@@ -13,17 +13,50 @@ using System.Collections.ObjectModel;
 namespace WizLib
 {
 
+    /// <summary>
+    /// Light mode families.
+    /// </summary>
     public enum LightModeType
     {
+        /// <summary>
+        /// Custom color mode that supports <see cref="BulbParams.Brightness"/>.
+        /// </summary>
         CustomColor = 0,
+        
+        /// <summary>
+        /// Static light modes that support <see cref="BulbParams.Brightness"/>.
+        /// </summary>
         Static = 1,
+
+        /// <summary>
+        /// Dynamic light modes that support <see cref="BulbParams.Brightness"/> and  <see cref="BulbParams.Speed"/>.
+        /// </summary>
         Dynamic = 2,
+
+        /// <summary>
+        /// White light modes that support <see cref="BulbParams.Temperature"/>.
+        /// </summary>
         WhiteLight = 3,
+
+        /// <summary>
+        /// Simple light modes that do not support additional paramters.
+        /// </summary>
         Simple = 4,
+
+        /// <summary>
+        /// Progressive light modes that evolve over 30 minutes and do not support additional paramters.
+        /// </summary>
         Progressive = 5,
+
+        /// <summary>
+        /// Dynamic holiday-themed light modes that support <see cref="BulbParams.Brightness"/> and  <see cref="BulbParams.Speed"/>.
+        /// </summary>
         Celebrations = 6
     }
 
+    /// <summary>
+    /// WiZ bulb built-in and custom lighting mode (scene) class.
+    /// </summary>
     public class LightMode : IComparable<LightMode>
     {
         public const int UserStartIdx = 2000;
@@ -301,6 +334,11 @@ namespace WizLib
             return ret;
         }
 
+        /// <summary>
+        /// Get a localized text description for a <see cref="LightModeType"/> value.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static string GetLightModeTypeDescription(LightModeType type)
         {
             switch (type)
@@ -331,6 +369,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Get a dictionary of all <see cref="LightModeType"/> values and descriptions.
+        /// </summary>
         public static ReadOnlyDictionary<LightModeType, string> AllLightModeTypes
         {
             get

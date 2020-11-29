@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace WizLib
 {
+    /// <summary>
+    /// Networking Helpers
+    /// </summary>
     public static class NetworkHelper
     {
         private static IPAddress defAddr;
@@ -26,7 +29,7 @@ namespace WizLib
         /// <summary>
         /// The default local address to bind to for UDP calls to bulbs.
         /// </summary>
-        public static IPAddress LocalAddress
+        public static IPAddress DefaultLocalIP
         {
             get
             {
@@ -46,7 +49,7 @@ namespace WizLib
         /// <summary>
         /// The default local interface to bind to for UDP calls to bulbs.
         /// </summary>
-        public static PhysicalAddress MACAddress
+        public static PhysicalAddress DefaultLocalMAC
         {
             get
             {
@@ -84,6 +87,18 @@ namespace WizLib
                     return;
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the status of the internet connection for the local machine.
+        /// </summary>
+        /// <returns>True if there is internet.</returns>
+        public static async Task<bool> GetHasInternet() 
+        {
+            var p = new Ping();
+            var reply = await p.SendPingAsync(DefaultPingIP);
+
+            return (reply.Status == IPStatus.Success);
         }
 
         /// <summary>

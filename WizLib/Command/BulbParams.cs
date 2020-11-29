@@ -345,6 +345,13 @@ namespace WizLib
         #endregion
 
         #region Pilot
+
+        /// <summary>
+        /// Gets or sets the brightness level.
+        /// </summary>
+        /// <remarks>
+        /// Value must be between 10 and 100.
+        /// </remarks>
         [JsonProperty("dimming")]
         public byte? Brightness
         {
@@ -352,10 +359,15 @@ namespace WizLib
             set
             {
                 if (value > 100) value = 100;
+                else if (value < 10) value = 10;
+
                 SetProperty(ref dimming, value);
             }
         }
 
+        /// <summary>
+        /// Gets or sets the on/off state of the bulb.
+        /// </summary>
         [JsonProperty("state")]
         public bool? State
         {
@@ -366,6 +378,12 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Gets or sets the animation speed of a dynamic scene.
+        /// </summary>
+        /// <remarks>
+        /// Value must be between 10 and 100.
+        /// </remarks>
         [JsonProperty("speed")]
         public byte? Speed
         {
@@ -374,7 +392,7 @@ namespace WizLib
             {
                 if (value != null)
                 {
-                    if (value < 1) value = 1;
+                    if (value < 10) value = 10;
                     else if (value > 100) value = 100;
                 }
 
@@ -382,6 +400,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Gets or sets the white-light color temperature of the bulb.
+        /// </summary>
         [JsonProperty("temp")]
         public int? Temperature
         {
@@ -398,6 +419,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Gets or sets a built-in scene code.
+        /// </summary>
         [JsonProperty("sceneId")]
         public int? Scene
         {
@@ -409,6 +433,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Gets the <see cref="LightMode"/> instance of the built-in <see cref="Scene"/>.
+        /// </summary>
         [JsonIgnore]
         public LightMode LightModeInfo
         {
@@ -425,6 +452,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Red color channel.
+        /// </summary>
         [JsonProperty("r")]
         public byte? Red
         {
@@ -437,6 +467,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Green color channel.
+        /// </summary>
         [JsonProperty("g")]
         public byte? Green
         {
@@ -449,6 +482,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Blue color channel.
+        /// </summary>
         [JsonProperty("b")]
         public byte? Blue
         {
@@ -461,6 +497,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Gets or sets the color for a custom color configuration.
+        /// </summary>
         [JsonIgnore]
         public System.Drawing.Color? Color
         {
@@ -507,6 +546,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Gets or sets the warm-white value.
+        /// </summary>
         [JsonProperty("w")]
         public byte? WarmWhite
         {
@@ -517,6 +559,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Gets or sets the cold-white value.
+        /// </summary>
         [JsonProperty("c")]
         public byte? ColdWhite
         {
@@ -527,6 +572,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Gets or sets the pulse delta.
+        /// </summary>
         [JsonProperty("delta")]
         public int? Delta
         {
@@ -537,6 +585,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Gets or sets the pulse duration (in milliseconds.)
+        /// </summary>
         [JsonProperty("duration")]
         public int? Duration
         {
@@ -551,6 +602,9 @@ namespace WizLib
 
         #region Returned Information
 
+        /// <summary>
+        /// The local Mac address.
+        /// </summary>
         [JsonProperty("phoneMac")]
         public string PhoneMac
         {
@@ -561,6 +615,12 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Pass true to register.
+        /// </summary>
+        /// <remarks>
+        /// It is not recommended to register from the PC, right now.
+        /// </remarks>
         [JsonProperty("register")]
         public bool? Register
         {
@@ -571,6 +631,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// The local IP address.
+        /// </summary>
         [JsonProperty("phoneIp")]
         public string PhoneIp
         {
@@ -581,6 +644,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Bulb Id.
+        /// </summary>
         [JsonProperty("id")]
         public string Id
         {
@@ -591,6 +657,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Received signal strength indicator.
+        /// </summary>
         [JsonProperty("rssi")]
         public int? Rssi
         {
@@ -601,6 +670,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Source (can be bluetooth, lan, or wan)
+        /// </summary>
         [JsonProperty("src")]
         public string Source
         {
@@ -611,6 +683,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Bulb Mac address.
+        /// </summary>
         [JsonProperty("mac")]
         public string MACAddress
         {
@@ -621,6 +696,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// True if the last command was successful.
+        /// </summary>
         [JsonProperty("success")]
         public bool? Success
         {
@@ -631,6 +709,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Home Id.
+        /// </summary>
         [JsonProperty("homeId")]
         public int? HomeId
         {
@@ -641,6 +722,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Room Id.
+        /// </summary>
         [JsonProperty("roomId")]
         public int? RoomId
         {
@@ -651,6 +735,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Driver configuration.
+        /// </summary>
         [JsonProperty("drvConf")]
         public (int, int)? DrvConf
         {
@@ -664,6 +751,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Driver configuration.
+        /// </summary>
         [JsonIgnore]
         public string DriverConfig
         {
@@ -680,6 +770,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Product module Ewf code.
+        /// </summary>
         [JsonProperty("ewf")] 
         public int[] Ewf
         {
@@ -690,6 +783,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Product module Ewf hex code.
+        /// </summary>
         [JsonProperty("ewfHex")]
         public string EwfHex
         {
@@ -700,6 +796,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Firmware version.
+        /// </summary>
         [JsonProperty("fwVersion")]
         public string FirmwareVersion
         {
@@ -710,6 +809,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Product module name.
+        /// </summary>
         [JsonProperty("moduleName")] 
         public string ModuleName
         {
@@ -721,6 +823,9 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Product bulb type description.
+        /// </summary>
         [JsonIgnore]
         public string TypeDescription
         {

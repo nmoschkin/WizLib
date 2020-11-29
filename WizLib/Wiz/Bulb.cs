@@ -797,14 +797,14 @@ namespace WizLib
             
             if (localAddr == null)
             {
-                localAddr = NetworkHelper.LocalAddress;
+                localAddr = NetworkHelper.DefaultLocalIP;
             }
 
             localAddr = localAddr.Clone();
 
             if (macAddr == null)
             {
-                macAddr = NetworkHelper.MACAddress;
+                macAddr = NetworkHelper.DefaultLocalMAC;
             }
 
             var udpClient = new UdpClient();

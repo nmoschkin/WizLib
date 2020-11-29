@@ -150,6 +150,10 @@ namespace WizLib
             return new BulbMethod(src, false);
         }
 
+        /// <summary>
+        /// Returns the method string of this instance.
+        /// </summary>
+        /// <returns></returns>
         public override string ToString() => mtd;
 
         public override bool Equals(object obj)
