@@ -408,12 +408,12 @@ namespace WizBulb
 
         }
 
-        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private async void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (notch) return;
 
             byte i = (byte)e.NewValue;
-            Bulb.SetLights(vm.SelectedBulbs, i);
+            await Bulb.SetLights(vm.SelectedBulbs, i);
 
         }
     }

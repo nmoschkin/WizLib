@@ -720,10 +720,6 @@ namespace WizLib
                 {
                     if (udpClient.Available > 0)
                     {
-                        string json = null;
-                        Bulb bulb = null;
-                        BulbCommand p = null;
-
                         try
                         {
                             var recvBuffer = udpClient.Receive(ref from);

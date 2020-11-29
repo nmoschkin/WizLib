@@ -397,8 +397,7 @@ namespace WizBulb
                     }
                     else if (SelectedBulbs != null && SelectedBulbs.Count > 0)
                     {
-                        Bulb.SetLights(SelectedBulbs, lm);
-                        await Task.Delay(500);
+                        await Bulb.SetLights(SelectedBulbs, lm);
 
                         foreach(Bulb bulb in SelectedBulbs)
                         {
