@@ -152,6 +152,33 @@ namespace WizLib
 
         public override string ToString() => mtd;
 
+        public override bool Equals(object obj)
+        {
+            if (obj is BulbMethod m)
+            {
+                return m.mtd == mtd && m.isInboundOnly == isInboundOnly && m.isSetMethod == isSetMethod;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return mtd.GetHashCode();
+        }
+
+        public static bool operator ==(BulbMethod a, BulbMethod b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(BulbMethod a, BulbMethod b)
+        {
+            return !a.Equals(b);
+        }
+
     }
 
     /// <summary>

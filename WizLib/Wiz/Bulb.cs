@@ -39,13 +39,13 @@ namespace WizLib
     }
 
     /// <summary>
-    /// Encapsulates the characteristics and behavior of a Philips Wiz light bulb.
+    /// Encapsulates the characteristics and behavior of a WiZ light bulb.
     /// </summary>
     public class Bulb : ViewModelBase //, IComparable
     {
 
         /// <summary>
-        /// The default port for Wiz bulbs.
+        /// The default port for WiZ bulbs.
         /// </summary>
         public const int DefaultPort = 38899;
 
@@ -55,7 +55,7 @@ namespace WizLib
         /// </summary>
         public static bool HasConsole { get; set; }
 
-        private static IPAddress localip = null;
+        private static IPAddress localip = NetworkHelper.LocalAddress;
 
         /// <summary>
         /// Gets or sets the working local IP address.
@@ -91,7 +91,7 @@ namespace WizLib
         protected static bool udpActive;
 
         /// <summary>
-        /// Gets or sets the settings object used to configure this bulb.
+        /// Gets or sets the <see cref="BulbParams"/> object used to configure this bulb.
         /// </summary>
         public virtual BulbParams Settings
         {
@@ -487,14 +487,14 @@ namespace WizLib
         /// <param name="bulbs"></param>
         /// <param name="c"></param>
         /// <param name="brightness"></param>
-        public static void SetLights(IEnumerable<Bulb> bulbs, Color c, byte? brightness = null)
+        public static async Task SetLights(IEnumerable<Bulb> bulbs, Color c, byte? brightness = null)
         {
             BulbParams bp = new BulbParams();
 
             bp.Color = c;
             bp.Brightness = brightness;
 
-            SetLights(bulbs, bp);
+            await SetLights(bulbs, bp);
         }
 
         /// <summary>
@@ -504,7 +504,7 @@ namespace WizLib
         /// <param name="lm"></param>
         /// <param name="brightness"></param>
         /// 
-        public static void SetLights(IEnumerable<Bulb> bulbs, LightMode lm, byte? brightness = null, byte? speed = null, int? colorTemp = null)
+        public static async Task SetLights(IEnumerable<Bulb> bulbs, LightMode lm, byte? brightness = null, byte? speed = null, int? colorTemp = null)
         {
             BulbParams bp = new BulbParams();
         
@@ -515,7 +515,7 @@ namespace WizLib
 
             bp.EnforceRules(lm.Type);
 
-            SetLights(bulbs, bp);
+            await SetLights(bulbs, bp);
         }
 
         /// <summary>
@@ -523,12 +523,12 @@ namespace WizLib
         /// </summary>
         /// <param name="bulbs"></param>
         /// <param name="brightness"></param>
-        public static void SetLights(IEnumerable<Bulb> bulbs, byte? brightness = null)
+        public static async Task SetLights(IEnumerable<Bulb> bulbs, byte? brightness = null)
         {
             BulbParams bp = new BulbParams();
             bp.Brightness = brightness;
 
-            SetLights(bulbs, bp);
+            await SetLights(bulbs, bp);
         }
 
         /// <summary>
@@ -537,26 +537,15 @@ namespace WizLib
         /// </summary>
         /// <param name=""></param>
         /// <param name="bp"></param>
-        public static void SetLights(IEnumerable<Bulb> bulbs, BulbParams bp)
+        public static async Task SetLights(IEnumerable<Bulb> bulbs, BulbParams bp)
         {
             var cmd = new BulbCommand(BulbMethod.SetPilot);
             cmd.Params = bp;
 
-            byte[] buffer;
-            var s = cmd.AssembleCommand();
-
-            buffer = Encoding.UTF8.GetBytes(s);
-            List<Action> a = new List<Action>();
-
             foreach (var b in bulbs)
             {
-                //a.Add(() =>
-                //{
-                SendUDP(buffer, b.IPAddress, b.Port);
-                //});
+                await b.SendCommand(cmd);
             }
-
-            // Parallel.Invoke(a.ToArray());
         }
 
         /// <summary>
@@ -645,23 +634,6 @@ namespace WizLib
         }
 
         /// <summary>
-        /// Send configuration back to the blub
-        /// </summary>
-        internal void SetPilot()
-        {
-            if (settings == null) return;
-            
-            var cmd = new BulbCommand(BulbMethod.SetPilot) 
-            { 
-                Params = Settings.Clone(true) 
-            };
-
-            if (cmd.Params.Color != null) cmd.Params.Scene = null;
-
-            _ = SendCommand(cmd);
-        }
-
-        /// <summary>
         /// Returns a string representation of the current object.
         /// </summary>
         /// <returns></returns>
@@ -679,7 +651,6 @@ namespace WizLib
             {
                 return addr?.ToString();
             }
-
         }
 
         protected void SettingsChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -698,20 +669,22 @@ namespace WizLib
             }
         }
 
-        protected async Task<BulbCommand> SendCommand(BulbCommand cmd, bool wait = false)
+        protected async Task<BulbCommand> SendCommand(BulbCommand cmd)
         {
-            if ((cmd.Params?.Scene ?? 0) != 0)
+            if (cmd.Method == BulbMethod.SetPilot)
+            {
                 cmd.Params?.EnforceRules();
+            }
 
-            var x = await SendCommand(cmd.AssembleCommand(), wait);
+            var x = await SendCommand(cmd.AssembleCommand());
             return new BulbCommand(x);
         }
 
-        protected async Task<string> SendCommand(string cmd, bool wait = false)
+        protected async Task<string> SendCommand(string cmd)
         {
 
             byte[] bOut = Encoding.UTF8.GetBytes(cmd);
-            var buffer = await SendUDP(bOut, waitForChannel: wait);
+            var buffer = await SendUDP(bOut);
             string json;
 
             if (buffer?.Length > 0)
@@ -728,57 +701,8 @@ namespace WizLib
 
         }
 
-        protected static void SendUDP(byte[] cmd, string addr, int port, string localAddr = null)
+        protected async Task<byte[]> SendUDP(byte[] cmd, string localAddr = null)
         {
-            byte[] buffer = cmd;
-
-            if (localAddr != null)
-                LocalAddress = System.Net.IPAddress.Parse(localAddr);
-
-            if (LocalAddress == null)
-            {
-                udpActive = false;
-                return;
-            }
-
-            var sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-            sock.Bind(new IPEndPoint(LocalAddress, port));
-            sock.Connect(new IPEndPoint(System.Net.IPAddress.Parse(addr), port));
-            sock.Send(buffer);
-            sock.Dispose();
-
-            //var udpClient = new UdpClient();
-
-            //udpClient.ExclusiveAddressUse = false;
-            //udpClient.Client.ExclusiveAddressUse = false;
-            //udpClient.Client.Bind(new IPEndPoint(LocalAddress, DefaultPort));
-            //udpClient.DontFragment = true;
-
-            //udpClient.Send(buffer, buffer.Length, addr, port);
-
-            //udpClient?.Close();
-            //udpClient?.Dispose();
-        }
-
-        protected async Task<byte[]> SendUDP(byte[] cmd, string localAddr = null, bool waitForChannel = false)
-        {
-
-            //if (!waitForChannel)
-            //{
-            //    if (udpActive)
-            //    {
-            //        return null;
-            //    }
-            //}
-            //else
-            //{
-            //    while (udpActive)
-            //    {
-            //        await Task.Delay(100);
-            //    }
-            //}
-
             udpActive = true;
 
             if (HasConsole) Console.WriteLine("Send UDP...");
@@ -798,6 +722,7 @@ namespace WizLib
             }
 
             var udpClient = new UdpClient();
+        
             udpClient.ExclusiveAddressUse = false;
             udpClient.Client.Bind(new IPEndPoint(LocalAddress, DefaultPort));
             udpClient.DontFragment = true;
@@ -834,13 +759,13 @@ namespace WizLib
                     }
 
                     await Task.Delay(100);
-                    //tdelc++;
+                    tdelc++;
 
-                    //if (tdelc >= 5)
-                    //{
-                    //    udpClient.Send(buffer, buffer.Length, "255.255.255.255", port);
-                    //    tdelc = 0;
-                    //}
+                    if (tdelc >= 5)
+                    {
+                        udpClient.Send(buffer, buffer.Length, "255.255.255.255", port);
+                        tdelc = 0;
+                    }
                 }
 
                 if (HasConsole) Console.WriteLine("Finished");
@@ -870,21 +795,6 @@ namespace WizLib
         /// <returns></returns>
         public static async Task<List<Bulb>> ScanForBulbs(string localAddr, string macAddr, ScanModes mode = ScanModes.Registration, int timeout = 5, BulbScanCallback callback = null, bool waitForChannel = false)
         {
-            //if (!waitForChannel)
-            //{
-            //    if (udpActive)
-            //    {
-            //        return null;
-            //    }
-            //}
-            //else
-            //{
-            //    while (udpActive)
-            //    {
-            //        await Task.Delay(100);
-            //    }
-            //}
-
             udpActive = true;
 
             if (HasConsole)
@@ -1012,83 +922,5 @@ namespace WizLib
             return bulbs;
         }
 
-        //public int CompareTo(object obj)
-        //{
-        //    if (obj is Bulb other)
-        //    {
-        //        if (Scene != null && other.Scene != null)
-        //        {
-        //            return Scene.CompareTo(other.Scene);
-        //        }
-        //        else 
-        //        {
-        //            var i = string.Compare(Name, other.Name);
-
-        //            if (i == 0)
-        //            {
-
-        //                i = string.Compare(IPAddress.ToString(), other.IPAddress.ToString());
-        //                if (i == 0)
-        //                {
-        //                    i = string.Compare(Settings?.MACAddress, other.Settings?.MACAddress);
-
-        //                }
-        //            }
-
-        //            return i;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        return -1;
-        //    }
-        //}
     }
-
-    //public class BulbComparer : System.Collections.IComparer
-    //{
-    //    public string PropertyName { get; set; } = "Scene";
-
-    //    public int Compare(object a, object b)
-    //    {
-    //        var la = a as Bulb;
-    //        var lb = b as Bulb;
-
-    //        if (la == null && lb == null)
-    //        {
-    //            return 0;
-    //        }
-    //        else if (la == null && lb != null)
-    //        {
-    //            return -1;
-    //        }
-    //        else if (la != null && lb == null)
-    //        {
-    //            return 1;
-    //        }
-    //        else
-    //        {
-    //            var sa = la.Scene;
-    //            var sb = lb.Scene;
-
-    //            if (sa == null && sb == null)
-    //            {
-    //                return 0;
-    //            }
-    //            else if (sa == null && sb != null)
-    //            {
-    //                return -1;
-    //            }
-    //            else if (sa != null && sb == null)
-    //            {
-    //                return 1;
-    //            }
-    //            else
-    //            {
-    //                return sa.CompareTo(sb);
-    //            }
-
-    //        }
-    //    }
-    //}
 }
