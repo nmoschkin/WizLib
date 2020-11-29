@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace WizLib
 {
-    public class Scene : ViewModelBase
+    public class Scene : ObservableBase
     {
 
         private KeyedObservableCollection<BulbParams> bp = new KeyedObservableCollection<BulbParams>(nameof(WizLib.BulbParams.MACAddress));

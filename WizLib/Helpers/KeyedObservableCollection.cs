@@ -49,10 +49,10 @@ namespace WizLib
             if (kpi == null)
                 throw new ArgumentException(nameof(propertyName), $"That property does not exist in '{tt}'.");
 
-            if (kpi.PropertyType != typeof(string))
-            {
-                throw new ArgumentException(nameof(propertyName), $"'{kpi.Name}' is not a string.");
-            }
+            //if (kpi.PropertyType != typeof(string))
+            //{
+            //    throw new ArgumentException(nameof(propertyName), $"'{kpi.Name}' is not a string.");
+            //}
         }
 
         public KeyedObservableCollection(string propertyName, IEnumerable<T> items) : this(propertyName)
@@ -73,7 +73,7 @@ namespace WizLib
             for (i = 0; i < c; i++)
             {
                 var ichk = innerList[i];
-                string s = (string)kpi.GetValue(ichk);
+                string s = kpi.GetValue(ichk).ToString();
 
                 if (s == key)
                 {

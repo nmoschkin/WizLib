@@ -13,7 +13,7 @@ namespace WizLib
     /// <summary>
     /// Bulb command structure root object.
     /// </summary>
-    public sealed class BulbCommand : ViewModelBase
+    public sealed class BulbCommand : ObservableBase
     {
 
         private BulbMethod method = BulbMethod.GetPilot;
@@ -22,6 +22,14 @@ namespace WizLib
         private BulbParams inparam;
         
         private string env;
+
+        internal static readonly JsonSerializerSettings DefaultJsonSettings = new JsonSerializerSettings()
+        {
+            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+                    NullValueHandling = NullValueHandling.Ignore,
+                    Converters = { new TupleConverter(), new PhysicalAddressConverter(), new BulbMethodJsonConverter() }
+        };
+
 
         /// <summary>
         /// The <see cref="BulbMethod"/> of this instance.
@@ -81,14 +89,7 @@ namespace WizLib
         /// <returns></returns>
         public string AssembleCommand()
         {
-            JsonSerializerSettings settings = new JsonSerializerSettings()
-            {
-                ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                NullValueHandling = NullValueHandling.Ignore,
-                Converters = { new TupleConverter() }
-            };
-
-            return JsonConvert.SerializeObject(this, settings);
+            return JsonConvert.SerializeObject(this, DefaultJsonSettings);
         }
 
         /// <summary>
@@ -117,17 +118,7 @@ namespace WizLib
         {
             try
             {
-                JsonSerializerSettings settings = new JsonSerializerSettings()
-                {
-                    ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    Converters = { new TupleConverter() }
-                };
-
-                Params?.ClearPilot();
-                Result?.ClearPilot();
-
-                JsonConvert.PopulateObject(json, this, settings);
+                JsonConvert.PopulateObject(json, this, DefaultJsonSettings);
             }
             catch
             {

@@ -46,7 +46,7 @@ namespace WizLib
     /// <summary>
     /// Encapsulates the characteristics and behavior of a WiZ light bulb.
     /// </summary>
-    public class Bulb : ViewModelBase //, IComparable
+    public class Bulb : ObservableBase //, IComparable
     {
 
         /// <summary>
@@ -69,6 +69,8 @@ namespace WizLib
         protected bool renaming;
 
         protected static bool udpActive;
+
+        protected static Dictionary<string, Bulb> bulbCache = new Dictionary<string, Bulb>();
 
         /// <summary>
         /// Gets or sets the <see cref="BulbParams"/> object used to configure this bulb.
@@ -177,7 +179,7 @@ namespace WizLib
         /// <summary>
         /// Gets or sets the MAC address for the bulb.
         /// </summary>
-        public virtual string MACAddress
+        public virtual PhysicalAddress MACAddress
         {
             get => Settings?.MACAddress;
             internal set
@@ -313,6 +315,8 @@ namespace WizLib
             this.addr = addr;
             this.port = port;
             this.timeout = timeout;
+
+            Settings = new BulbParams();
         }
 
         /// <summary>
@@ -321,8 +325,37 @@ namespace WizLib
         /// <param name="addr">IP address of the bulb.</param>
         /// <param name="port">Port number for the bulb.</param>
         /// <param name="timeout">Timeout for bulb commands.</param>
-        public Bulb(string addr, int port = DefaultPort, int timeout = 10000) : this(System.Net.IPAddress.Parse(addr), port, timeout)
+        public Bulb(string addr, int port = DefaultPort, int timeout = 10000) : this(IPAddress.Parse(addr), port, timeout)
         {
+
+        }
+
+        public static async Task<Bulb> GetBulbByMacAddr(PhysicalAddress macAddr, bool scanForBulb, IPAddress localAddr = null, PhysicalAddress localMac = null)
+        {
+            string smac = macAddr.ToString();
+
+            if (bulbCache.Count > 0)
+            {
+                if (bulbCache.ContainsKey(smac))
+                {
+                    return bulbCache[smac];
+                }
+            }
+
+            if (scanForBulb)
+            {
+                await ScanForBulbs(localAddr, localMac, ScanMode.GetSystemConfig, 1);
+
+                if (bulbCache.Count > 0)
+                {
+                    if (bulbCache.ContainsKey(smac))
+                    {
+                        return bulbCache[smac];
+                    }
+                }
+            }
+ 
+            return null;
         }
 
         /// <summary>
@@ -562,13 +595,6 @@ namespace WizLib
             var cmd = new BulbCommand(m);
             string json;
 
-            JsonSerializerSettings jset = new JsonSerializerSettings()
-            {
-                ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                NullValueHandling = NullValueHandling.Ignore,
-                Converters = { new TupleConverter() }
-            };
-
             try
             {
                 cmd.Params?.EnforceRules();
@@ -588,11 +614,11 @@ namespace WizLib
                 cmd.Result = Settings;
                 cmd.Result.ClearPilot();
 
-                JsonConvert.PopulateObject(json, cmd, jset);
+                JsonConvert.PopulateObject(json, cmd, BulbCommand.DefaultJsonSettings);
             }
             else
             {
-                cmd = JsonConvert.DeserializeObject<BulbCommand>(json, jset);
+                cmd = JsonConvert.DeserializeObject<BulbCommand>(json, BulbCommand.DefaultJsonSettings);
                 Settings = cmd.Result;
             }
 
@@ -627,7 +653,7 @@ namespace WizLib
             }
             else if (Settings?.MACAddress != null)
             {
-                return Settings?.MACAddress;
+                return Settings?.MACAddress?.ToString();
             }
             else
             {
@@ -850,7 +876,7 @@ namespace WizLib
 
                                 foreach (var bchk in bulbs)
                                 {
-                                    if (bchk.Settings.MACAddress == bulb.Settings.MACAddress)
+                                    if (bchk.Settings?.MACAddress?.ToString() == bulb.Settings?.MACAddress?.ToString())
                                     {
                                         already = true;
                                         break;
@@ -860,6 +886,15 @@ namespace WizLib
                                 if (already) continue;
 
                                 bulbs.Add(bulb);
+                                var smac = bulb.MACAddress.ToString();
+                                if (!bulbCache.ContainsKey(smac))
+                                {
+                                    bulbCache.Add(smac, bulb);
+                                }
+                                else
+                                {
+                                    bulbCache[smac] = bulb;
+                                }
 
                                 json = null;
                                 p = null;
@@ -915,6 +950,7 @@ namespace WizLib
             ConsoleHelper.LogOutput(data, localAddr.ToString(), "255.255.255.255");
 
             buffer = Encoding.UTF8.GetBytes(data);
+
             udpClient.Send(buffer, buffer.Length, "255.255.255.255", port);
 
             await t;

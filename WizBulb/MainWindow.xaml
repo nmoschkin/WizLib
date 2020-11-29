@@ -15,7 +15,7 @@
 
     <Window.Resources>
         <ResourceDictionary>
-
+            <conv:MacAddrConverter x:Key="macConv" />
             <conv:EnumConverter x:Key="enumConv" />
             <conv:IntDisplayConverter
                 x:Key="intConv"

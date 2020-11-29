@@ -14,7 +14,7 @@ using System.Collections;
 namespace WizLib
 {
 
-    public class Home : ViewModelBase
+    public class Home : ObservableBase
     {
 
         private string homeId;
@@ -70,9 +70,11 @@ namespace WizLib
                     {
                         if (nh.Rooms.ContainsKey(rid, out nr))
                         {
-                            if (nr.Bulbs.ContainsKey(b.MACAddress))
+                            var smac = b.MACAddress?.ToString();
+
+                            if (smac != null && nr.Bulbs.ContainsKey(smac))
                             {
-                                nr.Bulbs[b.MACAddress] = b;
+                                nr.Bulbs[smac] = b;
                             }
                             else
                             {

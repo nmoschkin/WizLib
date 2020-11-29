@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.NetworkInformation;
 
 namespace WizLib
 {
@@ -17,7 +18,7 @@ namespace WizLib
     /// <summary>
     /// Bulb configuration parameters.
     /// </summary>
-    public sealed class BulbParams : ViewModelBase, ICloneable
+    public class BulbParams : ObservableBase, ICloneable
     {
         #region Bulb Type Catalog
 
@@ -73,7 +74,7 @@ namespace WizLib
 
         private string src;
 
-        private string macaddr;
+        private PhysicalAddress macaddr;
 
         private bool? success;
 
@@ -687,7 +688,7 @@ namespace WizLib
         /// Bulb Mac address.
         /// </summary>
         [JsonProperty("mac")]
-        public string MACAddress
+        public PhysicalAddress MACAddress
         {
             get => macaddr;
             set
@@ -854,10 +855,36 @@ namespace WizLib
 
         public override bool Equals(object obj)
         {
-            var s1 = JsonConvert.SerializeObject(this);
-            var s2 = JsonConvert.SerializeObject(obj);
+            var flds = typeof(BulbParams).GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
-            return (s1 == s2);
+            bool bPass = true;
+
+            foreach (var f in flds)
+            {
+                object a = f.GetValue(this);
+                object b = f.GetValue(obj);
+
+                if (a == null && b == null)
+                {
+                    continue;
+                }
+                else if (a == null && b != null)
+                {
+                    bPass = false;
+                    break;
+                }
+                else if (a != null && b != null)
+                {
+                    bPass = false;
+                    break;
+                }
+
+                bPass &= a.Equals(b);
+                if (!bPass) break;
+
+            }
+
+            return bPass;
         }
 
         public override int GetHashCode()

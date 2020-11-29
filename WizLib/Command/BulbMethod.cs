@@ -185,27 +185,4 @@ namespace WizLib
 
     }
 
-    /// <summary>
-    /// <see cref="BulbMethod"/> <see cref="JsonConverter"/> class.
-    /// </summary>
-    public sealed class BulbMethodJsonConverter : JsonConverter<BulbMethod>
-    {
-        public override BulbMethod ReadJson(JsonReader reader, Type objectType, [AllowNull] BulbMethod existingValue, bool hasExistingValue, JsonSerializer serializer)
-        {
-            if (reader.Value is string s)
-            {
-                return (BulbMethod)s;
-            }
-            else
-            {
-                return (BulbMethod)"";
-            }
-        }
-
-        public override void WriteJson(JsonWriter writer, [AllowNull] BulbMethod value, JsonSerializer serializer)
-        {
-            writer.WriteValue((string)value);
-        }
-    }
-
 }

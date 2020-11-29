@@ -33,7 +33,7 @@ namespace WizBulb
 
     public delegate void LightModeClickEvent(object sender, LightModeClickEventArgs e);
 
-    public class MainViewModel : ViewModelBase
+    public class MainViewModel : ObservableBase
     {
 
         public event ScanCompleteEvent ScanComplete;

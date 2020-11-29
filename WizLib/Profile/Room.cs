@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace WizLib
 {
-    public class Room : ViewModelBase    
+    public class Room : ObservableBase    
     {
         private string roomId;
         private string name;

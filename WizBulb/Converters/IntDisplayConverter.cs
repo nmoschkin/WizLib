@@ -29,7 +29,7 @@ namespace WizBulb.Converters
 
     public delegate void ConverterErrorEvent(object sender, ConverterErrorEventArgs e);
 
-    public class IntDisplayConverter : ViewModelBase, IValueConverter
+    public class IntDisplayConverter : ObservableBase, IValueConverter
     {
         private bool error;
         private string errorMsg;

@@ -7,21 +7,30 @@ using Newtonsoft.Json;
 
 namespace WizLib
 {
-    public class Profile : ViewModelBase
+    public class Profile : ObservableBase, IProfile
     {
         private Guid projectId;
         
-        private List<Bulb> bulbs;
+        private IList<Bulb> bulbs;
 
-        private List<Room> rooms;
+        private IList<Room> rooms;
 
-        private List<Scene> scenes;
+        private IList<Scene> scenes;
 
-        private List<Home> homes;
+        private IList<Home> homes;
 
-        private List<LightMode> lightModes;
+        private IList<LightMode> lightModes;
 
         private string name;
+
+        public Profile()
+        {
+            bulbs = new List<Bulb>();
+            rooms = new List<Room>();
+            scenes = new List<Scene>();
+            homes = new List<Home>();
+            lightModes = new List<LightMode>();
+        }
 
         public Guid ProjectId
         {
@@ -43,7 +52,7 @@ namespace WizLib
         }
 
         [JsonProperty("homes")]
-        public List<Home> Homes
+        public IList<Home> Homes
         {
             get => homes;
             set
@@ -53,7 +62,7 @@ namespace WizLib
         }
 
         [JsonProperty("lightModes")]
-        public List<LightMode> LightModes
+        public IList<LightMode> LightModes
         {
             get => lightModes;
             set
@@ -63,7 +72,7 @@ namespace WizLib
         }
 
         [JsonProperty("bulbs")]
-        public List<Bulb> Bulbs
+        public IList<Bulb> Bulbs
         {
             get => bulbs;
             set
@@ -73,7 +82,7 @@ namespace WizLib
         }
 
         [JsonProperty("rooms")]
-        public List<Room> Rooms
+        public IList<Room> Rooms
         {
             get => rooms;
             set
@@ -84,7 +93,7 @@ namespace WizLib
 
 
         [JsonProperty("scenes")]
-        public List<Scene> Scenes
+        public IList<Scene> Scenes
         {
             get => scenes;
             set

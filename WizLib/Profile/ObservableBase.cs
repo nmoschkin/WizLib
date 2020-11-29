@@ -12,7 +12,7 @@ namespace WizLib
     /// <summary>
     /// Abstract base class for obseravable classes.
     /// </summary>
-    public abstract class ViewModelBase : INotifyPropertyChanged
+    public abstract class ObservableBase : INotifyPropertyChanged
     {
         /// <summary>
         /// Notifies a listener that a property has changed.
