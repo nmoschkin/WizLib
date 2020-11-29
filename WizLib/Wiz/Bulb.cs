@@ -16,6 +16,10 @@ using WizLib.Helpers;
 
 namespace WizLib
 {
+    /// <summary>
+    /// ScanForBulbs callback delegate.
+    /// </summary>
+    /// <param name="b"></param>
     public delegate void BulbScanCallback(Bulb b);
 
     /// <summary>
@@ -50,7 +54,7 @@ namespace WizLib
         /// </summary>
         public const int DefaultPort = 38899;
 
-        protected int timeout = 60000;
+        protected int timeout = 2000;
 
         protected int port = DefaultPort;
 
@@ -170,10 +174,13 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Gets or sets the MAC address for the bulb.
+        /// </summary>
         public virtual string MACAddress
         {
             get => Settings?.MACAddress;
-            set
+            internal set
             {
                 if (Settings == null)
                 {

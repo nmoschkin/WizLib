@@ -126,7 +126,7 @@ namespace WizBulb
             }
         }
 
-        private int timeout = 5;
+        private int timeout = 1;
 
         public int Timeout
         {

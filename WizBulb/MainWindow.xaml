@@ -20,7 +20,7 @@
             <conv:IntDisplayConverter
                 x:Key="intConv"
                 MaxValue="360"
-                MinValue="2" />
+                MinValue="1" />
 
             <conv:ColorBrushConverter x:Key="colorConv" />
 
