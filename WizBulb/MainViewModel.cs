@@ -325,9 +325,9 @@ namespace WizBulb
 
         public virtual bool CheckTimeout()
         {
-            if (Timeout < 5 || Timeout > 360)
+            if (Timeout < 1 || Timeout > 360)
             {
-                StatusMessage = string.Format(AppResources.WarnEnterNumberRange, 5, 360);
+                StatusMessage = string.Format(AppResources.WarnEnterNumberRange, 1, 360);
                 return false;
             }
 
@@ -449,7 +449,7 @@ namespace WizBulb
                 var aw = AutoWatch;
                 AutoWatch = false;
 
-                await Bulb.ScanForBulbs(selAdapter.IPV4Address.ToString(), selAdapter.PhysicalAddress.ToString(false), ScanModes.GetSystemConfig, Timeout,
+                await Bulb.ScanForBulbs(selAdapter.IPV4Address, selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout,
                 (b) =>
                 {
                     disp.Invoke(() =>

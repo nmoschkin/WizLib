@@ -34,9 +34,6 @@ namespace WizBulb
     {
         public delegate void BulbDoer();
 
-        [DllImport("kernel32.dll")]
-        static extern int AllocConsole();
-
         private MainViewModel vm;       
         
         public AdaptersCollection Networks { get; set; }
@@ -45,7 +42,7 @@ namespace WizBulb
 
         public MainWindow()
         {
-            Bulb.HasConsole = AllocConsole() != 0;
+            WizLib.Helpers.ConsoleHelper.AllocConsole();
 
             InitializeComponent();
 

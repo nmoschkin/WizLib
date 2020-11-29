@@ -273,8 +273,8 @@ namespace WizLib
             //Red = null;
             //Green = null;
             //Blue = null;
-            WarmWhite = 0;
-            ColdWhite = 0;
+            WarmWhite = null;
+            ColdWhite = null;
             Speed = null;
             Scene = null;
             Temperature = null;

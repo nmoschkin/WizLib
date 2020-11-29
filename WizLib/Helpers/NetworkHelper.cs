@@ -11,7 +11,8 @@ namespace WizLib
 {
     public static class NetworkHelper
     {
-        private static IPAddress defLocal;
+        private static IPAddress defAddr;
+        private static PhysicalAddress defMac;
 
         /// <summary>
         /// The default remote IP address to use to test internet connectivity.
@@ -27,13 +28,40 @@ namespace WizLib
         /// </summary>
         public static IPAddress LocalAddress
         {
-            get => defLocal;
-            set => defLocal = value;
+            get
+            {
+                if (defAddr == null)
+                {
+                    RefreshDefaultIP();
+                }
+
+                return defAddr;
+            }
+            set
+            {
+
+            }
+        }
+
+        /// <summary>
+        /// The default local interface to bind to for UDP calls to bulbs.
+        /// </summary>
+        public static PhysicalAddress MACAddress
+        {
+            get
+            {
+                if (defMac == null)
+                {
+                    RefreshDefaultIP();
+                }
+
+                return defMac;
+            }
         }
 
         static NetworkHelper()
         {
-            LocalAddress = FindDefaultIP();
+            RefreshDefaultIP();
         }
 
         /// <summary>
@@ -42,53 +70,34 @@ namespace WizLib
         /// </summary>
         /// <param name="locals">Collection of local IP addresses.</param>
         /// <returns></returns>
-        public static IPAddress FindDefaultIP(IEnumerable<IPAddress> locals = null)
+        public static void RefreshDefaultIP()
         {
-            if (locals == null)
+            var locals = GetLocalAddresses(true);
+
+            foreach (var local in locals)
             {
-                locals = GetLocalAddresses();
-            }
-
-            IPAddress ret = null;
-            Socket sock;
-
-            foreach (var locaddr in locals)
-            {
-                sock = null;
-
-                try
+                foreach (var locaddr in local.Value)
                 {
-                    sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    sock.Bind(new IPEndPoint(locaddr.Clone(), 53));
-                    sock.Connect(new IPEndPoint(DefaultPingIP.Clone(), 53));
+                    defAddr = locaddr;
+                    defMac = local.Key;
+
+                    return;
                 }
-                catch
-                {
-                    continue;
-                }
-
-                ret = locaddr;
-
-                sock?.Close();
-                sock = null;
-
-                break;
             }
-
-            return ret;
         }
 
         /// <summary>
-        /// Gets an array of all available local IPv4 addresses
+        /// Gets an dictionary of all active local network interfaces keyed by <see cref="PhysicalAddress"/>.
         /// </summary>
         /// <param name="withGatewaysOnly">Only include addresses with default gateways.</param>
         /// <returns></returns>
-        public static IPAddress[] GetLocalAddresses(bool withGatewaysOnly = false)
+        public static Dictionary<PhysicalAddress, List<IPAddress>> GetLocalAddresses(bool withGatewaysOnly = false)
         {
             var net = NetworkInterface.GetAllNetworkInterfaces();
 
             IPAddress addr;
-            List<IPAddress> addrs = new List<IPAddress>();
+            Dictionary<PhysicalAddress, List<IPAddress>> addrs = new Dictionary<PhysicalAddress, List<IPAddress>>();
+            KeyValuePair<PhysicalAddress, List<IPAddress>> kvp;
 
             foreach (var iface in net)
             {
@@ -111,24 +120,23 @@ namespace WizLib
 
                 if (!withGatewaysOnly || gpass)
                 {
+                    kvp = new KeyValuePair<PhysicalAddress, List<IPAddress>>(iface.GetPhysicalAddress(), new List<IPAddress>());
+                    
                     foreach (var la in ipprops.UnicastAddresses)
                     {
                         if (la.Address.AddressFamily == AddressFamily.InterNetwork && la.Address != IPAddress.Any)
                         {
-                            addr = la.Address;
+                            kvp.Value.Add(la.Address);
                             break;
                         }
                     }
 
-                    if (addr != null)
-                    {
-                        addrs.Add(addr);
-                    }
+                    addrs.Add(kvp.Key, kvp.Value);
                 }
 
             }
 
-            return addrs.ToArray();
+            return addrs;
         }
     }
 

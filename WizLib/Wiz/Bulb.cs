@@ -12,6 +12,7 @@ using System.Threading;
 using Newtonsoft.Json;
 using WizLib.Localization;
 using System.Net.NetworkInformation;
+using WizLib.Helpers;
 
 namespace WizLib
 {
@@ -20,7 +21,7 @@ namespace WizLib
     /// <summary>
     /// Bulb scanning modes indicating which command to broadcast to discover bulbs on the local network.
     /// </summary>
-    public enum ScanModes
+    public enum ScanMode
     {
         /// <summary>
         /// Scan using the 'registration' command
@@ -49,36 +50,11 @@ namespace WizLib
         /// </summary>
         public const int DefaultPort = 38899;
 
-        /// <summary>
-        /// Gets or sets a value indicating that a console is active 
-        /// on the currently running application.
-        /// </summary>
-        public static bool HasConsole { get; set; }
-
-        private static IPAddress localip = NetworkHelper.LocalAddress;
-
-        /// <summary>
-        /// Gets or sets the working local IP address.
-        /// </summary>
-        public static IPAddress LocalAddress
-        {
-            get => localip;
-            set
-            {
-                if (!(value?.Equals(localip) ?? false))
-                {
-                    localip = value;
-
-                }
-
-            }
-        }
-
         protected int timeout = 60000;
 
         protected int port = DefaultPort;
 
-        protected string addr;
+        protected IPAddress addr;
 
         protected string name;
 
@@ -172,7 +148,7 @@ namespace WizLib
         /// <summary>
         /// Gets the bulb's IP address.
         /// </summary>
-        public virtual string IPAddress
+        public virtual IPAddress IPAddress
         {
             get => addr;
             internal set
@@ -327,7 +303,7 @@ namespace WizLib
         /// <param name="timeout">Timeout for bulb commands.</param>
         public Bulb(IPAddress addr, int port = DefaultPort, int timeout = 10000)
         {
-            this.addr = addr.ToString();
+            this.addr = addr;
             this.port = port;
             this.timeout = timeout;
         }
@@ -682,15 +658,17 @@ namespace WizLib
 
         protected async Task<string> SendCommand(string cmd)
         {
+            ConsoleHelper.LogOutput(cmd, null, IPAddress);
 
             byte[] bOut = Encoding.UTF8.GetBytes(cmd);
             var buffer = await SendUDP(bOut);
+
             string json;
 
             if (buffer?.Length > 0)
             {
                 json = Encoding.UTF8.GetString(buffer).Trim('\x0');
-                if (HasConsole) Console.WriteLine(json + " Addr: " + IPAddress.ToString());
+                ConsoleHelper.LogInput(json, null, IPAddress);
 
                 return json;
             }
@@ -701,34 +679,31 @@ namespace WizLib
 
         }
 
-        protected async Task<byte[]> SendUDP(byte[] cmd, string localAddr = null)
+        protected async Task<byte[]> SendUDP(byte[] cmd, IPAddress localAddr = null)
         {
             udpActive = true;
 
-            if (HasConsole) Console.WriteLine("Send UDP...");
             List<Bulb> bulbs = new List<Bulb>();
 
             byte[] buffer = cmd;
             int port = DefaultPort;
 
-            if (localAddr != null)
-                LocalAddress = System.Net.IPAddress.Parse(localAddr);
-
-            if (LocalAddress == null)
-            {
-                udpActive = false;
-
-                return null;
-            }
+            localAddr = localAddr?.Clone();
+            var addr = this.addr.Clone();
 
             var udpClient = new UdpClient();
         
             udpClient.ExclusiveAddressUse = false;
-            udpClient.Client.Bind(new IPEndPoint(LocalAddress, DefaultPort));
+            
+            if (localAddr != null)
+            {
+                udpClient.Client.Bind(new IPEndPoint(localAddr, DefaultPort));
+            }
+
             udpClient.DontFragment = true;
 
             var from = new IPEndPoint(0, 0);
-            var timeupVal = DateTime.Now.AddSeconds(timeout);
+            var timeupVal = DateTime.Now.AddMilliseconds(timeout);
 
             var t = Task.Run(async () =>
             {
@@ -745,7 +720,7 @@ namespace WizLib
                         try
                         {
                             var recvBuffer = udpClient.Receive(ref from);
-                            if (addr == from.Address.ToString())
+                            if (addr.ToString() == from.Address.ToString())
                             {
                                 buffer = recvBuffer;
                                 return;
@@ -758,20 +733,19 @@ namespace WizLib
 
                     }
 
-                    await Task.Delay(100);
+                    await Task.Delay(10);
                     tdelc++;
 
-                    if (tdelc >= 5)
+                    if (tdelc >= 50)
                     {
-                        udpClient.Send(buffer, buffer.Length, "255.255.255.255", port);
+                        udpClient.Send(buffer, buffer.Length, addr.ToString(), port);
                         tdelc = 0;
                     }
                 }
 
-                if (HasConsole) Console.WriteLine("Finished");
             });
 
-            udpClient.Send(buffer, buffer.Length, addr, port);
+            udpClient.Send(buffer, buffer.Length, addr.ToString(), port);
             await t;
 
             udpClient?.Close();
@@ -786,33 +760,57 @@ namespace WizLib
         /// <summary>
         /// Scan for bulbs on the specified network.
         /// </summary>
+        /// <param name="mode">The broadcast <see cref="ScanMode"/> to use when scanning.</param>
+        /// <param name="timeout">Timeout for scan, in whole seconds.</param>
+        /// <param name="callback">Callback function that is called for each discovered bulb.</param>
+        /// <returns></returns>
+        public static async Task<List<Bulb>> ScanForBulbs(
+            ScanMode mode = ScanMode.Registration,
+            int timeout = 5,
+            BulbScanCallback callback = null)
+        {
+            return await ScanForBulbs(null, null, mode, timeout, callback);
+        }
+
+        /// <summary>
+        /// Scan for bulbs on the specified network.
+        /// </summary>
         /// <param name="localAddr">The local IP address to bind to.</param>
         /// <param name="macAddr">The MAC address of the local interface being bound.</param>
         /// <param name="mode">The broadcast <see cref="ScanMode"/> to use when scanning.</param>
         /// <param name="timeout">Timeout for scan, in whole seconds.</param>
         /// <param name="callback">Callback function that is called for each discovered bulb.</param>
-        /// <param name="waitForChannel">Wait for the UDP channel to become free if it is in use.</param>
         /// <returns></returns>
-        public static async Task<List<Bulb>> ScanForBulbs(string localAddr, string macAddr, ScanModes mode = ScanModes.Registration, int timeout = 5, BulbScanCallback callback = null, bool waitForChannel = false)
+        public static async Task<List<Bulb>> ScanForBulbs(
+            IPAddress localAddr, 
+            PhysicalAddress macAddr, 
+            ScanMode mode = ScanMode.Registration, 
+            int timeout = 5, 
+            BulbScanCallback callback = null)
         {
             udpActive = true;
 
-            if (HasConsole)
-            {
-                Console.Clear();
-                Console.WriteLine("Scanning For Bulbs...");
-            }
             List<Bulb> bulbs = new List<Bulb>();
 
             byte[] buffer = null;
             int port = DefaultPort;
+            
+            if (localAddr == null)
+            {
+                localAddr = NetworkHelper.LocalAddress;
+            }
 
-            LocalAddress = System.Net.IPAddress.Parse(localAddr);
+            localAddr = localAddr.Clone();
+
+            if (macAddr == null)
+            {
+                macAddr = NetworkHelper.MACAddress;
+            }
 
             var udpClient = new UdpClient();
 
             udpClient.ExclusiveAddressUse = false;
-            udpClient.Client.Bind(new IPEndPoint(localip, DefaultPort));
+            udpClient.Client.Bind(new IPEndPoint(localAddr, DefaultPort));
             udpClient.DontFragment = true;
 
             var from = new IPEndPoint(0, 0);
@@ -831,11 +829,13 @@ namespace WizLib
                         BulbCommand p = null;
 
                         var recvBuffer = udpClient.Receive(ref from);
+                        if (from.Address == localAddr) continue;
 
                         try
                         {
                             json = Encoding.UTF8.GetString(recvBuffer);
-                            if (HasConsole) Console.WriteLine(json + " Addr: " + from.Address.ToString());
+
+                            ConsoleHelper.LogInput(json, localAddr, from.Address);
 
                             p = new BulbCommand(json);
 
@@ -877,29 +877,29 @@ namespace WizLib
 
                     }
 
-                    await Task.Delay(100);
+                    await Task.Delay(10);
+
                     tdelc++;
-                    if (tdelc >= 5)
+                    if (tdelc >= 50)
                     {
                         udpClient.Send(buffer, buffer.Length, "255.255.255.255", port);
                         tdelc = 0;
                     }
                 }
 
-                if (HasConsole) Console.WriteLine("Finished");
             });
 
             var pilot = new BulbCommand();
 
-            if (mode == ScanModes.Registration)
+            if (mode == ScanMode.Registration)
             {
                 pilot.Method = BulbMethod.Registration;
-                pilot.Params.PhoneMac = macAddr;
+                pilot.Params.PhoneMac = macAddr.ToString().Replace(":","").ToLower();
                 pilot.Params.Register = false;
-                pilot.Params.PhoneIp = localAddr;
+                pilot.Params.PhoneIp = localAddr.ToString();
                 pilot.Params.Id = "12";
             }
-            else if (mode == ScanModes.GetPilot)
+            else if (mode == ScanMode.GetPilot)
             {
                 pilot.Method = BulbMethod.GetPilot;
             }
@@ -909,9 +909,12 @@ namespace WizLib
             }
 
             var data = pilot.AssembleCommand();
-            buffer = Encoding.UTF8.GetBytes(data);
 
+            ConsoleHelper.LogOutput(data, localAddr.ToString(), "255.255.255.255");
+
+            buffer = Encoding.UTF8.GetBytes(data);
             udpClient.Send(buffer, buffer.Length, "255.255.255.255", port);
+
             await t;
             
             udpClient?.Close();
