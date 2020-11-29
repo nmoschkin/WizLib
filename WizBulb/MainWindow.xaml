@@ -1,0 +1,699 @@
+﻿<Window
+    x:Class="WizBulb.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:color="clr-namespace:DataTools.ColorControls;assembly=DataTools.ColorControls"
+    xmlns:conv="clr-namespace:WizBulb.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i18n="clr-namespace:WizBulb.Localization"
+    xmlns:local="clr-namespace:WizBulb"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="{i18n:Translate ResourceKey=WizBulb}"
+    Width="630"
+    Height="365"
+    mc:Ignorable="d">
+
+    <Window.Resources>
+        <ResourceDictionary>
+
+            <conv:EnumConverter x:Key="enumConv" />
+            <conv:IntDisplayConverter
+                x:Key="intConv"
+                MaxValue="360"
+                MinValue="5" />
+
+            <conv:ColorBrushConverter x:Key="colorConv" />
+
+            <Style TargetType="Button">
+
+                <Setter Property="Background" Value="DarkSlateBlue" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="Padding" Value="8" />
+            </Style>
+
+            <DataTemplate x:Key="BulbTemplate">
+                <Grid>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="32" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Border
+                        Width="24"
+                        Height="24"
+                        Margin="4"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="{Binding Settings.Color, Converter={StaticResource colorConv}}"
+                        BorderBrush="Gray"
+                        BorderThickness="1" />
+
+                    <TextBox
+                        Grid.Column="1"
+                        Margin="4"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        GotFocus="TextBox_GotFocus"
+                        IsEnabled="{Binding Renaming, Mode=TwoWay}"
+                        LostFocus="TextBox_LostFocus"
+                        Text="{Binding Name, Mode=TwoWay}" />
+
+                </Grid>
+            </DataTemplate>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid Background="AliceBlue">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+
+        <Menu
+            Grid.Row="0"
+            Grid.ColumnSpan="4"
+            Padding="4"
+            Background="Transparent"
+            FontSize="14">
+            <MenuItem x:Name="mnuFile" Header="_File">
+                <MenuItem
+                    x:Name="mnuOpenProject"
+                    Click="mnuOpenProject_Click"
+                    Header="_Open Project"
+                    InputGestureText="Ctrl+O" />
+
+                <MenuItem
+                    x:Name="mnuNewProject"
+                    Click="mnuNewProject_Click"
+                    Header="_New Project"
+                    InputGestureText="Ctrl+N" />
+
+                <Separator />
+
+                <MenuItem
+                    x:Name="mnuRecents"
+                    Header="Recent Projects"
+                    ItemsSource="{Binding RecentMenu}" />
+
+                <Separator />
+
+                <MenuItem
+                    x:Name="mnuSaveProject"
+                    Click="mnuSaveProject_Click"
+                    Header="_Save Project"
+                    InputGestureText="Ctrl+S" />
+
+                <MenuItem
+                    x:Name="mnuSaveAs"
+                    Click="mnuSaveAs_Click"
+                    Header="_Save As..."
+                    InputGestureText="Ctrl+Shift+S" />
+
+                <Separator />
+
+                <MenuItem
+                    x:Name="mnuLoadLast"
+                    Click="mnuLoadLast_Click"
+                    Header="_Load Last Project on Startup"
+                    IsCheckable="True"
+                    IsChecked="{Binding StartupLoad, Mode=TwoWay}" />
+                <Separator />
+
+                <MenuItem
+                    x:Name="mnuQuit"
+                    Click="mnuQuit_Click"
+                    Header="_Quit"
+                    InputGestureText="Ctrl+Q" />
+                <Separator />
+
+            </MenuItem>
+
+
+        </Menu>
+
+
+
+
+        <TabControl
+            Grid.Row="1"
+            Grid.ColumnSpan="2"
+            Margin="8,2,8,8">
+
+            <TabItem>
+                <TabItem.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <Image
+                            x:Name="BulbTabHdr"
+                            Grid.Column="0"
+                            Margin="4"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Source="pack://application:,,,/WizBulb;component/Resources/lightbulb.png" />
+
+                        <TextBlock
+                            Grid.Column="1"
+                            Margin="2,4,4,4"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="10"
+                            Text="{i18n:Translate ResourceKey=Bulbs}" />
+
+                    </Grid>
+
+
+                </TabItem.Header>
+
+                <ListView
+                    x:Name="BulbList"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2"
+                    Margin="0"
+                    BorderThickness="0"
+                    GridViewColumnHeader.Click="BulbList_Click"
+                    ItemsSource="{Binding Bulbs}"
+                    KeyDown="BulbList_KeyDown"
+                    SelectedItem="{Binding SelectedBulb, Mode=TwoWay}"
+                    SelectionChanged="BulbList_SelectionChanged">
+
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem
+                                x:Name="mnuPing"
+                                Click="mnuPing_Click"
+                                Header="{i18n:Translate ResourceKey=PingBulb}" />
+
+                            <MenuItem
+                                x:Name="mnuRename"
+                                Click="mnuRename_Click"
+                                Header="{i18n:Translate ResourceKey=Rename}" />
+
+                            <Separator />
+
+                            <MenuItem x:Name="mnuModes" Header="{i18n:Translate ResourceKey=LightModes}" />
+
+
+                            <Separator />
+
+                            <MenuItem
+                                x:Name="mnuPower"
+                                Header="{i18n:Translate ResourceKey=IsPoweredOn}"
+                                IsCheckable="True"
+                                IsChecked="{Binding SelectedBulb.IsPoweredOn, Mode=TwoWay}" />
+
+                            <Separator />
+
+                            <MenuItem
+                                x:Name="mnuRefresh"
+                                Click="mnuRefresh_Click"
+                                Header="{i18n:Translate ResourceKey=Refresh}" />
+
+                            <MenuItem
+                                x:Name="mnuRefreshAll"
+                                Click="mnuRefreshAll_Click"
+                                Header="{i18n:Translate ResourceKey=RefreshAll}" />
+
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+
+                    <ListView.View>
+                        <GridView AllowsColumnReorder="True">
+                            <GridViewColumn
+                                Width="120"
+                                CellTemplate="{StaticResource BulbTemplate}"
+                                Header="{i18n:Translate ResourceKey=Bulbs}" />
+                            <GridViewColumn
+                                Width="100"
+                                DisplayMemberBinding="{Binding IPAddress}"
+                                Header="{i18n:Translate ResourceKey=IPAddress}" />
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding Scene}"
+                                Header="{i18n:Translate ResourceKey=LightMode}" />
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding Settings.HomeId}"
+                                Header="{i18n:Translate ResourceKey=HomeId}" />
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding Settings.RoomId}"
+                                Header="{i18n:Translate ResourceKey=RoomId}" />
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding Settings.ModuleName}"
+                                Header="{i18n:Translate ResourceKey=ModuleName}" />
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding Settings.TypeDescription}"
+                                Header="{i18n:Translate ResourceKey=BulbType}" />
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding Settings.FirmwareVersion}"
+                                Header="{i18n:Translate ResourceKey=FirmwareVersion}" />
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding Settings.EwfHex}"
+                                Header="{i18n:Translate ResourceKey=EwfHex}" />
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding Settings.DriverConfig}"
+                                Header="{i18n:Translate ResourceKey=DriverConfig}" />
+
+
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+
+
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <Image
+                            x:Name="HomeTabHdr"
+                            Grid.Column="0"
+                            Margin="4"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" />
+
+                        <TextBlock
+                            Grid.Column="1"
+                            Margin="2,4,4,4"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="10"
+                            Text="{i18n:Translate ResourceKey=Homes}" />
+
+                    </Grid>
+
+
+                </TabItem.Header>
+
+                <ListView
+                    x:Name="HomeList"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2"
+                    Margin="0"
+                    BorderThickness="0"
+                    GridViewColumnHeader.Click="HomeList_Click"
+                    ItemsSource="{Binding Homes}"
+                    KeyDown="BulbList_KeyDown"
+                    SelectedItem="{Binding SelectedHome, Mode=TwoWay}"
+                    SelectionChanged="HomeList_SelectionChanged">
+
+                    <ListView.View>
+                        <GridView AllowsColumnReorder="True">
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding Name}"
+                                Header="{i18n:Translate ResourceKey=Name}" />
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding HomeId}"
+                                Header="{i18n:Translate ResourceKey=HomeId}" />
+                            <GridViewColumn
+                                Width="100"
+                                DisplayMemberBinding="{Binding Rooms.Count}"
+                                Header="{i18n:Translate ResourceKey=Rooms}" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+            </TabItem>
+
+            <TabItem>
+                <TabItem.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <Image
+                            x:Name="RoomTabHdr"
+                            Grid.Column="0"
+                            Margin="4"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" />
+
+                        <TextBlock
+                            Grid.Column="1"
+                            Margin="2,4,4,4"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="10"
+                            Text="{i18n:Translate ResourceKey=Rooms}" />
+
+                    </Grid>
+
+
+                </TabItem.Header>
+
+                <ListView
+                    x:Name="RoomList"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2"
+                    Margin="0"
+                    BorderThickness="0"
+                    GridViewColumnHeader.Click="RoomList_Click"
+                    ItemsSource="{Binding Rooms}"
+                    KeyDown="BulbList_KeyDown"
+                    SelectedItem="{Binding SelectedRoom, Mode=TwoWay}"
+                    SelectionChanged="RoomList_SelectionChanged">
+
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem x:Name="mnuRoomModes" Header="{i18n:Translate ResourceKey=LightModes}" />
+
+                            <Separator />
+
+                            <MenuItem
+                                x:Name="mnuRoomPower"
+                                Header="{i18n:Translate ResourceKey=IsPoweredOn}"
+                                IsCheckable="True"
+                                IsChecked="{Binding SelectedBulb.IsPoweredOn, Mode=TwoWay}" />
+
+                            <Separator />
+
+                            <MenuItem
+                                x:Name="mnuRoomRefresh"
+                                Click="mnuRoomRefresh_Click"
+                                Header="{i18n:Translate ResourceKey=Refresh}" />
+
+                            <MenuItem
+                                x:Name="mnuRoomRefreshAll"
+                                Click="mnuRoomRefreshAll_Click"
+                                Header="{i18n:Translate ResourceKey=RefreshAll}" />
+
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+
+                    <ListView.View>
+                        <GridView AllowsColumnReorder="True">
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding Name}"
+                                Header="{i18n:Translate ResourceKey=Name}" />
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding RoomId}"
+                                Header="{i18n:Translate ResourceKey=RoomId}" />
+                            <GridViewColumn
+                                Width="100"
+                                DisplayMemberBinding="{Binding Bulbs.Count}"
+                                Header="{i18n:Translate ResourceKey=Bulbs}" />
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+            </TabItem>
+
+
+        </TabControl>
+        <!--<Grid Grid.Row="1" Grid.Column="1">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="88*" />
+                <ColumnDefinition Width="17*" />
+            </Grid.ColumnDefinitions>
+
+            <color:ColorPicker
+                x:Name="Picker"
+                Grid.Column="0"
+                Margin="8"
+                ColorValue="1"
+                ElementSize="10"
+                Mode="HexagonWheel" />
+
+            <Slider
+                x:Name="ValueSlider"
+                Grid.Column="1"
+                Margin="8"
+                Maximum="100"
+                Minimum="0"
+                Orientation="Vertical"
+                ValueChanged="ValueSlider_ValueChanged"
+                Value="100">
+
+                <Slider.Background>
+                    <LinearGradientBrush>
+                        <GradientStop Offset="1" Color="Black" />
+                        <GradientStop Offset="0" Color="White" />
+                    </LinearGradientBrush>
+                </Slider.Background>
+            </Slider>
+
+        </Grid>-->
+
+
+        <Border
+            Grid.Row="1"
+            Grid.Column="2"
+            Width="100"
+            Margin="8,24,8,8"
+            Padding="0"
+            BorderBrush="{x:Static SystemColors.ActiveBorderBrush}"
+            BorderThickness="1">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <color:ColorPicker
+                    x:Name="ColorPicker"
+                    Grid.Row="0"
+                    ColorHit="ColorPicker_ColorHit"
+                    InvertSaturation="True"
+                    Mode="LinearVertical" />
+
+                <Slider
+                    x:Name="Slide"
+                    Grid.Row="1"
+                    Margin="0,4,0,0"
+                    IsSnapToTickEnabled="True"
+                    LargeChange="10"
+                    ManipulationCompleted="Slider_ManipulationCompleted"
+                    Maximum="100"
+                    Minimum="0"
+                    SmallChange="1"
+                    TickFrequency="1"
+                    ValueChanged="Slider_ValueChanged" />
+
+            </Grid>
+
+        </Border>
+
+
+        <StackPanel
+            Grid.Row="1"
+            Grid.RowSpan="1"
+            Grid.Column="3"
+            Margin="16,8"
+            VerticalAlignment="Center"
+            Orientation="Vertical">
+
+            <Label Content="{i18n:Translate ResourceKey=SelectNetwork, AddColon=True}" />
+
+            <ComboBox
+                x:Name="cbIP"
+                Margin="0,2,0,8"
+                Padding="4"
+                ItemsSource="{Binding Adapters}"
+                SelectedItem="{Binding SelectedAdapter, Mode=TwoWay}"
+                ToolTipService.ShowDuration="5000">
+
+                <ComboBox.ToolTip>
+                    <ToolTip
+                        x:Name="ttNet"
+                        Content="{Binding NetworkStatus}"
+                        Visibility="{Binding ShowNetworkStatus, Mode=TwoWay}" />
+                </ComboBox.ToolTip>
+
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid.ToolTip>
+                                <ToolTip>
+                                    <ToolTip.Template>
+                                        <ControlTemplate>
+                                            <Border
+                                                Background="{x:Static SystemColors.InfoBrush}"
+                                                BorderBrush="Black"
+                                                BorderThickness="1">
+
+                                                <Grid Margin="2">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="Auto" />
+                                                    </Grid.RowDefinitions>
+
+                                                    <Label
+                                                        Grid.Row="0"
+                                                        Margin="4,2"
+                                                        Padding="0"
+                                                        Content="{Binding FriendlyName}"
+                                                        FontWeight="Bold" />
+                                                    <Label
+                                                        Grid.Row="1"
+                                                        Margin="4,0"
+                                                        Padding="0"
+                                                        Content="{Binding HasInternet, Converter={StaticResource enumConv}}" />
+                                                    <Label
+                                                        Grid.Row="2"
+                                                        Margin="4,2"
+                                                        Padding="0"
+                                                        Content="{Binding IPV4Address}" />
+                                                </Grid>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </ToolTip.Template>
+                                </ToolTip>
+                            </Grid.ToolTip>
+
+                            <Image
+                                Grid.Column="0"
+                                Margin="4"
+                                Source="{Binding DeviceIcon}" />
+
+                            <TextBlock
+                                Grid.Column="1"
+                                Margin="4,2"
+                                Text="{Binding FriendlyName}" />
+
+                        </Grid>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+
+            </ComboBox>
+
+            <Label Content="{i18n:Translate ResourceKey=TimeoutSeconds, AddColon=True}" />
+
+            <TextBox
+                x:Name="txtTimeout"
+                Margin="0,2,0,8"
+                Padding="4"
+                Text="{Binding Timeout, Mode=TwoWay, Converter={StaticResource intConv}}">
+
+                <TextBox.ToolTip>
+                    <ToolTip
+                        x:Name="ttTimeout"
+                        Content="{Binding TimeoutStatus}"
+                        Visibility="{Binding ShowTimeoutStatus, Mode=TwoWay}" />
+                </TextBox.ToolTip>
+
+            </TextBox>
+
+            <Button
+                x:Name="BtnScan"
+                Click="BtnScan_Click"
+                Content="{i18n:Translate ResourceKey=ScanForBulbs}"
+                IsEnabled="{Binding ButtonsEnabled}" />
+        </StackPanel>
+
+
+        <StatusBar
+            Grid.Row="2"
+            Grid.ColumnSpan="4"
+            Background="DarkSlateBlue">
+
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        x:Name="BulbCounter"
+                        Margin="8,2,0,2"
+                        Foreground="White"
+                        Text="{Binding Bulbs.Count}" />
+
+                    <TextBlock
+                        Margin="0,2"
+                        Foreground="White"
+                        Text=" " />
+
+                    <TextBlock
+                        Margin="0,2,8,2"
+                        Foreground="White"
+                        Text="{i18n:Translate ResourceKey=Bulbs}" />
+
+                </StackPanel>
+
+            </StatusBarItem>
+            <Separator />
+
+            <StatusBarItem>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        x:Name="ColorLabel"
+                        Margin="8,2"
+                        VerticalAlignment="Center"
+                        Foreground="White"
+                        Text="{i18n:Translate AddColon=True,
+                                              ResourceKey=Color}" />
+
+                    <TextBlock
+                        x:Name="ColorText"
+                        Width="120"
+                        Margin="8,2"
+                        VerticalAlignment="Center"
+                        FontFamily="Consolas"
+                        Foreground="White"
+                        Text="#FFFFFFFF" />
+
+                    <Label
+                        x:Name="ColorSwatch"
+                        Width="24"
+                        Height="24"
+                        VerticalAlignment="Center"
+                        Background="White"
+                        BorderBrush="Black"
+                        BorderThickness="1" />
+
+                </StackPanel>
+
+            </StatusBarItem>
+            <Separator />
+            <StatusBarItem
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Right"
+                VerticalContentAlignment="Center">
+
+                <TextBlock
+                    x:Name="Status"
+                    Margin="8,2"
+                    Foreground="White"
+                    Text="{Binding StatusMessage}" />
+            </StatusBarItem>
+        </StatusBar>
+
+    </Grid>
+
+</Window>

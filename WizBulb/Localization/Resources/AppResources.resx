@@ -1,0 +1,513 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Abort" xml:space="preserve">
+    <value>Abort</value>
+  </data>
+  <data name="AddDeviceManually" xml:space="preserve">
+    <value>Add New Device Manually</value>
+  </data>
+  <data name="AddNewDevice" xml:space="preserve">
+    <value>Add New Device</value>
+  </data>
+  <data name="AskSaveExit" xml:space="preserve">
+    <value>Would you like to save your changes before exiting?</value>
+  </data>
+  <data name="Blue" xml:space="preserve">
+    <value>Blue</value>
+  </data>
+  <data name="Bulb" xml:space="preserve">
+    <value>Bulb</value>
+  </data>
+  <data name="BulbDescription" xml:space="preserve">
+    <value>Bulb Description</value>
+  </data>
+  <data name="Bulbs" xml:space="preserve">
+    <value>Bulbs</value>
+  </data>
+  <data name="BulbType" xml:space="preserve">
+    <value>Bulb Type</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ChooseFile" xml:space="preserve">
+    <value>Choose File</value>
+  </data>
+  <data name="ChooseFolder" xml:space="preserve">
+    <value>Choose Folder</value>
+  </data>
+  <data name="Clone" xml:space="preserve">
+    <value>Clone</value>
+  </data>
+  <data name="CloseProgramTitle" xml:space="preserve">
+    <value>Close Program</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="Colors" xml:space="preserve">
+    <value>Colors</value>
+  </data>
+  <data name="CustomColor" xml:space="preserve">
+    <value>Custom Color</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DeleteDevice" xml:space="preserve">
+    <value>Delete Device</value>
+  </data>
+  <data name="DeleteLightMode" xml:space="preserve">
+    <value>Delete Light Mode</value>
+  </data>
+  <data name="DeleteRoom" xml:space="preserve">
+    <value>Delete Room</value>
+  </data>
+  <data name="DeleteScene" xml:space="preserve">
+    <value>Delete Scene</value>
+  </data>
+  <data name="DriverConfig" xml:space="preserve">
+    <value>Driver Config</value>
+  </data>
+  <data name="Duplicate" xml:space="preserve">
+    <value>Duplicate</value>
+  </data>
+  <data name="DynamicModes" xml:space="preserve">
+    <value>Dynamic Modes</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="ErrorNoInternet" xml:space="preserve">
+    <value>You do not appear to be connected to the internet.</value>
+  </data>
+  <data name="ErrorValueNotNumber" xml:space="preserve">
+    <value>Value is not a number.</value>
+  </data>
+  <data name="ErrorValueOutOfRange" xml:space="preserve">
+    <value>Value is out of range.</value>
+  </data>
+  <data name="EwfHex" xml:space="preserve">
+    <value>EwfHex</value>
+  </data>
+  <data name="Failure" xml:space="preserve">
+    <value>Failure</value>
+  </data>
+  <data name="File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="FirmwareVersion" xml:space="preserve">
+    <value>Firmware Version</value>
+  </data>
+  <data name="GettingBulbInfoForX" xml:space="preserve">
+    <value>Getting bulb info for '{0}' ...</value>
+  </data>
+  <data name="Green" xml:space="preserve">
+    <value>Green</value>
+  </data>
+  <data name="HasInternet" xml:space="preserve">
+    <value>Internet Access</value>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="HomeId" xml:space="preserve">
+    <value>Home ID</value>
+  </data>
+  <data name="HomeName" xml:space="preserve">
+    <value>Home Name</value>
+  </data>
+  <data name="Homes" xml:space="preserve">
+    <value>Homes</value>
+  </data>
+  <data name="Ignore" xml:space="preserve">
+    <value>Ignore</value>
+  </data>
+  <data name="IPAddress" xml:space="preserve">
+    <value>IP Address</value>
+  </data>
+  <data name="IsPoweredOff" xml:space="preserve">
+    <value>Is Powered Off</value>
+  </data>
+  <data name="IsPoweredOn" xml:space="preserve">
+    <value>Is Powered On</value>
+  </data>
+  <data name="LightIsOff" xml:space="preserve">
+    <value>Light is off.</value>
+  </data>
+  <data name="LightIsOn" xml:space="preserve">
+    <value>Light is on.</value>
+  </data>
+  <data name="LightMode" xml:space="preserve">
+    <value>Light Mode</value>
+  </data>
+  <data name="LightModes" xml:space="preserve">
+    <value>Light Modes</value>
+  </data>
+  <data name="LightOff" xml:space="preserve">
+    <value>Light Off</value>
+  </data>
+  <data name="LightOn" xml:space="preserve">
+    <value>Light On</value>
+  </data>
+  <data name="Link" xml:space="preserve">
+    <value>Link</value>
+  </data>
+  <data name="Load" xml:space="preserve">
+    <value>Load</value>
+  </data>
+  <data name="LoadSettings" xml:space="preserve">
+    <value>Load Settings</value>
+  </data>
+  <data name="MACAddress" xml:space="preserve">
+    <value>MAC Address</value>
+  </data>
+  <data name="ModuleName" xml:space="preserve">
+    <value>Module Name</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NamedColor" xml:space="preserve">
+    <value>Named Color</value>
+  </data>
+  <data name="NamedColors" xml:space="preserve">
+    <value>Named Colors</value>
+  </data>
+  <data name="NetworkName" xml:space="preserve">
+    <value>Network Name</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="NewLightMode" xml:space="preserve">
+    <value>New Light Mode</value>
+  </data>
+  <data name="NewRoom" xml:space="preserve">
+    <value>New Room</value>
+  </data>
+  <data name="NewScene" xml:space="preserve">
+    <value>New Scene</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="NoInternet" xml:space="preserve">
+    <value>No Internet Access</value>
+  </data>
+  <data name="NotDetermined" xml:space="preserve">
+    <value>Internet Connection Not Determined</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="Percentage" xml:space="preserve">
+    <value>Percentage</value>
+  </data>
+  <data name="PingBulb" xml:space="preserve">
+    <value>Ping Bulb</value>
+  </data>
+  <data name="PoweredOff" xml:space="preserve">
+    <value>Powered Off</value>
+  </data>
+  <data name="PoweredOn" xml:space="preserve">
+    <value>Powered On</value>
+  </data>
+  <data name="PowerOff" xml:space="preserve">
+    <value>Power Off</value>
+  </data>
+  <data name="PowerOn" xml:space="preserve">
+    <value>Power On</value>
+  </data>
+  <data name="PowerStatus" xml:space="preserve">
+    <value>Power Status</value>
+  </data>
+  <data name="Predefined" xml:space="preserve">
+    <value>Predefined</value>
+  </data>
+  <data name="Proximity" xml:space="preserve">
+    <value>Proximity</value>
+  </data>
+  <data name="Query" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="Red" xml:space="preserve">
+    <value>Red</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="RefreshAll" xml:space="preserve">
+    <value>Refresh All</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="Retry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="RetryingX" xml:space="preserve">
+    <value>Retrying {0} ...</value>
+  </data>
+  <data name="Room" xml:space="preserve">
+    <value>Room</value>
+  </data>
+  <data name="RoomId" xml:space="preserve">
+    <value>Room ID</value>
+  </data>
+  <data name="RoomName" xml:space="preserve">
+    <value>Room Name</value>
+  </data>
+  <data name="Rooms" xml:space="preserve">
+    <value>Rooms</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="SaveAs" xml:space="preserve">
+    <value>Save As</value>
+  </data>
+  <data name="SaveAsEllipses" xml:space="preserve">
+    <value>Save As...</value>
+  </data>
+  <data name="SaveChangesTitle" xml:space="preserve">
+    <value>Save Changes</value>
+  </data>
+  <data name="SaveSettings" xml:space="preserve">
+    <value>SaveSettings</value>
+  </data>
+  <data name="Scan" xml:space="preserve">
+    <value>Scan</value>
+  </data>
+  <data name="ScanComplete" xml:space="preserve">
+    <value>Scan Complete</value>
+  </data>
+  <data name="ScanForBulbs" xml:space="preserve">
+    <value>Scan For Bulbs</value>
+  </data>
+  <data name="ScanningBulbs" xml:space="preserve">
+    <value>Scanning for bulbs...</value>
+  </data>
+  <data name="ScanningBulbsXBulbsFound" xml:space="preserve">
+    <value>Scanning for bulbs... ({0} bulbs discovered)</value>
+  </data>
+  <data name="ScanNow" xml:space="preserve">
+    <value>Scan Now</value>
+  </data>
+  <data name="Scene" xml:space="preserve">
+    <value>Scene</value>
+  </data>
+  <data name="SceneId" xml:space="preserve">
+    <value>Scene ID</value>
+  </data>
+  <data name="SceneName" xml:space="preserve">
+    <value>Scene Name</value>
+  </data>
+  <data name="Scenes" xml:space="preserve">
+    <value>Scenes</value>
+  </data>
+  <data name="SelectMode" xml:space="preserve">
+    <value>Select Light Mode</value>
+  </data>
+  <data name="SelectNetwork" xml:space="preserve">
+    <value>Select Network</value>
+  </data>
+  <data name="SelectRoom" xml:space="preserve">
+    <value>Select Room</value>
+  </data>
+  <data name="SelectScene" xml:space="preserve">
+    <value>Select Scene</value>
+  </data>
+  <data name="SetColor" xml:space="preserve">
+    <value>Set Color</value>
+  </data>
+  <data name="SetLightMode" xml:space="preserve">
+    <value>Set Light Mode</value>
+  </data>
+  <data name="SetTimeout" xml:space="preserve">
+    <value>Set Timeout</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="SignalStrength" xml:space="preserve">
+    <value>Signal Strength</value>
+  </data>
+  <data name="StandardModes" xml:space="preserve">
+    <value>Standard Modes</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="StopScanning" xml:space="preserve">
+    <value>Stop Scanning</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Timeout" xml:space="preserve">
+    <value>Timeout</value>
+  </data>
+  <data name="TimeoutSeconds" xml:space="preserve">
+    <value>Timeout (in seconds)</value>
+  </data>
+  <data name="UserDefined" xml:space="preserve">
+    <value>User-defined</value>
+  </data>
+  <data name="UserDefinedLightMode" xml:space="preserve">
+    <value>User-defined Light Mode</value>
+  </data>
+  <data name="Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="WarnEnterNumberRange" xml:space="preserve">
+    <value>Please enter a number between {0} and {1}</value>
+  </data>
+  <data name="WarnSelectAdapter" xml:space="preserve">
+    <value>Please select a network adapter to continue.</value>
+  </data>
+  <data name="WizBulb" xml:space="preserve">
+    <value>WizBulb</value>
+  </data>
+  <data name="XBulbs" xml:space="preserve">
+    <value>{0} Bulbs</value>
+  </data>
+  <data name="XBulbsFound" xml:space="preserve">
+    <value>{0} Bulbs Discovered</value>
+  </data>
+  <data name="Xdb" xml:space="preserve">
+    <value>{0} db</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+</root>
