@@ -55,22 +55,6 @@ namespace WizBulb
             Width = size.Width;
             Height = size.Height;
             var ip = NetworkHelper.DefaultLocalIP;
-
-            //var b = new Bulb("192.168.1.12");
-            //var b2 = new Bulb("192.168.1.8");
-
-            //PredefinedScene p = PredefinedScene.GoldenWhite;
-
-            //List<Action> paras = new List<Action>();
-
-            //paras.Add(() => { b.SetScene(p, 64); });
-            //paras.Add(() => { b2.SetScene(p, 64); });
-            //paras.Add(() => { b.SetScene(p, System.Drawing.Color.Aqua, 255); });
-            //paras.Add(() => { b2.SetScene(p, System.Drawing.Color.Violet, 255); });
-
-            //Parallel.Invoke(paras.ToArray());
-
-            //Picker.ColorHit += Picker_ColorHit;
             
             this.Loaded += MainWindow_Loaded;
             this.LocationChanged += MainWindow_LocationChanged;
