@@ -1,5 +1,5 @@
 # WizLib
-Philips Wiz Color &amp; Tunable White Light Bulb .NET API Library
+WiZ Color &amp; Tunable White Light Bulb .NET API Library
 
 This library is in active development.
 
