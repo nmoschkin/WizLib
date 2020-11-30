@@ -125,7 +125,7 @@ namespace WizBulb
             Settings.LastWindowLocation = new Point(Left, Top);
         }
 
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             var loc = Settings.LastWindowLocation;
             var size = Settings.LastWindowSize;
@@ -135,6 +135,8 @@ namespace WizBulb
 
             Width = size.Width;
             Height = size.Height;
+
+            vm.ScanForBulbs();
         }
 
         private void ValueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

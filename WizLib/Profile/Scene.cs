@@ -11,12 +11,14 @@ namespace WizLib
     public class Scene : ObservableBase
     {
 
-        private KeyedObservableCollection<BulbParams> bp = new KeyedObservableCollection<BulbParams>(nameof(WizLib.BulbParams.MACAddress));
+        private KeyedObservableCollection<BulbParams> bp 
+            = new KeyedObservableCollection<BulbParams>(nameof(WizLib.BulbParams.MACAddress));
 
-        private string sceneId;
+        private Guid sceneId;
 
         private string name;
 
+        [JsonProperty("name")]
         public string Name
         {
             get => name;
@@ -26,7 +28,8 @@ namespace WizLib
             }
         }
 
-        public string SceneId
+        [JsonProperty("sceneId")]
+        public Guid SceneId
         {
             get => sceneId;
             set
@@ -35,6 +38,7 @@ namespace WizLib
             }
         }
 
+        [JsonProperty("bulbs")]
         public KeyedObservableCollection<BulbParams> BulbParams
         {
             get => bp;
@@ -46,15 +50,18 @@ namespace WizLib
 
         public Scene()
         {
-            SceneId = Guid.NewGuid().ToString("d");
+            SceneId = Guid.NewGuid();
         }
 
         public Scene(string sceneId)
         {
-            SceneId = sceneId;
+            SceneId = Guid.Parse(sceneId);
         }
 
-
+        public Scene(Guid sceneId)
+        {
+            SceneId = sceneId;
+        }
 
     }
 }

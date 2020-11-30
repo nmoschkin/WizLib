@@ -18,14 +18,9 @@ namespace WizLib
 
         IList<Home> Homes { get; set;  }
 
-        IList<LightMode> LightModes { get; set; }
+        IList<LightMode> CustomLightModes { get; set; }
 
-        IList<Bulb> Bulbs { get; set; }
-
-        IList<Room> Rooms { get; set; }
-
-        IList<Scene> Scenes { get; set; }
-
+        IList<BulbItem> Bulbs { get; set; }
     }
 
 
@@ -34,6 +29,8 @@ namespace WizLib
         IProfile Deserialize();
 
         void Serialize(IProfile profile);
+
+        string[] EnumProfiles();
     }
 
     public class JsonProfileSerializer : IProfileSerializer
@@ -43,6 +40,11 @@ namespace WizLib
         public static string DefaultExtension { get; set; } = ".wizj";
 
         public static string LastDirectory { get; set; }
+
+        public string[] EnumProfiles()
+        {
+            return EnumProfiles(LastDirectory);
+        }
 
         public static string[] EnumProfiles(string path, string ext = null, bool setLastDir = true)
         {

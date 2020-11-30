@@ -22,6 +22,14 @@ namespace WizLib
     /// <param name="b"></param>
     public delegate void BulbScanCallback(Bulb b);
 
+
+    public enum ScanCondition
+    { 
+        Never,
+        NotFound,
+        Always
+    }
+
     /// <summary>
     /// Bulb scanning modes indicating which command to broadcast to discover bulbs on the local network.
     /// </summary>
@@ -46,7 +54,7 @@ namespace WizLib
     /// <summary>
     /// Encapsulates the characteristics and behavior of a WiZ light bulb.
     /// </summary>
-    public class Bulb : ObservableBase //, IComparable
+    public class Bulb : ObservableBase, IBulb //, IComparable
     {
 
         /// <summary>
@@ -71,6 +79,15 @@ namespace WizLib
         protected static bool udpActive;
 
         protected static Dictionary<string, Bulb> bulbCache = new Dictionary<string, Bulb>();
+
+        public async Task<Bulb> GetBulb()
+        {
+            return await Task.Run(() =>
+            {
+                return this;
+            });
+
+        }
 
         /// <summary>
         /// Gets or sets the <see cref="BulbParams"/> object used to configure this bulb.
@@ -329,12 +346,32 @@ namespace WizLib
         {
 
         }
-
-        public static async Task<Bulb> GetBulbByMacAddr(PhysicalAddress macAddr, bool scanForBulb, IPAddress localAddr = null, PhysicalAddress localMac = null)
+        /// <summary>
+        /// Create a <see cref="Bulb"/> object using only a MAC address.
+        /// </summary>
+        /// <param name="macAddr">MAC Address</param>
+        /// <param name="scan">Condition on which to perform a network scan for bulbs.</param>
+        /// <param name="localAddr">Local address for the scan.  If none is provided, one will be automatically selected.</param>
+        /// <param name="localMac">Local hardware address for the scan.  If none is provided, one will be automatically selected.</param>
+        /// <returns></returns>
+        public static async Task<Bulb> GetBulbByMacAddr(string macAddr, ScanCondition scan, IPAddress localAddr = null, PhysicalAddress localMac = null)
+        {
+            return await GetBulbByMacAddr(PhysicalAddress.Parse(macAddr), scan, localAddr, localMac);
+        }
+        
+        /// <summary>
+        /// Create a <see cref="Bulb"/> object using only a MAC address.
+        /// </summary>
+        /// <param name="macAddr">MAC Address</param>
+        /// <param name="scan">Condition on which to perform a network scan for bulbs.</param>
+        /// <param name="localAddr">Local address for the scan.  If none is provided, one will be automatically selected.</param>
+        /// <param name="localMac">Local hardware address for the scan.  If none is provided, one will be automatically selected.</param>
+        /// <returns></returns>
+        public static async Task<Bulb> GetBulbByMacAddr(PhysicalAddress macAddr, ScanCondition scan, IPAddress localAddr = null, PhysicalAddress localMac = null)
         {
             string smac = macAddr.ToString();
 
-            if (bulbCache.Count > 0)
+            if (scan == ScanCondition.NotFound)
             {
                 if (bulbCache.ContainsKey(smac))
                 {
@@ -342,19 +379,15 @@ namespace WizLib
                 }
             }
 
-            if (scanForBulb)
-            {
-                await ScanForBulbs(localAddr, localMac, ScanMode.GetSystemConfig, 1);
+            if (scan == ScanCondition.Never) return null;
 
-                if (bulbCache.Count > 0)
-                {
-                    if (bulbCache.ContainsKey(smac))
-                    {
-                        return bulbCache[smac];
-                    }
-                }
+            await ScanForBulbs(localAddr, localMac, ScanMode.GetSystemConfig, 1);
+
+            if (bulbCache.ContainsKey(smac))
+            {
+                return bulbCache[smac];
             }
- 
+
             return null;
         }
 

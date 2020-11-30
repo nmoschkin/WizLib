@@ -11,11 +11,7 @@ namespace WizLib
     {
         private Guid projectId;
         
-        private IList<Bulb> bulbs;
-
-        private IList<Room> rooms;
-
-        private IList<Scene> scenes;
+        private IList<BulbItem> bulbs;
 
         private IList<Home> homes;
 
@@ -23,11 +19,25 @@ namespace WizLib
 
         private string name;
 
-        public Profile()
+        public Profile(string name) : this(name, Guid.NewGuid())
         {
-            bulbs = new List<Bulb>();
-            rooms = new List<Room>();
-            scenes = new List<Scene>();
+        }
+
+        public Profile(Guid projectId) : this(null, projectId)
+        {
+        }
+
+        public Profile() : this(null, Guid.NewGuid())
+        {
+        }
+
+
+        public Profile(string name, Guid projectId)
+        {
+            this.projectId = projectId;
+            this.name = name;
+
+            bulbs = new List<BulbItem>();
             homes = new List<Home>();
             lightModes = new List<LightMode>();
         }
@@ -62,7 +72,7 @@ namespace WizLib
         }
 
         [JsonProperty("lightModes")]
-        public IList<LightMode> LightModes
+        public IList<LightMode> CustomLightModes
         {
             get => lightModes;
             set
@@ -72,7 +82,7 @@ namespace WizLib
         }
 
         [JsonProperty("bulbs")]
-        public IList<Bulb> Bulbs
+        public IList<BulbItem> Bulbs
         {
             get => bulbs;
             set
@@ -80,29 +90,6 @@ namespace WizLib
                 SetProperty(ref bulbs, value);
             }
         }
-
-        [JsonProperty("rooms")]
-        public IList<Room> Rooms
-        {
-            get => rooms;
-            set
-            {
-                SetProperty(ref rooms, value);
-            }
-        }
-
-
-        [JsonProperty("scenes")]
-        public IList<Scene> Scenes
-        {
-            get => scenes;
-            set
-            {
-                SetProperty(ref scenes, value);
-            }
-        }
-
-
 
     }
 }

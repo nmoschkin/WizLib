@@ -4,13 +4,66 @@ using System.Windows;
 using System.IO;
 using System.Linq;
 using Microsoft.Win32;
+using WizLib;
 
 namespace WizBulb
 {
+    public class RegistrySerializer : IProfileSerializer
+    {
+        string rootKey = Settings.ConfigRootKey + @"\Profiles";
+        string itemKey;
+        
+        string[] profiles;
+
+        public RegistrySerializer(string itemKey)
+        {
+            this.itemKey = itemKey;
+        }
+
+        public RegistrySerializer(string rootKey, string itemKey) : this(itemKey)
+        {
+            this.rootKey = rootKey;
+            profiles = EnumProfiles();
+        }
+
+        public IProfile Deserialize()
+        {
+            RegistryKey key = Registry.CurrentUser.CreateSubKey($"{rootKey}\\{itemKey}", RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryOptions.None);
+
+            var prof = new Profile();
+
+            
+
+            return prof; 
+
+        }
+
+        public string[] EnumProfiles()
+        {
+            return EnumProfiles(rootKey);
+        }
+
+        public static string[] EnumProfiles(string rootKey)
+        {
+            RegistryKey key = Registry.CurrentUser.CreateSubKey(rootKey, RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryOptions.None);
+
+            var ret = key.GetSubKeyNames();
+            key.Close();
+
+            return ret;
+        }
+
+        public void Serialize(IProfile profile)
+        {
+
+        }
+
+    }
+
+
     public static class Settings
     {
-
-        public const string ConfigRootKey = @"Software\Nathaniel Moschkin\WizBulb";
+        public static string ConfigRootKey { get; set; } = @"Software\DataTools\WizBulb";
 
         public const int DefaultMaxRecentFiles = 40;
 
