@@ -11,7 +11,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using System.Collections;
 
-namespace WizLib
+namespace WizLib.Profiles
 {
 
     public class Home : ObservableBase

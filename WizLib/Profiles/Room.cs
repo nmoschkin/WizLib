@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
-namespace WizLib
+namespace WizLib.Profiles
 {
-    public class Room : ObservableBase    
+    public class Room : ObservableBase
     {
         private string roomId;
         private string name;
@@ -17,6 +17,9 @@ namespace WizLib
         private KeyedObservableCollection<BulbItem> bulbs = new KeyedObservableCollection<BulbItem>(nameof(Bulb.MACAddress));
 
         private KeyedObservableCollection<Scene> scenes = new KeyedObservableCollection<Scene>(nameof(Scene.SceneId));
+
+        public KeyedObservableCollection<Room> RoomCache { get; private set; } = new KeyedObservableCollection<Room>(nameof(RoomId));
+
 
         private Scene currentScene;
 
@@ -36,7 +39,17 @@ namespace WizLib
             get => roomId;
             set
             {
-                SetProperty(ref roomId, value);
+                if (SetProperty(ref roomId, value) && value != null)
+                {
+                    if (RoomCache.ContainsKey(roomId))
+                    {
+                        RoomCache[roomId] = this;
+                    }
+                    else
+                    {
+                        RoomCache.Add(this);
+                    }
+                }
             }
         }
 
@@ -50,7 +63,7 @@ namespace WizLib
             }
         }
 
-        [JsonProperty("bulbs")] 
+        [JsonProperty("bulbs")]
         public KeyedObservableCollection<BulbItem> Bulbs
         {
             get => bulbs;

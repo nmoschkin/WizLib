@@ -7,7 +7,7 @@ using System.Net.NetworkInformation;
 using System.Net;
 using Newtonsoft.Json;
 
-namespace WizLib
+namespace WizLib.Profiles
 {
     public interface IBulb
     {
@@ -18,9 +18,9 @@ namespace WizLib
         int Port { get; }
 
         string Name { get; set; }
-        
+
         string Icon { get; set; }
-        
+
         Task<Bulb> GetBulb();
 
     }

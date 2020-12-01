@@ -8,18 +8,18 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
-namespace WizLib
+namespace WizLib.Profiles
 {
     public class BulbItem : IBulb
     {
         [JsonProperty("mac")]
-        public virtual PhysicalAddress MACAddress { get; protected set; }
+        public virtual PhysicalAddress MACAddress { get; set; }
 
         [JsonProperty("addr")]
-        public virtual IPAddress IPAddress { get; protected set; }
+        public virtual IPAddress IPAddress { get; set; }
 
         [JsonProperty("port")]
-        public virtual int Port { get; protected set; }
+        public virtual int Port { get; set; }
 
         [JsonProperty("name")]
         public virtual string Name { get; set; }
@@ -52,7 +52,7 @@ namespace WizLib
 
         public async Task<Bulb> GetBulb()
         {
-            return await GetBulb(ScanCondition.NotFound);
+            return await GetBulb(ScanCondition.Never);
         }
 
         public async Task<Bulb> GetBulb(ScanCondition sc)
@@ -69,7 +69,9 @@ namespace WizLib
                 b = new Bulb(IPAddress, Port);
             }
 
-            await b?.GetPilot();
+            b.Name = Name;
+            b.Icon = Icon;
+
             return b;
         }
 

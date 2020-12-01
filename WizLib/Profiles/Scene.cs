@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
-namespace WizLib
+namespace WizLib.Profiles
 {
     public class Scene : ObservableBase
     {
 
-        private KeyedObservableCollection<BulbParams> bp 
+        private KeyedObservableCollection<BulbParams> bp
             = new KeyedObservableCollection<BulbParams>(nameof(WizLib.BulbParams.MACAddress));
 
         private Guid sceneId;

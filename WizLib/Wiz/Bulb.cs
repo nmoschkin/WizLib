@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 
 using WizLib.Helpers;
 using WizLib.Localization;
+using WizLib.Profiles;
 
 namespace WizLib
 {
@@ -159,7 +160,10 @@ namespace WizLib
                 string smac = MACAddress.ToString();
                 if (BulbCache.ContainsKey(smac))
                 {
-                    BulbCache[smac] = this;
+                    if (BulbCache[smac] != this)
+                    {
+                        BulbCache[smac] = this;
+                    }
                 }
                 else
                 {
@@ -168,6 +172,32 @@ namespace WizLib
 
                 Monitor.Exit(bulbCache);
             });
+        }
+
+        public Bulb(PhysicalAddress macAddr)
+        {
+            port = DefaultPort;
+
+            Settings = new BulbParams();
+            Settings.MACAddress = macAddr.Clone();
+
+            Monitor.Enter(bulbCache);
+
+            string smac = MACAddress.ToString();
+            if (BulbCache.ContainsKey(smac))
+            {
+                if (BulbCache[smac] != this)
+                {
+                    BulbCache[smac] = this;
+                }
+            }
+            else
+            {
+                BulbCache.Add(smac, this);
+            }
+
+            Monitor.Exit(bulbCache);
+
         }
 
         #endregion Public Constructors
@@ -458,7 +488,7 @@ namespace WizLib
                 }
             }
 
-            if (scan == ScanCondition.Never) return null;
+            if (scan == ScanCondition.Never) return new Bulb(macAddr);
 
             await ScanForBulbs(localAddr, localMac, ScanMode.GetSystemConfig, 1000);
 
@@ -467,7 +497,7 @@ namespace WizLib
                 return BulbCache[smac];
             }
 
-            return null;
+            return new Bulb(macAddr);
         }
 
         /// <summary>
@@ -554,9 +584,20 @@ namespace WizLib
 
                             if (p != null && p.Result?.MACAddress != null)
                             {
-                                bulb = new Bulb(from.Address, from.Port);
-                                bulb.Settings = p.Result;
+                                string smac = p.Result?.MACAddress.ToString();
 
+                                if (BulbCache.ContainsKey(smac))
+                                {
+                                    bulb = BulbCache[smac];
+                                    bulb.IPAddress = from.Address;
+                                    bulb.Port = from.Port;
+                                }
+                                else
+                                {
+                                    bulb = new Bulb(from.Address, from.Port);
+                                }
+
+                                bulb.Settings = p.Result;
                                 bool already = false;
 
                                 foreach (var bchk in bulbs)
@@ -989,6 +1030,8 @@ namespace WizLib
 
         protected async Task<byte[]> SendUDP(byte[] cmd, IPAddress localAddr = null)
         {
+            if (Port == 0 || IPAddress == null) return null;
+
             udpActive = true;
 
             List<Bulb> bulbs = new List<Bulb>();

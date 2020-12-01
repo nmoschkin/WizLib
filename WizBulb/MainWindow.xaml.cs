@@ -67,10 +67,12 @@ namespace WizBulb
             vm = new MainViewModel();
 
             vm.PopulateLightModesMenu(mnuModes);
+
             vm.LightModeClick += Vm_LightModeClick;
             vm.PropertyChanged += Vm_PropertyChanged;
-            //vm.AutoWatch = true;
-
+            
+            vm.PopulateRecentFiles(mnuRecents);
+            
             DataContext = vm;
         }
 
@@ -136,7 +138,11 @@ namespace WizBulb
             Width = size.Width;
             Height = size.Height;
 
+            await vm.LoadLastProject();
+
+            vm.WatchBulbs();
             vm.ScanForBulbs();
+
         }
 
         private void ValueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -271,29 +277,29 @@ namespace WizBulb
             }
         }
 
-        private void mnuOpenProject_Click(object sender, RoutedEventArgs e)
+        private async void mnuOpenProject_Click(object sender, RoutedEventArgs e)
         {
-
+            await vm.OpenProject();
         }
 
         private void mnuNewProject_Click(object sender, RoutedEventArgs e)
         {
-
+            vm.NewProject();
         }
 
         private void mnuSaveProject_Click(object sender, RoutedEventArgs e)
         {
-
+            vm.SaveProject();
         }
 
         private void mnuSaveAs_Click(object sender, RoutedEventArgs e)
         {
-
+            vm.SaveProjectAs();
         }
 
-        private void mnuLoadLast_Click(object sender, RoutedEventArgs e)
+        private async void mnuLoadLast_Click(object sender, RoutedEventArgs e)
         {
-
+            await vm.LoadLastProject();
         }
 
         private void mnuQuit_Click(object sender, RoutedEventArgs e)
@@ -357,6 +363,30 @@ namespace WizBulb
                     await vm.RefreshSelected();
                 }
             }
+            else if ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                if (e.Key == Key.S)
+                {
+                    if ((e.KeyboardDevice.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                    {
+                        vm.SaveProjectAs();
+                    }
+                    else
+                    {
+                        vm.SaveProject();
+                    }
+                }
+                else if (e.Key == Key.O)
+                {
+                    await vm.OpenProject();
+                }
+                else if (e.Key == Key.Q)
+                {
+                    Close();
+                }
+
+            }
+
         }
 
         private void Slider_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
@@ -399,8 +429,13 @@ namespace WizBulb
             if (notch) return;
 
             byte i = (byte)e.NewValue;
+            //bool ow = vm.AutoWatch;
+
+            //if (ow) vm.WatchAbort();
+
             await Bulb.SetLights(vm.SelectedBulbs, i);
 
+            //if (ow) vm.WatchBulbs();
         }
     }
 

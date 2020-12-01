@@ -1,21 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+
 using Newtonsoft.Json;
 
-namespace WizLib
+namespace WizLib.Profiles
 {
     public class Profile : ObservableBase, IProfile
     {
         private Guid projectId;
-        
-        private IList<BulbItem> bulbs;
 
-        private IList<Home> homes;
+        private List<BulbItem> bulbs;
 
-        private IList<LightMode> lightModes;
+        private List<Home> homes;
+
+        private List<LightMode> lightModes;
 
         private string name;
 
@@ -42,6 +44,7 @@ namespace WizLib
             lightModes = new List<LightMode>();
         }
 
+        [JsonProperty("projectId")]
         public Guid ProjectId
         {
             get => projectId;
@@ -62,7 +65,7 @@ namespace WizLib
         }
 
         [JsonProperty("homes")]
-        public IList<Home> Homes
+        public List<Home> Homes
         {
             get => homes;
             set
@@ -72,7 +75,7 @@ namespace WizLib
         }
 
         [JsonProperty("lightModes")]
-        public IList<LightMode> CustomLightModes
+        public List<LightMode> CustomLightModes
         {
             get => lightModes;
             set
@@ -82,7 +85,7 @@ namespace WizLib
         }
 
         [JsonProperty("bulbs")]
-        public IList<BulbItem> Bulbs
+        public List<BulbItem> Bulbs
         {
             get => bulbs;
             set
@@ -91,5 +94,60 @@ namespace WizLib
             }
         }
 
+        public void AddUpdateBulbs(IEnumerable<IBulb> bulbs, bool removeMissing)
+        {
+
+            bool bchk;
+            foreach (var b in bulbs)
+            {
+                bchk = false;
+                if (b.MACAddress == null) continue;
+
+                foreach (var b2 in this.bulbs)
+                {
+                    if (b2.MACAddress == null) continue;
+
+                    if (b.MACAddress.ToString() == b2.MACAddress.ToString())
+                    {
+                        b2.Name = b.Name;
+                        b2.IPAddress = b.IPAddress.Clone();
+                        b2.Icon = b.Icon;
+                        bchk = true;
+                        break;
+                    }
+                }
+
+                if (!bchk)
+                {
+                    this.bulbs.Add(BulbItem.CreateItemFromBulb(b));
+                }
+            }
+
+            if (removeMissing)
+            {
+                int c = this.bulbs.Count - 1;
+                int i;
+
+                for (i = c; i >= 0; i--)
+                {
+                    var b = this.bulbs[i];
+                    bchk = false;
+                    foreach (var b2 in bulbs)
+                    {
+                        if (b.MACAddress.ToString() == b2.MACAddress.ToString())
+                        {
+                            bchk = true;
+                            break;
+                        }
+                    }
+
+                    if (!bchk)
+                    {
+                        this.bulbs.RemoveAt(i);
+                    }
+                }
+            }
+
+        }
     }
 }

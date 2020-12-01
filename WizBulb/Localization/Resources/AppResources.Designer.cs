@@ -214,6 +214,24 @@ namespace WizBulb.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to dB.
+        /// </summary>
+        internal static string DB {
+            get {
+                return ResourceManager.GetString("DB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decibels.
+        /// </summary>
+        internal static string Decibels {
+            get {
+                return ResourceManager.GetString("Decibels", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Default.
         /// </summary>
         internal static string Default {
@@ -264,6 +282,15 @@ namespace WizBulb.Localization.Resources {
         internal static string DeleteScene {
             get {
                 return ResourceManager.GetString("DeleteScene", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Distance.
+        /// </summary>
+        internal static string Distance {
+            get {
+                return ResourceManager.GetString("Distance", resourceCulture);
             }
         }
         
@@ -345,6 +372,15 @@ namespace WizBulb.Localization.Resources {
         internal static string Failure {
             get {
                 return ResourceManager.GetString("Failure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Feet.
+        /// </summary>
+        internal static string Feet {
+            get {
+                return ResourceManager.GetString("Feet", resourceCulture);
             }
         }
         
@@ -538,6 +574,15 @@ namespace WizBulb.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Load Profile.
+        /// </summary>
+        internal static string LoadProfile {
+            get {
+                return ResourceManager.GetString("LoadProfile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Load Settings.
         /// </summary>
         internal static string LoadSettings {
@@ -552,6 +597,15 @@ namespace WizBulb.Localization.Resources {
         internal static string MACAddress {
             get {
                 return ResourceManager.GetString("MACAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Meters.
+        /// </summary>
+        internal static string Meters {
+            get {
+                return ResourceManager.GetString("Meters", resourceCulture);
             }
         }
         
@@ -615,6 +669,15 @@ namespace WizBulb.Localization.Resources {
         internal static string NewLightMode {
             get {
                 return ResourceManager.GetString("NewLightMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New Profile.
+        /// </summary>
+        internal static string NewProfile {
+            get {
+                return ResourceManager.GetString("NewProfile", resourceCulture);
             }
         }
         
@@ -691,6 +754,15 @@ namespace WizBulb.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open Profile.
+        /// </summary>
+        internal static string OpenProfile {
+            get {
+                return ResourceManager.GetString("OpenProfile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Percentage.
         /// </summary>
         internal static string Percentage {
@@ -759,6 +831,15 @@ namespace WizBulb.Localization.Resources {
         internal static string Predefined {
             get {
                 return ResourceManager.GetString("Predefined", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WiZ Profile (*.wizj)|*.wizj.
+        /// </summary>
+        internal static string ProfileFilterEntry {
+            get {
+                return ResourceManager.GetString("ProfileFilterEntry", resourceCulture);
             }
         }
         
@@ -912,6 +993,24 @@ namespace WizBulb.Localization.Resources {
         internal static string SaveChangesTitle {
             get {
                 return ResourceManager.GetString("SaveChangesTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save Profile.
+        /// </summary>
+        internal static string SaveProfile {
+            get {
+                return ResourceManager.GetString("SaveProfile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save Profile As.
+        /// </summary>
+        internal static string SaveProfileAs {
+            get {
+                return ResourceManager.GetString("SaveProfileAs", resourceCulture);
             }
         }
         
@@ -1222,11 +1321,74 @@ namespace WizBulb.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} cm.
+        /// </summary>
+        internal static string XCentimetersShort {
+            get {
+                return ResourceManager.GetString("XCentimetersShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} db.
         /// </summary>
         internal static string Xdb {
             get {
                 return ResourceManager.GetString("Xdb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} feet.
+        /// </summary>
+        internal static string XFeet {
+            get {
+                return ResourceManager.GetString("XFeet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} ft {1} in.
+        /// </summary>
+        internal static string XFeetInches {
+            get {
+                return ResourceManager.GetString("XFeetInches", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}&apos; {1}&quot;.
+        /// </summary>
+        internal static string XFeetInchesShort {
+            get {
+                return ResourceManager.GetString("XFeetInchesShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} f.
+        /// </summary>
+        internal static string XFeetShort {
+            get {
+                return ResourceManager.GetString("XFeetShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} meters.
+        /// </summary>
+        internal static string XMeters {
+            get {
+                return ResourceManager.GetString("XMeters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} m.
+        /// </summary>
+        internal static string XMetersShort {
+            get {
+                return ResourceManager.GetString("XMetersShort", resourceCulture);
             }
         }
         

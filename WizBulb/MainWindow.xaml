@@ -16,6 +16,7 @@
 
     <Window.Resources>
         <ResourceDictionary>
+            <conv:DistanceConverter x:Key="distConv" AsFeet="True" />
             <conv:MacAddrConverter x:Key="macConv" />
             <conv:EnumConverter x:Key="enumConv" />
             <conv:IntDisplayConverter
@@ -102,10 +103,7 @@
 
                 <Separator />
 
-                <MenuItem
-                    x:Name="mnuRecents"
-                    Header="Recent Projects"
-                    ItemsSource="{Binding RecentMenu}" />
+                <MenuItem x:Name="mnuRecents" Header="Recent Projects" />
 
                 <Separator />
 
@@ -264,16 +262,12 @@
                                 Header="{i18n:Translate ResourceKey=BulbType}" />
                             <GridViewColumn
                                 Width="120"
+                                DisplayMemberBinding="{Binding Settings.Distance, Converter={StaticResource distConv}}"
+                                Header="{i18n:Translate ResourceKey=Distance}" />
+                            <GridViewColumn
+                                Width="120"
                                 DisplayMemberBinding="{Binding Settings.FirmwareVersion}"
                                 Header="{i18n:Translate ResourceKey=FirmwareVersion}" />
-                            <GridViewColumn
-                                Width="120"
-                                DisplayMemberBinding="{Binding Settings.EwfHex}"
-                                Header="{i18n:Translate ResourceKey=EwfHex}" />
-                            <GridViewColumn
-                                Width="120"
-                                DisplayMemberBinding="{Binding Settings.DriverConfig}"
-                                Header="{i18n:Translate ResourceKey=DriverConfig}" />
 
 
                         </GridView>

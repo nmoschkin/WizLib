@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Win32;
 using WizLib;
+using WizLib.Profiles;
 
 namespace WizBulb
 {
@@ -35,6 +36,10 @@ namespace WizBulb
             
 
             return prof; 
+
+        }
+        public void Deserialize(IProfile obj)
+        {
 
         }
 
@@ -324,7 +329,7 @@ namespace WizBulb
                         continue;
                     switch (Path.GetExtension(f.FileName).ToLower())
                     {
-                        case ".pdproj":
+                        case ".wizj":
                             return f;
                     }
                 }
@@ -385,6 +390,7 @@ namespace WizBulb
             }
             set
             {
+                if (value == null) return;
                 RegistryKey key = Registry.CurrentUser.CreateSubKey(ConfigRootKey, RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryOptions.None);
                 key.SetValue("LastBrowseFolder", value);
                 key.Close();

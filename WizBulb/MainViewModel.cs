@@ -8,11 +8,15 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using System.Windows.Forms;
+using System.IO;
 
 using DataTools.Hardware.Network;
 
 using WizBulb.Localization.Resources;
+
 using WizLib;
+using WizLib.Profiles;
 
 namespace WizBulb
 {
@@ -46,49 +50,47 @@ namespace WizBulb
         private CancellationTokenSource cts;
 
         private bool autoWatch = false;
+        private Task watchTask;
 
         public bool AutoWatch
         {
             get => autoWatch;
             set
             {
-                if (autoWatch == value) return;
-
-                if (value == false)
-                {
-                    if (cts != null)
-                    {
-                        cts.Cancel();
-                        cts = null;
-
-                    }
-
-                    autoWatch = false;
-                }
-                else
-                {
-                    WatchCurrentBulb();
-                }
-
+                SetProperty(ref autoWatch, value);
             }
         }
 
-        private void WatchCurrentBulb()
+        public void WatchAbort()
         {
-            if (autoWatch) return;
+            if (AutoWatch && cts != null && watchTask != null) 
+            {
+                cts.Cancel();
+                watchTask.Wait();
+
+                AutoWatch = false;
+            }
+        }
+
+        public bool WatchBulbs()
+        {
+            if (AutoWatch) return false;
 
             cts = new CancellationTokenSource();
-            autoWatch = true;
+            AutoWatch = true;
 
-            _ = Task.Run(async () =>
+            watchTask = Task.Run(async () =>
             {
                 try
                 {
                     while (cts != null && !cts.IsCancellationRequested)
                     {
-                        if (SelectedBulb != null)
+                        if (Bulbs != null)
                         {
-                            await SelectedBulb.GetPilot();
+                            foreach (var b in Bulbs)
+                            {
+                                await b.GetPilot();
+                            }
                         }
 
                         await Task.Delay(2000);
@@ -101,8 +103,20 @@ namespace WizBulb
 
             }, cts.Token);
 
-
+            return true;
         }
+
+        private string projFile;
+
+        public string ProjectFile
+        {
+            get => projFile;
+            set
+            {
+                projFile = value;
+            }
+        }
+
 
         private bool changed = false;
 
@@ -330,6 +344,8 @@ namespace WizBulb
             }
         }
 
+
+
         public virtual bool CheckTimeout()
         {
             if (Timeout < 1 || Timeout > 360)
@@ -339,6 +355,155 @@ namespace WizBulb
             }
 
             return true;
+        }
+
+        public string WindowTitle
+        {
+            get 
+            {
+                if (!string.IsNullOrEmpty(ProjectFile))
+                {
+                    return "WiZBulb - " + Path.GetFileNameWithoutExtension(ProjectFile);
+                }
+                else
+                {
+                    return "WiZBulb";
+                }
+            }
+        }
+
+
+        public virtual async Task<bool> OpenProject()
+        {
+            var dlg = new OpenFileDialog()
+            {
+                InitialDirectory = Settings.LastDirectory,
+                Filter = $"{AppResources.ProfileFilterEntry}", 
+                Title = AppResources.LoadProfile,
+                CheckFileExists = true
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK) return false;
+
+            Settings.LastBrowseFolder = Path.GetDirectoryName(dlg.FileName);
+            return await OpenProject(dlg.FileName);
+        }
+
+        public virtual async Task<bool> OpenProject(string fileName)
+        {
+            if (!File.Exists(fileName)) return false;
+
+            var j = new JsonProfileSerializer(fileName);
+
+            SelectedRoom = null;
+            SelectedHome = null;
+
+            Profile = (Profile)j.Deserialize();
+
+            allBulbs = Bulbs = new KeyedObservableCollection<Bulb>(
+                            nameof(Bulb.MACAddress),
+                            await BulbItem.CreateBulbsFromInterfaceList(Profile.Bulbs)
+                            );
+
+            Settings.AddRecentFile(fileName, Profile.ProjectId);
+            ProjectFile = fileName;
+
+            OnPropertyChanged(nameof(WindowTitle));
+
+            return true;
+        }
+
+        public virtual bool SaveProjectAs()
+        {
+            var dlg = new SaveFileDialog()
+            {
+                InitialDirectory = Settings.LastDirectory,
+                Filter = $"{AppResources.ProfileFilterEntry}",
+                Title = AppResources.SaveProfileAs,
+                OverwritePrompt = true
+            };
+
+            Settings.LastBrowseFolder = Path.GetDirectoryName(dlg.FileName);
+
+            if (dlg.ShowDialog() != DialogResult.OK) return false;
+
+            var fileName = dlg.FileName;
+            var j = new JsonProfileSerializer(fileName);
+
+            Profile.AddUpdateBulbs(allBulbs, true);
+            j.Serialize(Profile);
+
+            ProjectFile = fileName;
+            Settings.AddRecentFile(fileName, Profile.ProjectId);
+            OnPropertyChanged(nameof(WindowTitle));
+
+            return true;
+        }
+
+        public virtual bool SaveProject()
+        {
+            if (string.IsNullOrEmpty(ProjectFile)) return SaveProjectAs();
+            var fileName = ProjectFile;
+
+            var j = new JsonProfileSerializer(fileName);
+
+            Profile.AddUpdateBulbs(allBulbs, true);
+            j.Serialize(Profile);
+
+            Settings.AddRecentFile(fileName, Profile.ProjectId);
+            OnPropertyChanged(nameof(WindowTitle));
+
+            return true;
+        }
+
+        public virtual void NewProject()
+        {
+            ProjectFile = null;
+            Profile = new Profile();
+
+            Bulb.BulbCache.Clear();
+            ScanForBulbs();
+        }
+
+        public async Task<bool> LoadLastProject()
+        {
+            var recents = Settings.RecentFiles;
+            if (recents == null || recents.Length == 0) return false;
+
+            string s = recents[0].FileName;
+
+            return await OpenProject(s);
+        }
+
+        public void PopulateRecentFiles(MenuItem mi)
+        {
+            var recents = Settings.RecentFiles;
+            var l = new List<MenuItem>();
+
+            foreach (var r in recents)
+            {
+                var mis = new MenuItem()
+                {
+                    Header = Path.GetFileName(r.FileName),
+                    ToolTip = r.FileName,
+                    Tag = r
+                };
+
+
+                mis.Click += RecentItemClicked;
+                l.Add(mis);
+            }
+
+            mi.ItemsSource = l;
+
+        }
+
+        protected virtual async void RecentItemClicked(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (e.Source is MenuItem mi && mi.Tag is RecentFile r)
+            {
+                await OpenProject(r.FileName);
+            }
         }
 
         public virtual void PopulateLightModesMenu(MenuItem mi)

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.NetworkInformation;
+using WizLib.Profiles;
 
 namespace WizLib
 {
@@ -673,9 +674,29 @@ namespace WizLib
             get => rssi;
             set
             {
-                SetProperty(ref rssi, value);
+                if (SetProperty(ref rssi, value))
+                {
+                    OnPropertyChanged(nameof(Distance));
+                }
             }
         }
+
+        [JsonIgnore]
+        public double Distance
+        {
+            get
+            {
+                if (rssi == null) return double.NaN;
+                return CalculateDistance((double)rssi, (double)(2.4 * 1000));
+            }
+        }
+
+        private double CalculateDistance(double signalLevelInDb, double freqInMHz)
+        {
+            double exp = (27.55 - (20 * Math.Log10(freqInMHz)) + Math.Abs(signalLevelInDb)) / 20.0;
+            return Math.Pow(10.0, exp);
+        }
+
 
         /// <summary>
         /// Source (can be bluetooth, lan, or wan)

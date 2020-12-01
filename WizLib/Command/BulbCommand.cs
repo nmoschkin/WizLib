@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
+using WizLib.Profiles;
+
 namespace WizLib
 {
     /// <summary>
@@ -22,7 +24,7 @@ namespace WizLib
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
             NullValueHandling = NullValueHandling.Ignore,
-            Converters = { new TupleConverter(), new PhysicalAddressConverter(), new BulbMethodJsonConverter() }
+            Converters = { new TupleConverter(), new PhysicalAddressConverter(), new BulbMethodJsonConverter(), new IPAddressConverter() }
         };
 
         #endregion Internal Fields

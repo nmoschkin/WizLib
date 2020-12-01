@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 
 using WizBulb.Localization.Resources;
-using WizLib;
+
+using WizLib.Profiles;
 
 namespace WizBulb.Converters
 {

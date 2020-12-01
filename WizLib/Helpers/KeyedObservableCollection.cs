@@ -8,11 +8,12 @@ using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WizLib.Profiles;
 
 namespace WizLib
 {
     /// <summary>
-    /// Keyed observable collection.
+    /// Sortable, keyed observable collection.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class KeyedObservableCollection<T> : ObservableBase, IList<T>, INotifyCollectionChanged where T : class
@@ -54,7 +55,7 @@ namespace WizLib
             kpi = tt.GetProperty(propertyName);
 
             if (kpi == null)
-                throw new ArgumentException(nameof(propertyName), $"That property does not exist in '{tt}'.");
+                throw new ArgumentException(nameof(propertyName), $"Property '{propertyName}' property does not exist in '{tt}'.");
         }
 
         public KeyedObservableCollection(string propertyName, IEnumerable<T> items) : this(propertyName)
@@ -154,7 +155,7 @@ namespace WizLib
             string s = kpi.GetValue(item).ToString();
 
             if (innerKeys.Contains(s))
-                throw new ArgumentException($"Collection already contains '{s}'.", nameof(item));
+                throw new ArgumentException($"Collection already contains key '{s}'.", nameof(item));
 
             innerList.Insert(index, item);
             innerKeys.Insert(index, s);
@@ -196,7 +197,7 @@ namespace WizLib
             string s = kpi.GetValue(item).ToString();
 
             if (innerKeys.Contains(s)) 
-                throw new ArgumentException($"Collection already contains '{s}'.", nameof(item));
+                throw new ArgumentException($"Collection already contains key '{s}'.", nameof(item));
 
             innerKeys.Add(s);
             innerList.Add(item);
@@ -223,7 +224,7 @@ namespace WizLib
                 string s = kpi.GetValue(item).ToString();
 
                 if (innerKeys.Contains(s))
-                    throw new ArgumentException($"Collection already contains '{s}'.", nameof(item));
+                    throw new ArgumentException($"Collection already contains key '{s}'.", nameof(item));
 
                 innerKeys.Add(s);
                 innerList.Add(item);
@@ -309,7 +310,7 @@ namespace WizLib
         }
 
         /// <summary>
-        /// Sort on keys
+        /// Sort on keys in ascending order
         /// </summary>
         public void Sort()
         {
@@ -345,51 +346,45 @@ namespace WizLib
             }
         }
 
+        #region QuickSort
         private void Sort(ref List<T> values, ref List<string> keys, Comparison<T> comparison, int lo, int hi, bool onKey)
         {
             if (lo < hi)
             {
-                int p = Partition(ref values, ref keys, comparison, lo, hi, onKey);
+                int p;
+                
+                if (onKey)
+                {
+                    p = PartitionOnKey(ref values, ref keys, lo, hi);
+                }
+                else
+                {
+                    p = Partition(ref values, ref keys, comparison, lo, hi);
+                }
 
                 Sort(ref values, ref keys, comparison, lo, p, onKey);
                 Sort(ref values, ref keys, comparison, p + 1, hi, onKey);
             }
         }
 
-        private int Partition(ref List<T> values, ref List<string> keys, Comparison<T> comparison, int lo, int hi, bool onKey)
+        private int Partition(ref List<T> values, ref List<string> keys, Comparison<T> comparison, int lo, int hi)
         {
             var ppt = (hi + lo) / 2;
             var pivot = values[ppt];
-
-            string kpivot = keys[ppt];
 
             int i = lo - 1;
             int j = hi + 1;
 
             while (true)
             {
-                if (onKey)
+                do
                 {
-                    do
-                    {
-                        ++i;
-                    } while (i <= hi && string.Compare(keys[i], kpivot) < 0);
-                    do
-                    {
-                        --j;
-                    } while (j >= 0 && string.Compare(keys[j], kpivot) > 0);
-                }
-                else
+                    ++i;
+                } while (i <= hi && comparison(values[i], pivot) < 0);
+                do
                 {
-                    do
-                    {
-                        ++i;
-                    } while (i <= hi && comparison(values[i], pivot) < 0);
-                    do
-                    {
-                        --j;
-                    } while (j >= 0 && comparison(values[j], pivot) > 0);
-                }
+                    --j;
+                } while (j >= 0 && comparison(values[j], pivot) > 0);
 
                 if (i >= j) return j;
 
@@ -404,6 +399,39 @@ namespace WizLib
             }
         }
 
+        private int PartitionOnKey(ref List<T> values, ref List<string> keys, int lo, int hi)
+        {
+            var ppt = (hi + lo) / 2;
+
+            string kpivot = keys[ppt];
+
+            int i = lo - 1;
+            int j = hi + 1;
+
+            while (true)
+            {
+                do
+                {
+                    ++i;
+                } while (i <= hi && string.Compare(keys[i], kpivot) < 0);
+                do
+                {
+                    --j;
+                } while (j >= 0 && string.Compare(keys[j], kpivot) > 0);
+
+                if (i >= j) return j;
+
+                T sw = values[i];
+                string sk = keys[i];
+
+                values[i] = values[j];
+                keys[i] = keys[j];
+
+                values[j] = sw;
+                keys[j] = sk;
+            }
+        }
+        #endregion
 
         public IEnumerator<T> GetEnumerator()
         {

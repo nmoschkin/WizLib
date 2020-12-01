@@ -168,6 +168,12 @@
   <data name="CustomColor" xml:space="preserve">
     <value>Custom Color</value>
   </data>
+  <data name="DB" xml:space="preserve">
+    <value>dB</value>
+  </data>
+  <data name="Decibels" xml:space="preserve">
+    <value>Decibels</value>
+  </data>
   <data name="Default" xml:space="preserve">
     <value>Default</value>
   </data>
@@ -185,6 +191,9 @@
   </data>
   <data name="DeleteScene" xml:space="preserve">
     <value>Delete Scene</value>
+  </data>
+  <data name="Distance" xml:space="preserve">
+    <value>Distance</value>
   </data>
   <data name="DriverConfig" xml:space="preserve">
     <value>Driver Config</value>
@@ -212,6 +221,9 @@
   </data>
   <data name="Failure" xml:space="preserve">
     <value>Failure</value>
+  </data>
+  <data name="Feet" xml:space="preserve">
+    <value>Feet</value>
   </data>
   <data name="File" xml:space="preserve">
     <value>File</value>
@@ -276,11 +288,17 @@
   <data name="Load" xml:space="preserve">
     <value>Load</value>
   </data>
+  <data name="LoadProfile" xml:space="preserve">
+    <value>Load Profile</value>
+  </data>
   <data name="LoadSettings" xml:space="preserve">
     <value>Load Settings</value>
   </data>
   <data name="MACAddress" xml:space="preserve">
     <value>MAC Address</value>
+  </data>
+  <data name="Meters" xml:space="preserve">
+    <value>Meters</value>
   </data>
   <data name="ModuleName" xml:space="preserve">
     <value>Module Name</value>
@@ -302,6 +320,9 @@
   </data>
   <data name="NewLightMode" xml:space="preserve">
     <value>New Light Mode</value>
+  </data>
+  <data name="NewProfile" xml:space="preserve">
+    <value>New Profile</value>
   </data>
   <data name="NewRoom" xml:space="preserve">
     <value>New Room</value>
@@ -327,6 +348,9 @@
   <data name="On" xml:space="preserve">
     <value>On</value>
   </data>
+  <data name="OpenProfile" xml:space="preserve">
+    <value>Open Profile</value>
+  </data>
   <data name="Percentage" xml:space="preserve">
     <value>Percentage</value>
   </data>
@@ -350,6 +374,9 @@
   </data>
   <data name="Predefined" xml:space="preserve">
     <value>Predefined</value>
+  </data>
+  <data name="ProfileFilterEntry" xml:space="preserve">
+    <value>WiZ Profile (*.wizj)|*.wizj</value>
   </data>
   <data name="Proximity" xml:space="preserve">
     <value>Proximity</value>
@@ -401,6 +428,12 @@
   </data>
   <data name="SaveChangesTitle" xml:space="preserve">
     <value>Save Changes</value>
+  </data>
+  <data name="SaveProfile" xml:space="preserve">
+    <value>Save Profile</value>
+  </data>
+  <data name="SaveProfileAs" xml:space="preserve">
+    <value>Save Profile As</value>
   </data>
   <data name="SaveSettings" xml:space="preserve">
     <value>SaveSettings</value>
@@ -504,8 +537,29 @@
   <data name="XBulbsFound" xml:space="preserve">
     <value>{0} Bulbs Discovered</value>
   </data>
+  <data name="XCentimetersShort" xml:space="preserve">
+    <value>{0} cm</value>
+  </data>
   <data name="Xdb" xml:space="preserve">
     <value>{0} db</value>
+  </data>
+  <data name="XFeet" xml:space="preserve">
+    <value>{0} feet</value>
+  </data>
+  <data name="XFeetInches" xml:space="preserve">
+    <value>{0} ft {1} in</value>
+  </data>
+  <data name="XFeetInchesShort" xml:space="preserve">
+    <value>{0}' {1}"</value>
+  </data>
+  <data name="XFeetShort" xml:space="preserve">
+    <value>{0} f</value>
+  </data>
+  <data name="XMeters" xml:space="preserve">
+    <value>{0} meters</value>
+  </data>
+  <data name="XMetersShort" xml:space="preserve">
+    <value>{0} m</value>
   </data>
   <data name="Yes" xml:space="preserve">
     <value>Yes</value>
