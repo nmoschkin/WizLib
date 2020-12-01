@@ -110,7 +110,6 @@ namespace WizLib
         {
             var net = NetworkInterface.GetAllNetworkInterfaces();
 
-            IPAddress addr;
             Dictionary<PhysicalAddress, List<IPAddress>> addrs = new Dictionary<PhysicalAddress, List<IPAddress>>();
             KeyValuePair<PhysicalAddress, List<IPAddress>> kvp;
 
@@ -119,8 +118,6 @@ namespace WizLib
                 var ipprops = iface.GetIPProperties();
                 var gpass = false;
 
-                addr = null;
-                
                 if (withGatewaysOnly)
                 {
                     foreach (var g in ipprops.GatewayAddresses)

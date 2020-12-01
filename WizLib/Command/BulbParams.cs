@@ -34,6 +34,8 @@ namespace WizLib
         #endregion
 
         #region Fields
+
+        #region Pilot Fields
         private bool? state;
 
         private byte? r;
@@ -57,9 +59,9 @@ namespace WizLib
         private int? delta;
 
         private int? duration;
+        #endregion
 
-        // registration params
-
+        #region Registration Params
         private string phoneMac;
 
         private bool? register;
@@ -67,8 +69,9 @@ namespace WizLib
         private string phoneIp;
 
         private string id;
+        #endregion
 
-        // results
+        #region Results
 
         private int? rssi;
 
@@ -91,6 +94,9 @@ namespace WizLib
         private int[] ewf;
 
         private string moduleName;
+
+        #endregion
+
         #endregion
 
         #region Settings Rules Enforcement, Copying, Clearing, Configuring, Cloning
@@ -329,18 +335,18 @@ namespace WizLib
         /// </summary>
         public void EnforcePulseRules()
         {
-            //State = null;
-            //Red = null;
-            //Green = null;
-            //Blue = null;
-            //WarmWhite = null;
-            //ColdWhite = null;
-            //Speed = null;
-            //Scene = null;
-            //Temperature = null;
-            //Brightness = null;
-            Delta = null;
-            Duration = null;
+            State = null;
+            Red = null;
+            Green = null;
+            Blue = null;
+            WarmWhite = null;
+            ColdWhite = null;
+            Speed = null;
+            Scene = null;
+            Temperature = null;
+            Brightness = null;
+            //Delta = null;
+            //Duration = null;
         }
 
         #endregion
@@ -845,7 +851,7 @@ namespace WizLib
 
         #endregion
 
-        #region Overrides and Operators
+        #region Object Overrides
         public override string ToString()
         {
             var s = TypeDescription;
@@ -892,7 +898,9 @@ namespace WizLib
             var s = JsonConvert.SerializeObject(this);
             return s.GetHashCode();
         }
+        #endregion
 
+        #region Operators
         public static bool operator ==(BulbParams v1, BulbParams v2)
         {
             if (!(v1 is object) && !(v2 is object))

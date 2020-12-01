@@ -16,20 +16,79 @@ namespace WizLib
     public sealed class BulbCommand : ObservableBase
     {
 
-        private BulbMethod method = BulbMethod.GetPilot;
-        
-        private BulbParams outparam;
-        private BulbParams inparam;
-        
-        private string env;
+        #region Internal Fields
 
         internal static readonly JsonSerializerSettings DefaultJsonSettings = new JsonSerializerSettings()
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    Converters = { new TupleConverter(), new PhysicalAddressConverter(), new BulbMethodJsonConverter() }
+            NullValueHandling = NullValueHandling.Ignore,
+            Converters = { new TupleConverter(), new PhysicalAddressConverter(), new BulbMethodJsonConverter() }
         };
 
+        #endregion Internal Fields
+
+        #region Private Fields
+
+        private string env;
+        private BulbParams inparam;
+        private BulbMethod method = BulbMethod.GetPilot;
+
+        private BulbParams outparam;
+
+        #endregion Private Fields
+
+        #region Public Constructors
+
+        /// <summary>
+        /// Create a new, blank instance.
+        /// </summary>
+        public BulbCommand()
+        {
+            Params = new BulbParams();
+        }
+
+        /// <summary>
+        /// Create a new instance initialized to the specified <see cref="BulbMethod"/>.
+        /// </summary>
+        /// <param name="mtd"></param>
+        public BulbCommand(BulbMethod mtd)
+        {
+            Method = mtd;
+            Params = new BulbParams();
+        }
+
+        /// <summary>
+        /// Create a new instance initialzed with a JSON string object.
+        /// </summary>
+        /// <param name="json"></param>
+        public BulbCommand(string json)
+        {
+            try
+            {
+                JsonConvert.PopulateObject(json, this, DefaultJsonSettings);
+            }
+            catch
+            {
+
+            }
+        }
+
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        /// <summary>
+        /// Environment.
+        /// </summary>
+        [JsonProperty("env")]
+        public string Environment
+        {
+            get => env;
+            set
+            {
+                SetProperty(ref env, value);
+            }
+        }
 
         /// <summary>
         /// The <see cref="BulbMethod"/> of this instance.
@@ -70,18 +129,9 @@ namespace WizLib
             }
         }
 
-        /// <summary>
-        /// Environment.
-        /// </summary>
-        [JsonProperty("env")]
-        public string Environment
-        {
-            get => env;
-            set
-            {
-                SetProperty(ref env, value);
-            }
-        }
+        #endregion Public Properties
+
+        #region Public Methods
 
         /// <summary>
         /// Assemble and return the JSON string for this command.
@@ -92,40 +142,7 @@ namespace WizLib
             return JsonConvert.SerializeObject(this, DefaultJsonSettings);
         }
 
-        /// <summary>
-        /// Create a new, blank instance.
-        /// </summary>
-        public BulbCommand()
-        {
-            Params = new BulbParams();
-        }
-
-        /// <summary>
-        /// Create a new instance initialized to the specified <see cref="BulbMethod"/>.
-        /// </summary>
-        /// <param name="mtd"></param>
-        public BulbCommand(BulbMethod mtd)
-        {
-            Method = mtd;
-            Params = new BulbParams();
-        }
-
-        /// <summary>
-        /// Create a new instance initialzed with a JSON string object.
-        /// </summary>
-        /// <param name="json"></param>
-        public BulbCommand(string json)
-        {
-            try
-            {
-                JsonConvert.PopulateObject(json, this, DefaultJsonSettings);
-            }
-            catch
-            {
-
-            }
-        }
-
+        #endregion Public Methods
     }
 
 }

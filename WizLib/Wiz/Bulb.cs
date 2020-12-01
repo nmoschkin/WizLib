@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections;
 using System.Drawing;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
 using Newtonsoft.Json;
-using WizLib.Localization;
-using System.Net.NetworkInformation;
+
 using WizLib.Helpers;
+using WizLib.Localization;
 
 namespace WizLib
 {
@@ -22,11 +21,24 @@ namespace WizLib
     /// <param name="b"></param>
     public delegate void BulbScanCallback(Bulb b);
 
-
+    /// <summary>
+    /// The condition on which to perform a scan to discover WiZ bulbs.
+    /// </summary>
     public enum ScanCondition
-    { 
+    {
+        /// <summary>
+        /// Never perform a scan.
+        /// </summary>
         Never,
+
+        /// <summary>
+        /// Only scan if there is no item in the cache.
+        /// </summary>
         NotFound,
+
+        /// <summary>
+        /// Always perform a scan.
+        /// </summary>
         Always
     }
 
@@ -54,33 +66,114 @@ namespace WizLib
     /// <summary>
     /// Encapsulates the characteristics and behavior of a WiZ light bulb.
     /// </summary>
-    public class Bulb : ObservableBase, IBulb //, IComparable
+    public class Bulb : ObservableBase, IBulb
     {
+        #region Public Fields
 
         /// <summary>
         /// The default port for WiZ bulbs.
         /// </summary>
         public const int DefaultPort = 38899;
 
+        #endregion Public Fields
+
+        #region Protected Fields
+
+        protected static Dictionary<string, Bulb> bulbCache = new Dictionary<string, Bulb>();
+        protected static bool udpActive;
+        protected IPAddress addr;
+        protected string bulbType;
+        protected string icon;
+        protected string name;
+        protected int port = DefaultPort;
+        protected bool renaming;
+        protected BulbParams settings;
         protected int timeout = 2000;
 
-        protected int port = DefaultPort;
+        #endregion Private Fields
 
-        protected IPAddress addr;
+        #region Public Constructors
 
-        protected string name;
+        /// <summary>
+        /// Instantiate a new bulb object.
+        /// </summary>
+        /// <param name="addr">IP address of the bulb.</param>
+        public Bulb(IPAddress addr) : this(addr, DefaultPort, 2000)
+        {
+        }
 
-        protected string icon;
+        /// <summary>
+        /// Instantiate a new bulb object.
+        /// </summary>
+        /// <param name="addr">IP address of the bulb.</param>
+        public Bulb(string addr) : this(IPAddress.Parse(addr), DefaultPort, 2000)
+        {
+        }
 
-        protected string bulbType;
+        /// <summary>
+        /// Instantiate a new bulb object.
+        /// </summary>
+        /// <param name="addr">IP address of the bulb.</param>
+        /// <param name="port">Port number for the bulb.</param>
+        public Bulb(IPAddress addr, int port) : this(addr, port, 2000)
+        {
+        }
 
-        protected BulbParams settings;
+        /// <summary>
+        /// Instantiate a new bulb object.
+        /// </summary>
+        /// <param name="addr">IP address of the bulb.</param>
+        /// <param name="port">Port number for the bulb.</param>
+        public Bulb(string addr, int port) : this(IPAddress.Parse(addr), port, 2000)
+        {
+        }
 
-        protected bool renaming;
+        /// <summary>
+        /// Instantiate a new bulb object.
+        /// </summary>
+        /// <param name="addr">IP address of the bulb.</param>
+        /// <param name="port">Port number for the bulb.</param>
+        /// <param name="timeout">Timeout for bulb commands.</param>
+        public Bulb(string addr, int port, int timeout) : this(IPAddress.Parse(addr), port, timeout)
+        {
+        }
 
-        protected static bool udpActive;
+        /// <summary>
+        /// Instantiate a new bulb object.
+        /// </summary>
+        /// <param name="addr">IP address of the bulb.</param>
+        /// <param name="port">Port number for the bulb.</param>
+        /// <param name="timeout">Timeout for bulb commands.</param>
+        public Bulb(IPAddress addr, int port, int timeout)
+        {
+            this.addr = addr;
+            this.port = port;
+            this.timeout = timeout;
 
-        private static Dictionary<string, Bulb> bulbCache = new Dictionary<string, Bulb>();
+            Settings = new BulbParams();
+
+            GetPilot().ContinueWith((a) =>
+            {
+                Monitor.Enter(bulbCache);
+
+                string smac = MACAddress.ToString();
+                if (BulbCache.ContainsKey(smac))
+                {
+                    BulbCache[smac] = this;
+                }
+                else
+                {
+                    BulbCache.Add(smac, this);
+                }
+
+                Monitor.Exit(bulbCache);
+            });
+        }
+
+        #endregion Public Constructors
+
+        #region Public Properties
+
         public static Dictionary<string, Bulb> BulbCache
         {
             get => bulbCache;
@@ -90,37 +183,32 @@ namespace WizLib
             }
         }
 
-        public async Task<Bulb> GetBulb()
-        {
-            return await Task.Run(() =>
-            {
-                return this;
-            });
-        }
-
         /// <summary>
-        /// Gets or sets the <see cref="BulbParams"/> object used to configure this bulb.
+        /// Gets or sets the brightness of the bulb
+        /// using whole values between 1 and 100.
         /// </summary>
-        public virtual BulbParams Settings
+        /// <remarks>
+        /// This property is live.
+        /// </remarks>
+        public virtual byte? Brightness
         {
-            get => settings;
+            get => Settings?.Brightness;
             set
             {
-                if (settings == value) return;
-
-                if (settings != null)
+                if (Settings == null)
                 {
-                    settings.PropertyChanged -= SettingsChanged;
+                    Settings = new BulbParams();
                 }
 
-                settings = value;
+                if (Settings.Brightness == value) return;
 
-                if (settings != null)
-                {
-                    settings.PropertyChanged += SettingsChanged;
-                }
+                Settings.Brightness = value;
+                if (value == null) return;
 
-                OnPropertyChanged();
+                var stg = new BulbCommand(BulbMethod.SetPilot);
+                stg.Params.Brightness = value;
+
+                _ = SendCommand(stg);
             }
         }
 
@@ -136,53 +224,12 @@ namespace WizLib
             }
         }
 
-        /// <summary>
-        /// Gets or sets the name of this buld.
-        /// </summary>
-        public virtual string Name
-        {
-            get
-            {
-                if (name == null)
-                {
-                    name = ToString();
-                }
-
-                return name;
-            }
-            set
-            {
-                SetProperty(ref name, value);
-            }
-        }
-
-        public virtual string Icon 
+        public virtual string Icon
         {
             get => icon;
             set
             {
                 SetProperty(ref icon, value);
-            }
-        }
-
-        public virtual bool Renaming
-        {
-            get => renaming;
-            set
-            {
-                SetProperty(ref renaming, value);
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the default timeout for commands (in milliseconds).
-        /// </summary>
-        public virtual int Timeout
-        {
-            get => timeout;
-            set
-            {
-                SetProperty(ref timeout, value);
             }
         }
 
@@ -195,65 +242,6 @@ namespace WizLib
             internal set
             {
                 SetProperty(ref addr, value);
-            }
-        }
-
-
-        /// <summary>
-        /// Gets or sets the communications port (default is 38899).
-        /// </summary>
-        public virtual int Port
-        {
-            get => port;
-            set
-            {
-                SetProperty(ref port, value);
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the MAC address for the bulb.
-        /// </summary>
-        public virtual PhysicalAddress MACAddress
-        {
-            get => Settings?.MACAddress;
-            internal set
-            {
-                if (Settings == null)
-                {
-                    Settings = new BulbParams();
-                }
-
-                Settings.MACAddress = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the brightness of the bulb 
-        /// using whole values between 1 and 100.
-        /// </summary>
-        /// <remarks>
-        /// This property is live.
-        /// </remarks>
-        public virtual byte? Brightness
-        {
-            get => Settings?.Brightness;
-            set
-            {
-                if (Settings == null)
-                {
-                    Settings = new BulbParams();
-                }
-                
-                if (Settings.Brightness == value) return;
-                
-                Settings.Brightness = value;
-                if (value == null) return;
-
-                var stg = new BulbCommand(BulbMethod.SetPilot);
-                stg.Params.Brightness = value;
-
-                _ = SendCommand(stg);
             }
         }
 
@@ -283,7 +271,64 @@ namespace WizLib
                 stg.Params.State = value;
 
                 _ = SendCommand(stg).ContinueWith((a) => _ = GetPilot());
+            }
+        }
 
+        /// <summary>
+        /// Gets or sets the MAC address for the bulb.
+        /// </summary>
+        public virtual PhysicalAddress MACAddress
+        {
+            get => Settings?.MACAddress;
+            internal set
+            {
+                if (Settings == null)
+                {
+                    Settings = new BulbParams();
+                }
+
+                Settings.MACAddress = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the name of this buld.
+        /// </summary>
+        public virtual string Name
+        {
+            get
+            {
+                if (name == null)
+                {
+                    name = ToString();
+                }
+
+                return name;
+            }
+            set
+            {
+                SetProperty(ref name, value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the communications port (default is 38899).
+        /// </summary>
+        public virtual int Port
+        {
+            get => port;
+            set
+            {
+                SetProperty(ref port, value);
+            }
+        }
+
+        public virtual bool Renaming
+        {
+            get => renaming;
+            set
+            {
+                SetProperty(ref renaming, value);
             }
         }
 
@@ -338,86 +383,47 @@ namespace WizLib
             }
         }
 
-
         /// <summary>
-        /// Instantiate a new bulb object.
+        /// Gets or sets the <see cref="BulbParams"/> object used to configure this bulb.
         /// </summary>
-        /// <param name="addr">IP address of the bulb.</param>
-        public Bulb(IPAddress addr) : this(addr, DefaultPort, 2000)
+        public virtual BulbParams Settings
         {
-
-        }
-
-        /// <summary>
-        /// Instantiate a new bulb object.
-        /// </summary>
-        /// <param name="addr">IP address of the bulb.</param>
-        public Bulb(string addr) : this(IPAddress.Parse(addr), DefaultPort, 2000)
-        {
-
-        }
-
-        /// <summary>
-        /// Instantiate a new bulb object.
-        /// </summary>
-        /// <param name="addr">IP address of the bulb.</param>
-        /// <param name="port">Port number for the bulb.</param>
-        public Bulb(IPAddress addr, int port) : this(addr, port, 2000)
-        {
-
-        }
-
-        /// <summary>
-        /// Instantiate a new bulb object.
-        /// </summary>
-        /// <param name="addr">IP address of the bulb.</param>
-        /// <param name="port">Port number for the bulb.</param>
-        public Bulb(string addr, int port) : this(IPAddress.Parse(addr), port, 2000)
-        {
-
-        }
-
-        /// <summary>
-        /// Instantiate a new bulb object.
-        /// </summary>
-        /// <param name="addr">IP address of the bulb.</param>
-        /// <param name="port">Port number for the bulb.</param>
-        /// <param name="timeout">Timeout for bulb commands.</param>
-        public Bulb(string addr, int port, int timeout) : this(IPAddress.Parse(addr), port, timeout)
-        {
-        }
-
-        /// <summary>
-        /// Instantiate a new bulb object.
-        /// </summary>
-        /// <param name="addr">IP address of the bulb.</param>
-        /// <param name="port">Port number for the bulb.</param>
-        /// <param name="timeout">Timeout for bulb commands.</param>
-        public Bulb(IPAddress addr, int port, int timeout)
-        {
-            this.addr = addr;
-            this.port = port;
-            this.timeout = timeout;
-
-            Settings = new BulbParams();
-
-            GetPilot().ContinueWith((a) =>
+            get => settings;
+            set
             {
-                Monitor.Enter(bulbCache);
+                if (settings == value) return;
 
-                string smac = MACAddress.ToString();
-                if (BulbCache.ContainsKey(smac))
+                if (settings != null)
                 {
-                    BulbCache[smac] = this;
-                }
-                else
-                {
-                    BulbCache.Add(smac, this);
+                    settings.PropertyChanged -= SettingsChanged;
                 }
 
-                Monitor.Exit(bulbCache);
-            });
+                settings = value;
+
+                if (settings != null)
+                {
+                    settings.PropertyChanged += SettingsChanged;
+                }
+
+                OnPropertyChanged();
+            }
         }
+
+        /// <summary>
+        /// Gets or sets the default timeout for commands (in milliseconds).
+        /// </summary>
+        public virtual int Timeout
+        {
+            get => timeout;
+            set
+            {
+                SetProperty(ref timeout, value);
+            }
+        }
+
+        #endregion Public Properties
+
+        #region Public Methods
 
         /// <summary>
         /// Create a <see cref="Bulb"/> object using only a MAC address.
@@ -431,7 +437,7 @@ namespace WizLib
         {
             return await GetBulbByMacAddress(PhysicalAddress.Parse(macAddr), scan, localAddr, localMac);
         }
-        
+
         /// <summary>
         /// Create a <see cref="Bulb"/> object using only a MAC address.
         /// </summary>
@@ -465,435 +471,6 @@ namespace WizLib
         }
 
         /// <summary>
-        /// Turn the bulb on.
-        /// </summary>
-        /// <returns>Result from the bulb.</returns>
-        public virtual async Task<BulbCommand> TurnOn()
-        {
-            var cmd = new BulbCommand(BulbMethod.SetPilot);
-
-            cmd.Params.State = true;
-            var ret = await SendCommand(cmd);
-            await GetPilot();
-            return ret;
-        }
-
-        /// <summary>
-        /// Turn the bulb off.
-        /// </summary>
-        /// <returns>Result from the bulb.</returns>
-        public virtual async Task<BulbCommand> TurnOff()
-        {
-            var cmd = new BulbCommand(BulbMethod.SetPilot);
-
-            cmd.Params.State = false;
-            var ret = await SendCommand(cmd);
-            await GetPilot();
-            return ret;
-        }
-
-        /// <summary>
-        /// Toggles the on/off state of the bulb.
-        /// </summary>
-        /// <returns>Result from the bulb.</returns>
-        public virtual async Task<BulbCommand> Switch()
-        {
-            if (Settings == null)
-            {
-                Settings = new BulbParams();
-            }
-            
-            if (Settings.State ?? false)
-            {
-                return await TurnOff();
-            }
-            else
-            {
-                return await TurnOn();
-            }
-        }
-
-
-        /// <summary>
-        /// Sets the light mode to the specified scene.
-        /// </summary>
-        /// <param name="scene">Light mode to enable.</param>
-        /// <returns>Result from the bulb.</returns>
-        public virtual async Task<BulbCommand> SetLightMode(LightMode scene)
-        {
-            var cmd = new BulbCommand(BulbMethod.SetPilot);
-
-            if (scene.Settings != null)
-            {
-                cmd.Params = scene.Settings;
-            }
-            else
-            {
-                // set scene
-                cmd.Params.State = true;
-                cmd.Params.Scene = scene.Code;
-            }
-
-            var ret = await SendCommand(cmd);
-            await GetPilot();
-            return ret;
-        }
-
-        /// <summary>
-        /// Sets the light mode to the specified scene and brightness.
-        /// </summary>
-        /// <param name="scene">Light mode to enable.</param>
-        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
-        /// <returns>Result from the bulb.</returns>
-        public virtual async Task<BulbCommand> SetLightMode(LightMode scene, byte brightness)
-        {
-            var cmd = new BulbCommand(BulbMethod.SetPilot);
-
-            // set scene
-            cmd.Params.State = true;
-            cmd.Params.Brightness = brightness;
-            cmd.Params.Scene = scene.Code;
-
-            var ret = await SendCommand(cmd);
-            await GetPilot();
-            return ret;
-
-        }
-
-        /// <summary>
-        /// Sets the light mode to the specified custom color.
-        /// </summary>
-        /// <param name="c">Color to enable.</param>
-        /// <returns>Result from the bulb.</returns>
-        public virtual async Task<BulbCommand> SetLightMode(Color c)
-        {
-            var cmd = new BulbCommand(BulbMethod.SetPilot);
-
-            // set scene
-            cmd.Params.State = true;
-            cmd.Params.Red = c.R;
-            cmd.Params.Green = c.G;
-            cmd.Params.Blue = c.B;
-
-            var ret = await SendCommand(cmd);
-            await GetPilot();
-            return ret;
-        }
-
-        /// <summary>
-        /// Sets the light mode to the specified custom color and brightness.
-        /// </summary>
-        /// <param name="c">New custom color</param>
-        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
-        /// <returns>Result from the bulb.</returns>
-        public virtual async Task<BulbCommand> SetLightMode(Color c, byte brightness)
-        {
-            var cmd = new BulbCommand(BulbMethod.SetPilot);
-
-            cmd.Params.State = true;
-            cmd.Params.Brightness = brightness;
-            cmd.Params.WarmWhite = 0;
-            cmd.Params.ColdWhite = 0;
-            cmd.Params.Red = c.R;
-            cmd.Params.Green = c.G;
-            cmd.Params.Blue = c.B;
-
-            var ret = await SendCommand(cmd);
-            await GetPilot();
-            return ret;
-        }
-
-        /// <summary>
-        /// Sets the color and brightness of all the specified bulbs.
-        /// </summary>
-        /// <param name="bulbs">Bulbs to set.</param>
-        /// <param name="c">New custom color</param>
-        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
-        public static async Task SetLights(IEnumerable<Bulb> bulbs, Color c, byte? brightness = null)
-        {
-            BulbParams bp = new BulbParams();
-
-            bp.Color = c;
-            bp.Brightness = brightness;
-
-            await SetLights(bulbs, bp);
-        }
-
-        /// <summary>
-        /// Sets the light mode of all the specified bulbs.
-        /// </summary>
-        /// <param name="bulbs">Bulbs to set.</param>
-        /// <param name="lm">LightMode to enable</param>
-        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
-        /// 
-        public static async Task SetLights(IEnumerable<Bulb> bulbs, LightMode lm, byte? brightness = null, byte? speed = null, int? colorTemp = null)
-        {
-            BulbParams bp = new BulbParams();
-        
-            bp.Scene = lm.Code;
-            bp.Brightness = brightness;
-            bp.Speed = speed;
-            bp.Temperature = colorTemp;
-
-            bp.EnforceRules(lm.Type);
-
-            await SetLights(bulbs, bp);
-        }
-
-        /// <summary>
-        /// Sets the brightness of all the specified bulbs.
-        /// </summary>
-        /// <param name="bulbs">Bulbs to set.</param>
-        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
-        public static async Task SetLights(IEnumerable<Bulb> bulbs, byte? brightness = null)
-        {
-            BulbParams bp = new BulbParams();
-            bp.Brightness = brightness;
-
-            await SetLights(bulbs, bp);
-        }
-
-        /// <summary>
-        /// Set many bulbs with the same configuration.
-        /// No wait for return, and no getPilot is called. 
-        /// </summary>
-        /// <param name="bulbs">Bulbs to set.</param>
-        /// <param name="bp">Configuration options</param>
-        public static async Task SetLights(IEnumerable<Bulb> bulbs, BulbParams bp)
-        {
-            var cmd = new BulbCommand(BulbMethod.SetPilot);
-            cmd.Params = bp;
-
-            foreach (var b in bulbs)
-            {
-                await b.SendCommand(cmd);
-            }
-        }
-
-        /// <summary>
-        /// Refresh the bulb settings with 'getPilot'.
-        /// </summary>
-        /// <returns>True if successful.</returns>
-        public virtual async Task<bool> GetPilot()
-        {
-            return await GetMethod(BulbMethod.GetPilot);
-        }
-
-        /// <summary>
-        /// Refresh the bulb settings with 'getSystemConfig'.
-        /// </summary>
-        /// <returns>True if successful.</returns>
-        public virtual async Task<bool> GetSystemConfig()
-        {
-            return await GetMethod(BulbMethod.GetSystemConfig);
-        }
-
-
-        /// <summary>
-        /// Run a 'get' method on the bulb.
-        /// </summary>
-        /// <param name="m">The method to run (must be a 'get' method)</param>
-        /// <returns>True if successful.</returns>
-        internal async Task<bool> GetMethod(BulbMethod m)
-        {
-            if (m.IsSetMethod || m.IsInboundOnly) return false;
-
-            var cmd = new BulbCommand(m);
-            string json;
-
-            try
-            {
-                cmd.Params?.EnforceRules();
-
-                json = cmd.AssembleCommand();
-                json = await SendCommand(json);
-            }
-            catch
-            {
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(json)) return false;
-
-            if (Settings != null)
-            {
-                cmd.Result = Settings;
-                cmd.Result.ClearPilot();
-
-                JsonConvert.PopulateObject(json, cmd, BulbCommand.DefaultJsonSettings);
-            }
-            else
-            {
-                cmd = JsonConvert.DeserializeObject<BulbCommand>(json, BulbCommand.DefaultJsonSettings);
-                Settings = cmd.Result;
-            }
-
-            OnPropertyChanged("Scene");
-            return true;
-        }
-
-        /// <summary>
-        /// Pulse the bulb
-        /// </summary>
-        /// <param name="delta">The dimming amount.</param>
-        /// <param name="pulseTime">The length of the pulse (in milliseconds.)</param>
-        public void Pulse(int delta = -50, int pulseTime = 250)
-        {
-            var cmd = new BulbCommand(BulbMethod.Pulse);
-            cmd.Params = new BulbParams()
-            {
-                Delta = delta,
-                Duration = pulseTime
-            };
-
-            _ = SendCommand(cmd);
-        }
-
-        /// <summary>
-        /// Returns a string representation of the current object.
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            if (!string.IsNullOrEmpty(name))
-            {
-                return name;
-            }
-            else if (Settings?.MACAddress != null)
-            {
-                return Settings?.MACAddress?.ToString();
-            }
-            else
-            {
-                return addr?.ToString();
-            }
-        }
-
-        protected void SettingsChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(BulbParams.Brightness))
-            {
-                OnPropertyChanged(nameof(Brightness));
-            }
-            else if (e.PropertyName == nameof(BulbParams.State))
-            {
-                OnPropertyChanged(nameof(IsPoweredOn));
-            }
-            else if (e.PropertyName == nameof(BulbParams.MACAddress))
-            {
-                OnPropertyChanged(nameof(MACAddress));
-            }
-        }
-
-        protected async Task<BulbCommand> SendCommand(BulbCommand cmd)
-        {
-            if (cmd.Method == BulbMethod.SetPilot)
-            {
-                cmd.Params?.EnforceRules();
-            }
-
-            var x = await SendCommand(cmd.AssembleCommand());
-            return new BulbCommand(x);
-        }
-
-        protected async Task<string> SendCommand(string cmd)
-        {
-            ConsoleHelper.LogOutput(cmd, null, IPAddress);
-
-            byte[] bOut = Encoding.UTF8.GetBytes(cmd);
-            var buffer = await SendUDP(bOut);
-
-            string json;
-
-            if (buffer?.Length > 0)
-            {
-                json = Encoding.UTF8.GetString(buffer).Trim('\x0');
-                ConsoleHelper.LogInput(json, null, IPAddress);
-
-                return json;
-            }
-            else
-            {
-                return null;
-            }
-
-        }
-
-        protected async Task<byte[]> SendUDP(byte[] cmd, IPAddress localAddr = null)
-        {
-            udpActive = true;
-
-            List<Bulb> bulbs = new List<Bulb>();
-
-            byte[] buffer = cmd;
-            int port = DefaultPort;
-
-            localAddr = localAddr?.Clone();
-            var addr = this.addr.Clone();
-
-            var udpClient = new UdpClient();
-        
-            udpClient.ExclusiveAddressUse = false;
-            
-            if (localAddr != null)
-            {
-                udpClient.Client.Bind(new IPEndPoint(localAddr, DefaultPort));
-            }
-
-            udpClient.DontFragment = true;
-
-            var from = new IPEndPoint(0, 0);
-            var timeupVal = DateTime.Now.AddMilliseconds(timeout);
-
-            var t = Task.Run(async () =>
-            {
-                int tdelc = 0;
-
-                while (timeupVal > DateTime.Now)
-                {
-                    if (udpClient.Available > 0)
-                    {
-                        try
-                        {
-                            var recvBuffer = udpClient.Receive(ref from);
-                            if (addr.ToString() == from.Address.ToString())
-                            {
-                                buffer = recvBuffer;
-                                return;
-                            }
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-
-                    }
-
-                    await Task.Delay(10);
-                    tdelc++;
-
-                    if (tdelc >= 50)
-                    {
-                        udpClient.Send(buffer, buffer.Length, addr.ToString(), port);
-                        tdelc = 0;
-                    }
-                }
-
-            });
-
-            udpClient.Send(buffer, buffer.Length, addr.ToString(), port);
-            await t;
-
-            udpClient?.Close();
-            udpClient?.Dispose();
-
-            udpActive = false;
-
-            return buffer;
-
-        }
-
-        /// <summary>
         /// Scan for bulbs on the default network.
         /// </summary>
         /// <param name="mode">The broadcast <see cref="ScanMode"/> to use when scanning.</param>
@@ -918,9 +495,9 @@ namespace WizLib
         /// <param name="callback">Callback function that is called for each discovered bulb.</param>
         /// <returns></returns>
         public static async Task<List<Bulb>> ScanForBulbs(
-            IPAddress localAddr, 
-            PhysicalAddress macAddr, 
-            ScanMode mode = ScanMode.GetSystemConfig, 
+            IPAddress localAddr,
+            PhysicalAddress macAddr,
+            ScanMode mode = ScanMode.GetSystemConfig,
             int timeout = 5000,
             BulbScanCallback callback = null)
         {
@@ -930,7 +507,7 @@ namespace WizLib
 
             byte[] buffer = null;
             int port = DefaultPort;
-            
+
             if (localAddr == null)
             {
                 localAddr = NetworkHelper.DefaultLocalIP;
@@ -1010,7 +587,6 @@ namespace WizLib
                         {
                             continue;
                         }
-
                     }
 
                     await Task.Delay(10);
@@ -1022,7 +598,6 @@ namespace WizLib
                         tdelc = 0;
                     }
                 }
-
             });
 
             var pilot = new BulbCommand();
@@ -1030,7 +605,7 @@ namespace WizLib
             if (mode == ScanMode.Registration)
             {
                 pilot.Method = BulbMethod.Registration;
-                pilot.Params.PhoneMac = macAddr.ToString().Replace(":","").ToLower();
+                pilot.Params.PhoneMac = macAddr.ToString().Replace(":", "").ToLower();
                 pilot.Params.Register = false;
                 pilot.Params.PhoneIp = localAddr.ToString();
                 pilot.Params.Id = "12";
@@ -1053,7 +628,7 @@ namespace WizLib
             udpClient.Send(buffer, buffer.Length, "255.255.255.255", port);
 
             await t;
-            
+
             udpClient?.Close();
             udpClient?.Dispose();
 
@@ -1062,5 +637,443 @@ namespace WizLib
             return bulbs;
         }
 
+        /// <summary>
+        /// Sets the color and brightness of all the specified bulbs.
+        /// </summary>
+        /// <param name="bulbs">Bulbs to set.</param>
+        /// <param name="c">New custom color</param>
+        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
+        public static async Task SetLights(IEnumerable<Bulb> bulbs, Color c, byte? brightness = null)
+        {
+            BulbParams bp = new BulbParams();
+
+            bp.Color = c;
+            bp.Brightness = brightness;
+
+            await SetLights(bulbs, bp);
+        }
+
+        /// <summary>
+        /// Sets the light mode of all the specified bulbs.
+        /// </summary>
+        /// <param name="bulbs">Bulbs to set.</param>
+        /// <param name="lm">LightMode to enable</param>
+        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
+        ///
+        public static async Task SetLights(IEnumerable<Bulb> bulbs, LightMode lm, byte? brightness = null, byte? speed = null, int? colorTemp = null)
+        {
+            BulbParams bp = new BulbParams();
+
+            bp.Scene = lm.Code;
+            bp.Brightness = brightness;
+            bp.Speed = speed;
+            bp.Temperature = colorTemp;
+
+            bp.EnforceRules(lm.Type);
+
+            await SetLights(bulbs, bp);
+        }
+
+        /// <summary>
+        /// Sets the brightness of all the specified bulbs.
+        /// </summary>
+        /// <param name="bulbs">Bulbs to set.</param>
+        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
+        public static async Task SetLights(IEnumerable<Bulb> bulbs, byte? brightness = null)
+        {
+            BulbParams bp = new BulbParams();
+            bp.Brightness = brightness;
+
+            await SetLights(bulbs, bp);
+        }
+
+        /// <summary>
+        /// Set many bulbs with the same configuration.
+        /// No wait for return, and no getPilot is called.
+        /// </summary>
+        /// <param name="bulbs">Bulbs to set.</param>
+        /// <param name="bp">Configuration options</param>
+        public static async Task SetLights(IEnumerable<Bulb> bulbs, BulbParams bp)
+        {
+            var cmd = new BulbCommand(BulbMethod.SetPilot);
+            cmd.Params = bp;
+
+            foreach (var b in bulbs)
+            {
+                await b.SendCommand(cmd);
+            }
+        }
+
+        public async Task<Bulb> GetBulb()
+        {
+            return await Task.Run(() =>
+            {
+                return this;
+            });
+        }
+        /// <summary>
+        /// Refresh the bulb settings with 'getPilot'.
+        /// </summary>
+        /// <returns>True if successful.</returns>
+        public virtual async Task<bool> GetPilot()
+        {
+            return await GetMethod(BulbMethod.GetPilot);
+        }
+
+        /// <summary>
+        /// Refresh the bulb settings with 'getSystemConfig'.
+        /// </summary>
+        /// <returns>True if successful.</returns>
+        public virtual async Task<bool> GetSystemConfig()
+        {
+            return await GetMethod(BulbMethod.GetSystemConfig);
+        }
+
+        /// <summary>
+        /// Pulse the bulb
+        /// </summary>
+        /// <param name="delta">The dimming amount.</param>
+        /// <param name="pulseTime">The length of the pulse (in milliseconds.)</param>
+        public void Pulse(int delta = -50, int pulseTime = 250)
+        {
+            var cmd = new BulbCommand(BulbMethod.Pulse);
+            cmd.Params = new BulbParams()
+            {
+                Delta = delta,
+                Duration = pulseTime
+            };
+
+            _ = SendCommand(cmd);
+        }
+
+        /// <summary>
+        /// Sets the light mode to the specified scene.
+        /// </summary>
+        /// <param name="scene">Light mode to enable.</param>
+        /// <returns>Result from the bulb.</returns>
+        public virtual async Task<BulbCommand> SetLightMode(LightMode scene)
+        {
+            var cmd = new BulbCommand(BulbMethod.SetPilot);
+
+            if (scene.Settings != null)
+            {
+                cmd.Params = scene.Settings;
+            }
+            else
+            {
+                // set scene
+                cmd.Params.State = true;
+                cmd.Params.Scene = scene.Code;
+            }
+
+            var ret = await SendCommand(cmd);
+            await GetPilot();
+            return ret;
+        }
+
+        /// <summary>
+        /// Sets the light mode to the specified scene and brightness.
+        /// </summary>
+        /// <param name="scene">Light mode to enable.</param>
+        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
+        /// <returns>Result from the bulb.</returns>
+        public virtual async Task<BulbCommand> SetLightMode(LightMode scene, byte brightness)
+        {
+            var cmd = new BulbCommand(BulbMethod.SetPilot);
+
+            // set scene
+            cmd.Params.State = true;
+            cmd.Params.Brightness = brightness;
+            cmd.Params.Scene = scene.Code;
+
+            var ret = await SendCommand(cmd);
+            await GetPilot();
+            return ret;
+        }
+
+        /// <summary>
+        /// Sets the light mode to the specified custom color.
+        /// </summary>
+        /// <param name="c">Color to enable.</param>
+        /// <returns>Result from the bulb.</returns>
+        public virtual async Task<BulbCommand> SetLightMode(Color c)
+        {
+            var cmd = new BulbCommand(BulbMethod.SetPilot);
+
+            // set scene
+            cmd.Params.State = true;
+            cmd.Params.Red = c.R;
+            cmd.Params.Green = c.G;
+            cmd.Params.Blue = c.B;
+
+            var ret = await SendCommand(cmd);
+            await GetPilot();
+            return ret;
+        }
+
+        /// <summary>
+        /// Sets the light mode to the specified custom color and brightness.
+        /// </summary>
+        /// <param name="c">New custom color</param>
+        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
+        /// <returns>Result from the bulb.</returns>
+        public virtual async Task<BulbCommand> SetLightMode(Color c, byte brightness)
+        {
+            var cmd = new BulbCommand(BulbMethod.SetPilot);
+
+            cmd.Params.State = true;
+            cmd.Params.Brightness = brightness;
+            cmd.Params.WarmWhite = 0;
+            cmd.Params.ColdWhite = 0;
+            cmd.Params.Red = c.R;
+            cmd.Params.Green = c.G;
+            cmd.Params.Blue = c.B;
+
+            var ret = await SendCommand(cmd);
+            await GetPilot();
+            return ret;
+        }
+
+        /// <summary>
+        /// Toggles the on/off state of the bulb.
+        /// </summary>
+        /// <returns>Result from the bulb.</returns>
+        public virtual async Task<BulbCommand> Switch()
+        {
+            if (Settings == null)
+            {
+                Settings = new BulbParams();
+            }
+
+            if (Settings.State ?? false)
+            {
+                return await TurnOff();
+            }
+            else
+            {
+                return await TurnOn();
+            }
+        }
+
+        /// <summary>
+        /// Returns a string representation of the current object.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            if (!string.IsNullOrEmpty(name))
+            {
+                return name;
+            }
+            else if (Settings?.MACAddress != null)
+            {
+                return Settings?.MACAddress?.ToString();
+            }
+            else
+            {
+                return addr?.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Turn the bulb off.
+        /// </summary>
+        /// <returns>Result from the bulb.</returns>
+        public virtual async Task<BulbCommand> TurnOff()
+        {
+            var cmd = new BulbCommand(BulbMethod.SetPilot);
+
+            cmd.Params.State = false;
+            var ret = await SendCommand(cmd);
+            await GetPilot();
+            return ret;
+        }
+
+        /// <summary>
+        /// Turn the bulb on.
+        /// </summary>
+        /// <returns>Result from the bulb.</returns>
+        public virtual async Task<BulbCommand> TurnOn()
+        {
+            var cmd = new BulbCommand(BulbMethod.SetPilot);
+
+            cmd.Params.State = true;
+            var ret = await SendCommand(cmd);
+            await GetPilot();
+            return ret;
+        }
+
+        #endregion Public Methods
+
+        #region Internal Methods
+
+        /// <summary>
+        /// Run a 'get' method on the bulb.
+        /// </summary>
+        /// <param name="m">The method to run (must be a 'get' method)</param>
+        /// <returns>True if successful.</returns>
+        internal async Task<bool> GetMethod(BulbMethod m)
+        {
+            if (m.IsSetMethod || m.IsInboundOnly) return false;
+
+            var cmd = new BulbCommand(m);
+            string json;
+
+            try
+            {
+                cmd.Params?.EnforceRules();
+
+                json = cmd.AssembleCommand();
+                json = await SendCommand(json);
+            }
+            catch
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(json)) return false;
+
+            if (Settings != null)
+            {
+                cmd.Result = Settings;
+                cmd.Result.ClearPilot();
+
+                JsonConvert.PopulateObject(json, cmd, BulbCommand.DefaultJsonSettings);
+            }
+            else
+            {
+                cmd = JsonConvert.DeserializeObject<BulbCommand>(json, BulbCommand.DefaultJsonSettings);
+                Settings = cmd.Result;
+            }
+
+            OnPropertyChanged("Scene");
+            return true;
+        }
+
+        #endregion Internal Methods
+
+        #region Protected Methods
+
+        protected async Task<BulbCommand> SendCommand(BulbCommand cmd)
+        {
+            if (cmd.Method == BulbMethod.SetPilot)
+            {
+                cmd.Params?.EnforceRules();
+            }
+
+            var x = await SendCommand(cmd.AssembleCommand());
+            return new BulbCommand(x);
+        }
+
+        protected async Task<string> SendCommand(string cmd)
+        {
+            ConsoleHelper.LogOutput(cmd, null, IPAddress);
+
+            byte[] bOut = Encoding.UTF8.GetBytes(cmd);
+            var buffer = await SendUDP(bOut);
+
+            string json;
+
+            if (buffer?.Length > 0)
+            {
+                json = Encoding.UTF8.GetString(buffer).Trim('\x0');
+                ConsoleHelper.LogInput(json, null, IPAddress);
+
+                return json;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        protected async Task<byte[]> SendUDP(byte[] cmd, IPAddress localAddr = null)
+        {
+            udpActive = true;
+
+            List<Bulb> bulbs = new List<Bulb>();
+
+            byte[] buffer = cmd;
+            int port = DefaultPort;
+
+            localAddr = localAddr?.Clone();
+            var addr = this.addr.Clone();
+
+            var udpClient = new UdpClient();
+
+            udpClient.ExclusiveAddressUse = false;
+
+            if (localAddr != null)
+            {
+                udpClient.Client.Bind(new IPEndPoint(localAddr, DefaultPort));
+            }
+
+            udpClient.DontFragment = true;
+
+            var from = new IPEndPoint(0, 0);
+            var timeupVal = DateTime.Now.AddMilliseconds(timeout);
+
+            var t = Task.Run(async () =>
+            {
+                int tdelc = 0;
+
+                while (timeupVal > DateTime.Now)
+                {
+                    if (udpClient.Available > 0)
+                    {
+                        try
+                        {
+                            var recvBuffer = udpClient.Receive(ref from);
+                            if (addr.ToString() == from.Address.ToString())
+                            {
+                                buffer = recvBuffer;
+                                return;
+                            }
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                    }
+
+                    await Task.Delay(10);
+                    tdelc++;
+
+                    if (tdelc >= 50)
+                    {
+                        udpClient.Send(buffer, buffer.Length, addr.ToString(), port);
+                        tdelc = 0;
+                    }
+                }
+            });
+
+            udpClient.Send(buffer, buffer.Length, addr.ToString(), port);
+            await t;
+
+            udpClient?.Close();
+            udpClient?.Dispose();
+
+            udpActive = false;
+
+            return buffer;
+        }
+
+        protected void SettingsChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(BulbParams.Brightness))
+            {
+                OnPropertyChanged(nameof(Brightness));
+            }
+            else if (e.PropertyName == nameof(BulbParams.State))
+            {
+                OnPropertyChanged(nameof(IsPoweredOn));
+            }
+            else if (e.PropertyName == nameof(BulbParams.MACAddress))
+            {
+                OnPropertyChanged(nameof(MACAddress));
+            }
+        }
+
+        #endregion Protected Methods
     }
 }
