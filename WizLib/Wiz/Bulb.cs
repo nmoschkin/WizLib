@@ -432,7 +432,7 @@ namespace WizLib
         {
             string smac = macAddr.ToString();
 
-            if (scan == ScanCondition.NotFound)
+            if (scan != ScanCondition.Always)
             {
                 if (BulbCache.ContainsKey(smac))
                 {
