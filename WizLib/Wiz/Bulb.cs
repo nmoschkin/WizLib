@@ -70,6 +70,8 @@ namespace WizLib
 
         protected string name;
 
+        protected string icon;
+
         protected string bulbType;
 
         protected BulbParams settings;
@@ -78,7 +80,7 @@ namespace WizLib
 
         protected static bool udpActive;
 
-        protected static Dictionary<string, Bulb> bulbCache = new Dictionary<string, Bulb>();
+        public static Dictionary<string, Bulb> BulbCache { get; protected set; } = new Dictionary<string, Bulb>();
 
         public async Task<Bulb> GetBulb()
         {
@@ -86,7 +88,6 @@ namespace WizLib
             {
                 return this;
             });
-
         }
 
         /// <summary>
@@ -144,6 +145,15 @@ namespace WizLib
             set
             {
                 SetProperty(ref name, value);
+            }
+        }
+
+        public virtual string Icon 
+        {
+            get => icon;
+            set
+            {
+                SetProperty(ref icon, value);
             }
         }
 
@@ -325,15 +335,38 @@ namespace WizLib
         /// Instantiate a new bulb object.
         /// </summary>
         /// <param name="addr">IP address of the bulb.</param>
-        /// <param name="port">Port number for the bulb.</param>
-        /// <param name="timeout">Timeout for bulb commands.</param>
-        public Bulb(IPAddress addr, int port = DefaultPort, int timeout = 10000)
+        public Bulb(IPAddress addr) : this(addr, DefaultPort, 2000)
         {
-            this.addr = addr;
-            this.port = port;
-            this.timeout = timeout;
 
-            Settings = new BulbParams();
+        }
+
+        /// <summary>
+        /// Instantiate a new bulb object.
+        /// </summary>
+        /// <param name="addr">IP address of the bulb.</param>
+        public Bulb(string addr) : this(IPAddress.Parse(addr), DefaultPort, 2000)
+        {
+
+        }
+
+        /// <summary>
+        /// Instantiate a new bulb object.
+        /// </summary>
+        /// <param name="addr">IP address of the bulb.</param>
+        /// <param name="port">Port number for the bulb.</param>
+        public Bulb(IPAddress addr, int port) : this(addr, port, 2000)
+        {
+
+        }
+
+        /// <summary>
+        /// Instantiate a new bulb object.
+        /// </summary>
+        /// <param name="addr">IP address of the bulb.</param>
+        /// <param name="port">Port number for the bulb.</param>
+        public Bulb(string addr, int port) : this(IPAddress.Parse(addr), port, 2000)
+        {
+
         }
 
         /// <summary>
@@ -342,10 +375,38 @@ namespace WizLib
         /// <param name="addr">IP address of the bulb.</param>
         /// <param name="port">Port number for the bulb.</param>
         /// <param name="timeout">Timeout for bulb commands.</param>
-        public Bulb(string addr, int port = DefaultPort, int timeout = 10000) : this(IPAddress.Parse(addr), port, timeout)
+        public Bulb(string addr, int port, int timeout) : this(IPAddress.Parse(addr), port, timeout)
         {
-
         }
+
+        /// <summary>
+        /// Instantiate a new bulb object.
+        /// </summary>
+        /// <param name="addr">IP address of the bulb.</param>
+        /// <param name="port">Port number for the bulb.</param>
+        /// <param name="timeout">Timeout for bulb commands.</param>
+        public Bulb(IPAddress addr, int port, int timeout)
+        {
+            this.addr = addr;
+            this.port = port;
+            this.timeout = timeout;
+
+            Settings = new BulbParams();
+
+            GetPilot().ContinueWith((a) =>
+            {
+                string smac = MACAddress.ToString();
+                if (BulbCache.ContainsKey(smac))
+                {
+                    BulbCache[smac] = this;
+                }
+                else
+                {
+                    BulbCache.Add(smac, this);
+                }
+            });
+        }
+
         /// <summary>
         /// Create a <see cref="Bulb"/> object using only a MAC address.
         /// </summary>
@@ -373,19 +434,19 @@ namespace WizLib
 
             if (scan == ScanCondition.NotFound)
             {
-                if (bulbCache.ContainsKey(smac))
+                if (BulbCache.ContainsKey(smac))
                 {
-                    return bulbCache[smac];
+                    return BulbCache[smac];
                 }
             }
 
             if (scan == ScanCondition.Never) return null;
 
-            await ScanForBulbs(localAddr, localMac, ScanMode.GetSystemConfig, 1);
+            await ScanForBulbs(localAddr, localMac, ScanMode.GetSystemConfig, 1000);
 
-            if (bulbCache.ContainsKey(smac))
+            if (BulbCache.ContainsKey(smac))
             {
-                return bulbCache[smac];
+                return BulbCache[smac];
             }
 
             return null;
@@ -822,12 +883,12 @@ namespace WizLib
         /// Scan for bulbs on the default network.
         /// </summary>
         /// <param name="mode">The broadcast <see cref="ScanMode"/> to use when scanning.</param>
-        /// <param name="timeout">Timeout for scan, in whole seconds.</param>
+        /// <param name="timeout">Timeout for scan, in milliseconds.</param>
         /// <param name="callback">Callback function that is called for each discovered bulb.</param>
         /// <returns></returns>
         public static async Task<List<Bulb>> ScanForBulbs(
             ScanMode mode = ScanMode.GetSystemConfig,
-            int timeout = 5,
+            int timeout = 5000,
             BulbScanCallback callback = null)
         {
             return await ScanForBulbs(NetworkHelper.DefaultLocalIP, NetworkHelper.DefaultLocalMAC, mode, timeout, callback);
@@ -839,14 +900,14 @@ namespace WizLib
         /// <param name="localAddr">The local IP address to bind to.</param>
         /// <param name="macAddr">The MAC address of the local interface being bound.</param>
         /// <param name="mode">The broadcast <see cref="ScanMode"/> to use when scanning.</param>
-        /// <param name="timeout">Timeout for scan, in whole seconds.</param>
+        /// <param name="timeout">Timeout for scan, in milliseconds.</param>
         /// <param name="callback">Callback function that is called for each discovered bulb.</param>
         /// <returns></returns>
         public static async Task<List<Bulb>> ScanForBulbs(
             IPAddress localAddr, 
             PhysicalAddress macAddr, 
             ScanMode mode = ScanMode.GetSystemConfig, 
-            int timeout = 5, 
+            int timeout = 5000,
             BulbScanCallback callback = null)
         {
             udpActive = true;
@@ -875,7 +936,7 @@ namespace WizLib
             udpClient.DontFragment = true;
 
             var from = new IPEndPoint(0, 0);
-            var timeupVal = DateTime.Now.AddSeconds(timeout);
+            var timeupVal = DateTime.Now.AddMilliseconds(timeout);
 
             var t = Task.Run(async () =>
             {
@@ -902,7 +963,7 @@ namespace WizLib
 
                             if (p != null && p.Result?.MACAddress != null)
                             {
-                                bulb = new Bulb(from.Address);
+                                bulb = new Bulb(from.Address, from.Port);
                                 bulb.Settings = p.Result;
 
                                 bool already = false;
@@ -919,15 +980,6 @@ namespace WizLib
                                 if (already) continue;
 
                                 bulbs.Add(bulb);
-                                var smac = bulb.MACAddress.ToString();
-                                if (!bulbCache.ContainsKey(smac))
-                                {
-                                    bulbCache.Add(smac, bulb);
-                                }
-                                else
-                                {
-                                    bulbCache[smac] = bulb;
-                                }
 
                                 json = null;
                                 p = null;

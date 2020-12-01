@@ -5,14 +5,17 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <ApplicationIcon>Resources\wiz.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\lightbulb.png" />
+    <None Remove="Resources\wiz.ico" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Resources\lightbulb.png" />
+    <Resource Include="Resources\wiz.ico" />
   </ItemGroup>
 
   <ItemGroup>

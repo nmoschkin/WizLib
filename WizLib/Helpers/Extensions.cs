@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
+using System.Net.NetworkInformation;
 
 namespace System.Net
 {
@@ -23,4 +24,23 @@ namespace System.Net
             return IPAddress.Parse(original.ToString());
         }
     }
+
+    /// <summary>
+    /// <see cref="IPAddress"/> extensions.
+    /// </summary>
+    public static class PhysicalAddressExtensions
+    {
+        /// <summary>
+        /// Make a copy of an <see cref="PhysicalAddress"/>
+        /// </summary>
+        /// <param name="original"><see cref="PhysicalAddress"/> object to copy.</param>
+        /// <returns>A copy of original <see cref="PhysicalAddress"/>.</returns>
+        public static PhysicalAddress Clone(this PhysicalAddress original)
+        {
+            if (original == null) return null;
+            return PhysicalAddress.Parse(original.ToString());
+        }
+    }
+
+
 }

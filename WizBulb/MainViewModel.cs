@@ -231,14 +231,21 @@ namespace WizBulb
             {
                 if (SetProperty(ref selRoom, value))
                 {
-                    if (selRoom == null)
+                    Task.Run(async () =>
                     {
-                        Bulbs = allBulbs;
-                    }
-                    else
-                    {
-                        Bulbs = selRoom.Bulbs;
-                    }
+                        if (selRoom == null)
+                        {
+                            Bulbs = allBulbs;
+                        }
+                        else
+                        {
+                            Bulbs = new KeyedObservableCollection<Bulb>(
+                                            nameof(Bulb.MACAddress), 
+                                            await BulbItem.CreateBulbsFromInterfaceList(selRoom.Bulbs)
+                                            );
+                            }
+
+                    });
                 }
             }
         }
@@ -448,7 +455,7 @@ namespace WizBulb
                 var aw = AutoWatch;
                 AutoWatch = false;
 
-                await Bulb.ScanForBulbs(selAdapter.IPV4Address, selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout,
+                await Bulb.ScanForBulbs(selAdapter.IPV4Address, selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
                 (b) =>
                 {
                     disp.Invoke(() =>
@@ -459,20 +466,20 @@ namespace WizBulb
                 });
 
 
-                foreach (var bulb in Bulbs)
-                {
-                    GC.Collect(0);
-                    StatusMessage = string.Format(AppResources.GettingBulbInfoForX, bulb.ToString());
+                //foreach (var bulb in Bulbs)
+                //{
+                //    GC.Collect(0);
+                //    StatusMessage = string.Format(AppResources.GettingBulbInfoForX, bulb.ToString());
 
-                    for (int re = 0; re < 3; re++)
-                    {
-                        if (await bulb.GetPilot()) break;
+                //    for (int re = 0; re < 3; re++)
+                //    {
+                //        if (await bulb.GetPilot()) break;
 
-                        StatusMessage = string.Format(AppResources.RetryingX, re);
-                        await Task.Delay(1000);
-                    }
+                //        StatusMessage = string.Format(AppResources.RetryingX, re);
+                //        await Task.Delay(1000);
+                //    }
 
-                }
+                //}
 
                 allBulbs = bulbs;
                 Homes = Home.GenerateHomes(Bulbs);
@@ -483,6 +490,19 @@ namespace WizBulb
 
                 ButtonsEnabled = true;
                 AutoWatch = aw;
+
+                App.Current.Dispatcher.Invoke(() =>
+                {
+                    allBulbs.Sort((a, b) =>
+                    {
+                        if (a.Settings.RoomId == null && b.Settings.RoomId == null) return 0;
+                        else if (a.Settings.RoomId == null) return 1;
+                        else if (b.Settings.RoomId == null) return -1;
+
+                        return (int)a.Settings.RoomId - (int)b.Settings.RoomId;
+                        //return string.Compare(a.IPAddress.ToString(), b.IPAddress.ToString());
+                    });
+                });
 
                 _ = Task.Run(async () =>
                 {

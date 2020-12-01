@@ -208,17 +208,17 @@ namespace WizBulb
 
         private void Sort(string sortBy, ListSortDirection direction)
         {
-            var dataView =
-              CollectionViewSource.GetDefaultView(BulbList.ItemsSource);
+            //var dataView =
+            //  CollectionViewSource.GetDefaultView(BulbList.ItemsSource);
 
-            //if (sortBy == "Scene")
-            //{
-            //    dataView.CustomSort = new BulbComparer();
-            //}
-            dataView.SortDescriptions.Clear();
-            SortDescription sd = new SortDescription(sortBy, direction);
-            dataView.SortDescriptions.Add(sd);
-            dataView.Refresh();
+            ////if (sortBy == "Scene")
+            ////{
+            ////    dataView.CustomSort = new BulbComparer();
+            ////}
+            //dataView.SortDescriptions.Clear();
+            //SortDescription sd = new SortDescription(sortBy, direction);
+            //dataView.SortDescriptions.Add(sd);
+            //dataView.Refresh();
         }
 
         private void mnuPing_Click(object sender, RoutedEventArgs e)

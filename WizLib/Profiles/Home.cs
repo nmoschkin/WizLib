@@ -66,26 +66,29 @@ namespace WizLib
                     var hid = b.Settings.HomeId.Value.ToString();
                     var rid = b.Settings.RoomId.Value.ToString();
 
+                    var nb = BulbItem.CreateItemFromBulb(b);
+
                     if (kh.ContainsKey(hid, out nh))
                     {
+
                         if (nh.Rooms.ContainsKey(rid, out nr))
                         {
                             var smac = b.MACAddress?.ToString();
 
                             if (smac != null && nr.Bulbs.ContainsKey(smac))
                             {
-                                nr.Bulbs[smac] = b;
+                                nr.Bulbs[smac] = nb;
                             }
                             else
                             {
-                                nr.Bulbs.Add(b);
+                                nr.Bulbs.Add(nb);
                             }
                         }
                         else
                         {
                             nr = new Room() { RoomId = b.Settings.RoomId.ToString() };
 
-                            nr.Bulbs.Add(b);
+                            nr.Bulbs.Add(nb);
                             nh.Rooms.Add(nr);
                         }
                     }
@@ -94,7 +97,7 @@ namespace WizLib
                         nh = new Home() { HomeId = b.Settings.HomeId.ToString() };
                         nr = new Room() { RoomId = b.Settings.RoomId.ToString() };
 
-                        nr.Bulbs.Add(b);
+                        nr.Bulbs.Add(nb);
                         nh.Rooms.Add(nr);
 
                         kh.Add(nh);

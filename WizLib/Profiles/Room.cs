@@ -14,7 +14,7 @@ namespace WizLib
         private string roomId;
         private string name;
 
-        private KeyedObservableCollection<Bulb> bulbs = new KeyedObservableCollection<Bulb>(nameof(Bulb.MACAddress));
+        private KeyedObservableCollection<BulbItem> bulbs = new KeyedObservableCollection<BulbItem>(nameof(Bulb.MACAddress));
 
         private KeyedObservableCollection<Scene> scenes = new KeyedObservableCollection<Scene>(nameof(Scene.SceneId));
 
@@ -51,7 +51,7 @@ namespace WizLib
         }
 
         [JsonProperty("bulbs")] 
-        public KeyedObservableCollection<Bulb> Bulbs
+        public KeyedObservableCollection<BulbItem> Bulbs
         {
             get => bulbs;
             set

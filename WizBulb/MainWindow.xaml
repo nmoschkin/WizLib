@@ -11,6 +11,7 @@
     Title="{i18n:Translate ResourceKey=WizBulb}"
     Width="630"
     Height="365"
+    Icon="pack://application:,,,/WizBulb;component/Resources/wiz.ico"
     mc:Ignorable="d">
 
     <Window.Resources>

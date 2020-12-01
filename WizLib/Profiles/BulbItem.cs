@@ -1,28 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.NetworkInformation;
-using System.Net;
+
 using Newtonsoft.Json;
 
 namespace WizLib
 {
-    public interface IBulb
-    {
-        PhysicalAddress MACAddress { get; }
-
-        IPAddress IPAddress { get; }
-
-        int Port { get; }
-
-        string Name { get; set; }
-
-        Task<Bulb> GetBulb();
-
-    }
-
     public class BulbItem : IBulb
     {
         [JsonProperty("mac")]
@@ -37,6 +24,9 @@ namespace WizLib
         [JsonProperty("name")]
         public virtual string Name { get; set; }
 
+        [JsonProperty("icon")]
+        public virtual string Icon { get; set; }
+
         public static BulbItem CreateItemFromBulb(IBulb source)
         {
             return new BulbItem()
@@ -48,7 +38,7 @@ namespace WizLib
             };
         }
 
-        public static async Task<IList<Bulb>> CreateBulbFromInterfaceList(IEnumerable<IBulb> source)
+        public static async Task<IList<Bulb>> CreateBulbsFromInterfaceList(IEnumerable<IBulb> source)
         {
             var l = new List<Bulb>();
 
@@ -67,6 +57,9 @@ namespace WizLib
 
         public async Task<Bulb> GetBulb(ScanCondition sc)
         {
+            if (Bulb.BulbCache.ContainsKey(MACAddress.ToString()))
+                return Bulb.BulbCache[MACAddress.ToString()];
+
             Bulb b;
 
             b = await Bulb.GetBulbByMacAddr(MACAddress, sc);
@@ -81,7 +74,5 @@ namespace WizLib
         }
 
     }
-
-
 
 }
