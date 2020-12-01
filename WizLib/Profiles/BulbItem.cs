@@ -62,7 +62,7 @@ namespace WizLib
 
             Bulb b;
 
-            b = await Bulb.GetBulbByMacAddr(MACAddress, sc);
+            b = await Bulb.GetBulbByMacAddress(MACAddress, sc);
 
             if (b == null)
             {

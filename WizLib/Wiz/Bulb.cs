@@ -80,7 +80,15 @@ namespace WizLib
 
         protected static bool udpActive;
 
-        public static Dictionary<string, Bulb> BulbCache { get; protected set; } = new Dictionary<string, Bulb>();
+        private static Dictionary<string, Bulb> bulbCache = new Dictionary<string, Bulb>();
+        public static Dictionary<string, Bulb> BulbCache
+        {
+            get => bulbCache;
+            protected set
+            {
+                bulbCache = value;
+            }
+        }
 
         public async Task<Bulb> GetBulb()
         {
@@ -395,6 +403,8 @@ namespace WizLib
 
             GetPilot().ContinueWith((a) =>
             {
+                Monitor.Enter(bulbCache);
+
                 string smac = MACAddress.ToString();
                 if (BulbCache.ContainsKey(smac))
                 {
@@ -404,6 +414,8 @@ namespace WizLib
                 {
                     BulbCache.Add(smac, this);
                 }
+
+                Monitor.Exit(bulbCache);
             });
         }
 
@@ -415,9 +427,9 @@ namespace WizLib
         /// <param name="localAddr">Local address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <param name="localMac">Local hardware address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <returns></returns>
-        public static async Task<Bulb> GetBulbByMacAddr(string macAddr, ScanCondition scan, IPAddress localAddr = null, PhysicalAddress localMac = null)
+        public static async Task<Bulb> GetBulbByMacAddress(string macAddr, ScanCondition scan, IPAddress localAddr = null, PhysicalAddress localMac = null)
         {
-            return await GetBulbByMacAddr(PhysicalAddress.Parse(macAddr), scan, localAddr, localMac);
+            return await GetBulbByMacAddress(PhysicalAddress.Parse(macAddr), scan, localAddr, localMac);
         }
         
         /// <summary>
@@ -428,7 +440,7 @@ namespace WizLib
         /// <param name="localAddr">Local address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <param name="localMac">Local hardware address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <returns></returns>
-        public static async Task<Bulb> GetBulbByMacAddr(PhysicalAddress macAddr, ScanCondition scan, IPAddress localAddr = null, PhysicalAddress localMac = null)
+        public static async Task<Bulb> GetBulbByMacAddress(PhysicalAddress macAddr, ScanCondition scan, IPAddress localAddr = null, PhysicalAddress localMac = null)
         {
             string smac = macAddr.ToString();
 
@@ -531,7 +543,7 @@ namespace WizLib
         /// Sets the light mode to the specified scene and brightness.
         /// </summary>
         /// <param name="scene">Light mode to enable.</param>
-        /// <param name="brightness">Brightness (a whole-number value between 1 and 100)</param>
+        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
         /// <returns>Result from the bulb.</returns>
         public virtual async Task<BulbCommand> SetLightMode(LightMode scene, byte brightness)
         {
@@ -571,8 +583,8 @@ namespace WizLib
         /// <summary>
         /// Sets the light mode to the specified custom color and brightness.
         /// </summary>
-        /// <param name="c">Color to enable.</param>
-        /// <param name="brightness">Brightness (a whole-number value between 1 and 100)</param>
+        /// <param name="c">New custom color</param>
+        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
         /// <returns>Result from the bulb.</returns>
         public virtual async Task<BulbCommand> SetLightMode(Color c, byte brightness)
         {
@@ -594,9 +606,9 @@ namespace WizLib
         /// <summary>
         /// Sets the color and brightness of all the specified bulbs.
         /// </summary>
-        /// <param name="bulbs"></param>
-        /// <param name="c"></param>
-        /// <param name="brightness"></param>
+        /// <param name="bulbs">Bulbs to set.</param>
+        /// <param name="c">New custom color</param>
+        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
         public static async Task SetLights(IEnumerable<Bulb> bulbs, Color c, byte? brightness = null)
         {
             BulbParams bp = new BulbParams();
@@ -610,9 +622,9 @@ namespace WizLib
         /// <summary>
         /// Sets the light mode of all the specified bulbs.
         /// </summary>
-        /// <param name="bulbs"></param>
-        /// <param name="lm"></param>
-        /// <param name="brightness"></param>
+        /// <param name="bulbs">Bulbs to set.</param>
+        /// <param name="lm">LightMode to enable</param>
+        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
         /// 
         public static async Task SetLights(IEnumerable<Bulb> bulbs, LightMode lm, byte? brightness = null, byte? speed = null, int? colorTemp = null)
         {
@@ -631,8 +643,8 @@ namespace WizLib
         /// <summary>
         /// Sets the brightness of all the specified bulbs.
         /// </summary>
-        /// <param name="bulbs"></param>
-        /// <param name="brightness"></param>
+        /// <param name="bulbs">Bulbs to set.</param>
+        /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
         public static async Task SetLights(IEnumerable<Bulb> bulbs, byte? brightness = null)
         {
             BulbParams bp = new BulbParams();
@@ -645,8 +657,8 @@ namespace WizLib
         /// Set many bulbs with the same configuration.
         /// No wait for return, and no getPilot is called. 
         /// </summary>
-        /// <param name=""></param>
-        /// <param name="bp"></param>
+        /// <param name="bulbs">Bulbs to set.</param>
+        /// <param name="bp">Configuration options</param>
         public static async Task SetLights(IEnumerable<Bulb> bulbs, BulbParams bp)
         {
             var cmd = new BulbCommand(BulbMethod.SetPilot);
@@ -723,6 +735,8 @@ namespace WizLib
         /// <summary>
         /// Pulse the bulb
         /// </summary>
+        /// <param name="delta">The dimming amount.</param>
+        /// <param name="pulseTime">The length of the pulse (in milliseconds.)</param>
         public void Pulse(int delta = -50, int pulseTime = 250)
         {
             var cmd = new BulbCommand(BulbMethod.Pulse);
