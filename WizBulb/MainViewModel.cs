@@ -631,7 +631,7 @@ namespace WizBulb
             _ = Task.Run(async () =>
             {
                 var aw = AutoWatch;
-                AutoWatch = false;
+                if (aw) WatchAbort();
 
                 await Bulb.ScanForBulbs(selAdapter.IPV4Address, selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
                 (b) =>
@@ -651,7 +651,7 @@ namespace WizBulb
                 ScanComplete?.Invoke(this, new EventArgs());
 
                 ButtonsEnabled = true;
-                AutoWatch = aw;
+                if (aw) WatchBulbs();
 
                 App.Current.Dispatcher.Invoke(() =>
                 {
@@ -671,7 +671,7 @@ namespace WizBulb
                     await Task.Delay(5000);
 
                     if (ButtonsEnabled)
-                        StatusMessage = prevStat;
+                        StatusMessage = prevStat ?? "";
 
                 });
 
@@ -713,7 +713,6 @@ namespace WizBulb
                                 if (b.MACAddress?.ToString() is string s && !Bulbs.ContainsKey(s))
                                 {
                                     Bulbs.Add(b);
-                                    StatusMessage = string.Format(AppResources.ScanningBulbsXBulbsFound, Bulbs.Count);                                    
                                 }
                                 else
                                 {
@@ -722,7 +721,12 @@ namespace WizBulb
                             });
                         });
 
-                        await Task.Delay(5000);
+                        for (int i = 0; i < 22; i++)
+                        {
+                            if (cts?.IsCancellationRequested ?? true) break;
+                            await Task.Delay(100);
+                        }
+                        
                     }
                 }
                 catch

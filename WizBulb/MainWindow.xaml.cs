@@ -324,6 +324,8 @@ namespace WizBulb
                     return;
                 }
             }
+
+            Close();
         }
 
         private async void mnuRefresh_Click(object sender, RoutedEventArgs e)
