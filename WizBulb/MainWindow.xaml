@@ -8,7 +8,7 @@
     xmlns:i18n="clr-namespace:WizBulb.Localization"
     xmlns:local="clr-namespace:WizBulb"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="{i18n:Translate ResourceKey=WizBulb}"
+    Title="{Binding WindowTitle}"
     Width="630"
     Height="365"
     Icon="pack://application:,,,/WizBulb;component/Resources/wiz.ico"
@@ -23,6 +23,33 @@
                 x:Key="intConv"
                 MaxValue="360"
                 MinValue="1" />
+
+            <DataTemplate x:Key="HeaderTemplateArrowUp">
+                <DockPanel>
+                    <TextBlock HorizontalAlignment="Center" Text="{Binding}" />
+                    <Path
+                        x:Name="arrow"
+                        Data="M 5,10 L 15,10 L 10,5 L 5,10"
+                        Fill="gray"
+                        StrokeThickness="1" />
+                </DockPanel>
+            </DataTemplate>
+
+            <DataTemplate x:Key="HeaderTemplateArrowDown">
+                <DockPanel>
+                    <TextBlock HorizontalAlignment="Center" Text="{Binding}" />
+                    <Path
+                        x:Name="arrow"
+                        Data="M 5,10 L 15,10 L 10,5 L 5,10"
+                        Fill="gray"
+                        StrokeThickness="1">
+                        <Path.LayoutTransform>
+                            <RotateTransform Angle="180" />
+                        </Path.LayoutTransform>
+                    </Path>
+                </DockPanel>
+            </DataTemplate>
+
 
             <conv:ColorBrushConverter x:Key="colorConv" />
 
@@ -123,10 +150,9 @@
 
                 <MenuItem
                     x:Name="mnuLoadLast"
-                    Click="mnuLoadLast_Click"
+                    Checked="mnuLoadLast_Checked"
                     Header="_Load Last Project on Startup"
-                    IsCheckable="True"
-                    IsChecked="{Binding StartupLoad, Mode=TwoWay}" />
+                    IsCheckable="True" />
                 <Separator />
 
                 <MenuItem

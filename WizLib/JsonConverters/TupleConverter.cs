@@ -51,7 +51,10 @@ namespace WizLib
             }
             else
             {
-                writer.WriteValue(new int[] { value.Value.Item1, value.Value.Item2 });
+                writer.WriteStartArray();
+                writer.WriteValue(value.Value.Item1);
+                writer.WriteValue(value.Value.Item2);
+                writer.WriteEndArray();
             }
         }
     }

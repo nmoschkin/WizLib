@@ -45,6 +45,10 @@ namespace WizBulb.Converters
 
                 return s;
             }
+            else if (value == null)
+            {
+                return "";
+            }
             else
             {
                 return value?.ToString();

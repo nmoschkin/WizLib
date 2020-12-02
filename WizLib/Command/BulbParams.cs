@@ -121,8 +121,8 @@ namespace WizLib
         /// <param name="other"></param>
         public void CopyTo(BulbParams other)
         {
-            var json = JsonConvert.SerializeObject(this);
-            JsonConvert.PopulateObject(json, other);
+            var json = JsonConvert.SerializeObject(this, BulbCommand.DefaultJsonSettings);
+            JsonConvert.PopulateObject(json, other, BulbCommand.DefaultJsonSettings);
         }
 
         /// <summary>
@@ -882,6 +882,11 @@ namespace WizLib
 
         public override bool Equals(object obj)
         {
+
+            if (obj == null) return false;
+
+            if (obj.GetType() != typeof(BulbParams)) return false;
+
             var flds = typeof(BulbParams).GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
 
             bool bPass = true;

@@ -81,7 +81,8 @@ namespace WizLib
         #region Protected Fields
 
         protected static Dictionary<string, Bulb> bulbCache = new Dictionary<string, Bulb>();
-        protected static bool udpActive;
+        protected static bool allUdpActive;
+        protected bool udpActive;
         protected IPAddress addr;
         protected string bulbType;
         protected string icon;
@@ -531,7 +532,7 @@ namespace WizLib
             int timeout = 5000,
             BulbScanCallback callback = null)
         {
-            udpActive = true;
+            allUdpActive = true;
 
             List<Bulb> bulbs = new List<Bulb>();
 
@@ -580,24 +581,27 @@ namespace WizLib
 
                             ConsoleHelper.LogInput(json, localAddr, from.Address);
 
-                            p = new BulbCommand(json);
 
-                            if (p != null && p.Result?.MACAddress != null)
+                            if (json != null)
                             {
+                                p = new BulbCommand(json);
                                 string smac = p.Result?.MACAddress.ToString();
 
                                 if (BulbCache.ContainsKey(smac))
                                 {
                                     bulb = BulbCache[smac];
+
+                                    p.Result.CopyTo(bulb.Settings);
+
                                     bulb.IPAddress = from.Address;
                                     bulb.Port = from.Port;
                                 }
                                 else
                                 {
                                     bulb = new Bulb(from.Address, from.Port);
+                                    bulb.Settings = p.Result;
                                 }
 
-                                bulb.Settings = p.Result;
                                 bool already = false;
 
                                 foreach (var bchk in bulbs)
@@ -673,7 +677,7 @@ namespace WizLib
             udpClient?.Close();
             udpClient?.Dispose();
 
-            udpActive = false;
+            allUdpActive = false;
 
             return bulbs;
         }
@@ -1030,7 +1034,12 @@ namespace WizLib
 
         protected async Task<byte[]> SendUDP(byte[] cmd, IPAddress localAddr = null)
         {
-            if (Port == 0 || IPAddress == null) return null;
+            if (Port <= 0 || IPAddress == null) return null;
+
+            while (allUdpActive || udpActive)
+            {
+                await Task.Delay(10);
+            }
 
             udpActive = true;
 
