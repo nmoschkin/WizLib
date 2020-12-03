@@ -68,10 +68,8 @@ namespace WizLib
         }
 
         /// <summary>
-        /// Find the first connection with internet access from a collection of local IP addresses.
-        /// If a collection is not provided, it will retrieved from the system.
+        /// Find the first connection with internet access.
         /// </summary>
-        /// <param name="locals">Collection of local IP addresses.</param>
         /// <returns></returns>
         public static void RefreshDefaultIP()
         {

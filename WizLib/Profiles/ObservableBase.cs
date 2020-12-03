@@ -10,7 +10,7 @@ namespace WizLib.Profiles
 {
 
     /// <summary>
-    /// Abstract base class for obseravable classes.
+    /// Abstract base class for observable classes.
     /// </summary>
     public abstract class ObservableBase : INotifyPropertyChanged
     {
