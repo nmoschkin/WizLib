@@ -397,6 +397,7 @@ namespace WizBulb
             SelectedHome = null;
 
             Profile = (Profile)j.Deserialize();
+            Homes = new KeyedObservableCollection<Home>(nameof(Home.HomeId), Profile.Homes);
 
             allBulbs = Bulbs = new KeyedObservableCollection<Bulb>(
                             nameof(Bulb.MACAddress),
@@ -420,6 +421,8 @@ namespace WizBulb
             var j = new JsonProfileSerializer(fileName);
 
             Profile.AddUpdateBulbs(allBulbs, true);
+            Profile.Homes = new List<Home>(Homes);
+
             j.Serialize(Profile);
 
             Settings.AddRecentFile(fileName, Profile.ProjectId);
@@ -446,6 +449,8 @@ namespace WizBulb
             var j = new JsonProfileSerializer(fileName);
 
             Profile.AddUpdateBulbs(allBulbs, true);
+            Profile.Homes = new List<Home>(Homes);
+
             j.Serialize(Profile);
 
             ProjectFile = fileName;
@@ -712,6 +717,14 @@ namespace WizBulb
                             {
                                 if (b.MACAddress?.ToString() is string s && !Bulbs.ContainsKey(s))
                                 {
+                                    string selRoom = null;
+
+                                    if (SelectedRoom != null)
+                                    {
+                                        selRoom = SelectedRoom.RoomId;
+                                        if (b.Settings.RoomId?.ToString() != selRoom) return;
+                                    }
+
                                     Bulbs.Add(b);
                                 }
                                 else

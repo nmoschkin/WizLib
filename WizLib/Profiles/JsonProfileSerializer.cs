@@ -82,6 +82,10 @@ namespace WizLib.Profiles
             string json = JsonConvert.SerializeObject(profile, BulbCommand.DefaultJsonSettings);
 
             if (string.IsNullOrEmpty(Filename)) throw new NullReferenceException(nameof(Filename));
+            if (File.Exists(Filename))
+            {
+                File.Delete(Filename);
+            }
             File.WriteAllText(Filename, json);
         }
 

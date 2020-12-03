@@ -18,7 +18,7 @@ namespace WizLib.Profiles
 
         private KeyedObservableCollection<Scene> scenes = new KeyedObservableCollection<Scene>(nameof(Scene.SceneId));
 
-        public KeyedObservableCollection<Room> RoomCache { get; private set; } = new KeyedObservableCollection<Room>(nameof(RoomId));
+        public static KeyedObservableCollection<Room> RoomCache { get; private set; } = new KeyedObservableCollection<Room>(nameof(RoomId));
 
 
         private Scene currentScene;
