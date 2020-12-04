@@ -216,7 +216,7 @@ namespace WizLib
 
         /// <summary>
         /// Gets or sets the brightness of the bulb
-        /// using whole values between 1 and 100.
+        /// using whole values between 10 and 100.
         /// </summary>
         /// <remarks>
         /// This property is live.
@@ -252,6 +252,28 @@ namespace WizLib
             internal set
             {
                 SetProperty(ref bulbType, value);
+            }
+        }
+
+        public virtual int? HomeId
+        {
+            get => settings?.HomeId;
+            set
+            {
+                if (Settings == null)
+                {
+                    Settings = new BulbParams();
+                }
+
+                if (Settings.HomeId == value) return;
+
+                Settings.HomeId = value;
+                //if (value == null) return;
+
+                //var stg = new BulbCommand(BulbMethod.SetSystemConfig);
+                //stg.Params.HomeId = value;
+
+                //_ = SendCommand(stg);
             }
         }
 
@@ -363,6 +385,28 @@ namespace WizLib
             }
         }
 
+        public virtual int? RoomId
+        {
+            get => Settings?.RoomId;
+            set
+            {
+                if (Settings == null)
+                {
+                    Settings = new BulbParams();
+                }
+
+                if (Settings.RoomId == value) return;
+
+                Settings.RoomId = value;
+                //if (value == null) return;
+
+                //var stg = new BulbCommand(BulbMethod.SetSystemConfig);
+                //stg.Params.RoomId = value;
+
+                //_ = SendCommand(stg);
+            }
+        }
+
         /// <summary>
         /// Gets a description of the current lighting mode.
         /// </summary>
@@ -439,6 +483,36 @@ namespace WizLib
                 OnPropertyChanged();
             }
         }
+
+        /// <summary>
+        /// Gets or sets the speed of the bulb
+        /// using whole values between 10 and 100.
+        /// </summary>
+        /// <remarks>
+        /// This property is live.
+        /// </remarks>
+        public virtual byte? Speed
+        {
+            get => Settings?.Speed;
+            set
+            {
+                if (Settings == null)
+                {
+                    Settings = new BulbParams();
+                }
+
+                if (Settings.Speed == value) return;
+
+                Settings.Speed = value;
+                if (value == null) return;
+
+                var stg = new BulbCommand(BulbMethod.SetPilot);
+                stg.Params.Speed = value;
+
+                _ = SendCommand(stg);
+            }
+        }
+
 
         /// <summary>
         /// Gets or sets the default timeout for commands (in milliseconds).
@@ -724,10 +798,12 @@ namespace WizLib
         /// </summary>
         /// <param name="bulbs">Bulbs to set.</param>
         /// <param name="brightness">Brightness (a whole-number value between 10 and 100)</param>
-        public static async Task SetLights(IEnumerable<Bulb> bulbs, byte? brightness = null)
+        public static async Task SetLights(IEnumerable<Bulb> bulbs, byte? brightness = null, byte? speed = null)
         {
             BulbParams bp = new BulbParams();
+
             bp.Brightness = brightness;
+            bp.Speed = speed;
 
             await SetLights(bulbs, bp);
         }
@@ -742,6 +818,7 @@ namespace WizLib
         {
             var cmd = new BulbCommand(BulbMethod.SetPilot);
             cmd.Params = bp;
+            bp.Id = "1";
 
             foreach (var b in bulbs)
             {
@@ -1115,6 +1192,10 @@ namespace WizLib
             if (e.PropertyName == nameof(BulbParams.Brightness))
             {
                 OnPropertyChanged(nameof(Brightness));
+            }
+            else if (e.PropertyName == nameof(BulbParams.Speed))
+            {
+                OnPropertyChanged(nameof(Speed));
             }
             else if (e.PropertyName == nameof(BulbParams.State))
             {

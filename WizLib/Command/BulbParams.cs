@@ -133,7 +133,7 @@ namespace WizLib
         /// </remarks>
         public void EnforceRules()
         {
-            if (Scene == null || Scene == 0)
+            if (Scene == 0)
             {
                 EnforceCustomColorRules();
             }
@@ -390,7 +390,7 @@ namespace WizLib
         /// Gets or sets the animation speed of a dynamic scene.
         /// </summary>
         /// <remarks>
-        /// Value must be between 10 and 100.
+        /// Value must be between 10 and 200.
         /// </remarks>
         [JsonProperty("speed")]
         public byte? Speed
@@ -401,7 +401,7 @@ namespace WizLib
                 if (value != null)
                 {
                     if (value < 10) value = 10;
-                    else if (value > 100) value = 100;
+                    else if (value > 200) value = 200;
                 }
 
                 SetProperty(ref speed, value);
@@ -547,9 +547,9 @@ namespace WizLib
                     b = c.B;
                 }
 
-                OnPropertyChanged("Red");
-                OnPropertyChanged("Green");
-                OnPropertyChanged("Blue");
+                OnPropertyChanged(nameof(Red));
+                OnPropertyChanged(nameof(Green));
+                OnPropertyChanged(nameof(Blue));
                 OnPropertyChanged();
             }
         }

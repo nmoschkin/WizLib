@@ -300,6 +300,14 @@
                                 Header="{i18n:Translate ResourceKey=Distance}" />
                             <GridViewColumn
                                 Width="120"
+                                DisplayMemberBinding="{Binding Settings.Brightness}"
+                                Header="{i18n:Translate ResourceKey=Brightness}" />
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding Settings.Speed}"
+                                Header="{i18n:Translate ResourceKey=Speed}" />
+                            <GridViewColumn
+                                Width="120"
                                 DisplayMemberBinding="{Binding Settings.FirmwareVersion}"
                                 Header="{i18n:Translate ResourceKey=FirmwareVersion}" />
 
@@ -509,6 +517,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <color:ColorPicker
@@ -524,13 +533,28 @@
                     Margin="8,0,8,0"
                     IsSnapToTickEnabled="True"
                     LargeChange="10"
-                    ManipulationCompleted="Slider_ManipulationCompleted"
                     Maximum="100"
-                    Minimum="0"
+                    Minimum="10"
                     Orientation="Vertical"
                     SmallChange="1"
                     TickFrequency="1"
+                    TickPlacement="BottomRight"
                     ValueChanged="Slider_ValueChanged" />
+
+                <Slider
+                    x:Name="Speed"
+                    Grid.Column="2"
+                    Margin="8,0,8,0"
+                    IsSnapToTickEnabled="True"
+                    LargeChange="20"
+                    Maximum="200"
+                    Minimum="10"
+                    Orientation="Vertical"
+                    SmallChange="1"
+                    TickFrequency="1"
+                    TickPlacement="TopLeft"
+                    ValueChanged="Speed_ValueChanged" />
+
 
             </Grid>
 

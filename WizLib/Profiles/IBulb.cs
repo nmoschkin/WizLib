@@ -14,6 +14,10 @@ namespace WizLib.Profiles
         PhysicalAddress MACAddress { get; }
 
         IPAddress IPAddress { get; }
+        
+        int? HomeId { get; }
+
+        int? RoomId { get; }
 
         int Port { get; }
 

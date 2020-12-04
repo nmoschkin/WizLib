@@ -404,6 +404,16 @@ namespace WizBulb
                             await BulbItem.CreateBulbsFromInterfaceList(Profile.Bulbs)
                             );
 
+            allBulbs.Sort((a, b) =>
+            {
+                int x = (a.Settings.RoomId ?? 0) - (b.Settings.RoomId ?? 0);
+                if (x == 0)
+                {
+                    x = string.Compare(a.Name, b.Name);
+                }
+                return x;
+            });
+
             Settings.AddRecentFile(fileName, Profile.ProjectId);
             ProjectFile = fileName;
 

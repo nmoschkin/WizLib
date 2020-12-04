@@ -112,6 +112,8 @@ namespace WizLib.Profiles
                         b2.Name = b.Name;
                         b2.IPAddress = b.IPAddress.Clone();
                         b2.Icon = b.Icon;
+                        b2.HomeId = b.HomeId;
+                        b2.RoomId = b.RoomId;
                         bchk = true;
                         break;
                     }

@@ -132,6 +132,9 @@
   <data name="Blue" xml:space="preserve">
     <value>Blue</value>
   </data>
+  <data name="Brightness" xml:space="preserve">
+    <value>Brightness</value>
+  </data>
   <data name="Bulb" xml:space="preserve">
     <value>Bulb</value>
   </data>
@@ -494,6 +497,9 @@
   </data>
   <data name="SignalStrength" xml:space="preserve">
     <value>Signal Strength</value>
+  </data>
+  <data name="Speed" xml:space="preserve">
+    <value>Speed</value>
   </data>
   <data name="StandardModes" xml:space="preserve">
     <value>Standard Modes</value>

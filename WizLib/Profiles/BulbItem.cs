@@ -27,6 +27,12 @@ namespace WizLib.Profiles
         [JsonProperty("icon")]
         public virtual string Icon { get; set; }
 
+        [JsonProperty("roomId")]
+        public int? RoomId { get; set; }
+
+        [JsonProperty("homeId")]
+        public int? HomeId { get; set; }
+
         public static BulbItem CreateItemFromBulb(IBulb source)
         {
             return new BulbItem()
@@ -34,7 +40,9 @@ namespace WizLib.Profiles
                 MACAddress = source.MACAddress,
                 IPAddress = source.IPAddress,
                 Port = source.Port,
-                Name = source.Name
+                Name = source.Name,
+                HomeId = source.HomeId,
+                RoomId = source.RoomId
             };
         }
 
@@ -71,6 +79,8 @@ namespace WizLib.Profiles
 
             b.Name = Name;
             b.Icon = Icon;
+            b.HomeId = HomeId;
+            b.RoomId = RoomId;
 
             return b;
         }

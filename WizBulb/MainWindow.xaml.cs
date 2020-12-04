@@ -48,7 +48,7 @@ namespace WizBulb
 
         public MainWindow()
         {
-            WizLib.Helpers.ConsoleHelper.AllocConsole();
+            //WizLib.Helpers.ConsoleHelper.AllocConsole();
 
             InitializeComponent();
 
@@ -74,7 +74,6 @@ namespace WizBulb
 
             vm.PopulateLightModesMenu(mnuModes);
 
-            vm.LightModeClick += Vm_LightModeClick;
             vm.PropertyChanged += Vm_PropertyChanged;
 
             vm.PopulateRecentFiles(mnuRecents);
@@ -263,6 +262,7 @@ namespace WizBulb
             mnuLoadLast.IsChecked = Settings.OpenLastOnStartup;
 
             await vm.LoadLastProject();
+            //await vm.RefreshAll();
             vm.WatchBulbs();
         }
 
@@ -399,18 +399,21 @@ namespace WizBulb
             _ = vm.RefreshSelected();
         }
 
-        private async void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private async void Speed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (notch) return;
+            if (notch || vm == null) return;
 
             byte i = (byte)e.NewValue;
-            //bool ow = vm.AutoWatch;
+            await Bulb.SetLights(vm.SelectedBulbs, speed: i);
 
-            //if (ow) vm.WatchAbort();
+        }
 
-            await Bulb.SetLights(vm.SelectedBulbs, i);
+        private async void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (notch || vm == null) return;
 
-            //if (ow) vm.WatchBulbs();
+            byte i = (byte)e.NewValue;
+            await Bulb.SetLights(vm.SelectedBulbs, brightness: i);
         }
 
         private void Sort(string sortBy, ListSortDirection direction)
@@ -447,22 +450,13 @@ namespace WizBulb
             }
         }
 
-        private void ValueSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            //Picker.ColorValue = ValueSlider.Value / 100;
-        }
-
-        private void Vm_LightModeClick(object sender, LightModeClickEventArgs e)
-        {
-            // throw new NotImplementedException();
-        }
-
         private void Vm_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(MainViewModel.SelectedBulb) && vm.SelectedBulb != null && vm.SelectedBulb.Brightness != null)
             {
                 notch = true;
                 Slide.Value = (double)vm.SelectedBulb.Brightness;
+                Speed.Value = (double)vm.SelectedBulb.Speed;
                 notch = false;
             }
         }
