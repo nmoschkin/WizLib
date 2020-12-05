@@ -680,7 +680,7 @@ namespace WizLib
 
                                 foreach (var bchk in bulbs)
                                 {
-                                    if (bchk.Settings?.MACAddress?.ToString() == bulb.Settings?.MACAddress?.ToString())
+                                    if (bulb.Settings.MACAddress.Equals(bchk.Settings?.MACAddress))
                                     {
                                         already = true;
                                         break;

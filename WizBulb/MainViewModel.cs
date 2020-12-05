@@ -406,7 +406,7 @@ namespace WizBulb
                             );
 
             var b = new Bulb("192.168.50.222");
-            b.Settings.MACAddress = BulbAddress.Parse("aabbcceedd00");
+            b.Settings.MACAddress = BulbAddress.Parse("A8BB5091EFE1");
 
             allBulbs.Insert(5, b);
 
@@ -424,7 +424,9 @@ namespace WizBulb
                 return x;
             });
 
+            var key = ((IList<Bulb>)allBulbs)[4].MACAddress;
 
+            var item = allBulbs[key];
 
             Settings.AddRecentFile(fileName, Profile.ProjectId);
             ProjectFile = fileName;
@@ -665,8 +667,11 @@ namespace WizBulb
                 {
                     disp.Invoke(() =>
                     {
-                        Bulbs.Add(b);
-                        StatusMessage = string.Format(AppResources.ScanningBulbsXBulbsFound, Bulbs.Count);
+                        if (!Bulbs.ContainsKey(b.MACAddress))
+                        {
+                            Bulbs.Add(b);
+                            StatusMessage = string.Format(AppResources.ScanningBulbsXBulbsFound, Bulbs.Count);
+                        }
                     });
                 });
 
