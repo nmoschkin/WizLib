@@ -329,9 +329,13 @@ namespace WizLib
 
             ArrOp(ArrayOperation.Insert, ref innerList, newIndex: index);
             ArrOp(ArrayOperation.Insert, ref entries, newIndex: index);
+            ArrOp(ArrayOperation.Insert, ref indexKey, newIndex: index);
+            ArrOp(ArrayOperation.Insert, ref keyIndex, newIndex: index);
 
             innerList[index] = item;
             entries[index] = new Entry(index, k);
+            indexKey[index] = index;
+            keyIndex[index] = index;
 
             capacity++;
             KeySort();
@@ -411,9 +415,13 @@ namespace WizLib
 
             Array.Resize(ref innerList, x + 1);
             Array.Resize(ref entries, x + 1);
+            Array.Resize(ref keyIndex, x + 1);
+            Array.Resize(ref indexKey, x + 1);
 
             innerList[x] = item;
             entries[x] = new Entry(x, s);
+            keyIndex[x] = x;
+            indexKey[x] = x;
 
             capacity = x + 1;
 
@@ -444,6 +452,8 @@ namespace WizLib
 
             Array.Resize(ref innerList, ns);
             Array.Resize(ref entries, ns);
+            Array.Resize(ref keyIndex, ns);
+            Array.Resize(ref indexKey, ns);
 
             foreach (var item in items)
             {
@@ -456,6 +466,8 @@ namespace WizLib
 
                 innerList[x] = item;
                 entries[x] = new Entry(x, k);
+                keyIndex[x] = x;
+                indexKey[x] = x;
 
                 x++;
             }
@@ -473,8 +485,12 @@ namespace WizLib
 
         public void Clear()
         {
+            Array.Clear(innerList, 0, innerList?.Length ?? 0);
+
             innerList = null;
             entries = null;
+            indexKey = null;
+            keyIndex = null;
             capacity = 0;
 
             if (CollectionChanged != null)
@@ -498,13 +514,16 @@ namespace WizLib
         private void ReIndex()
         {
             int i, c = innerList.Length;
-
+            
             if (c < 2) return;
 
             for (i = 0; i < c; i++)
             {
                 entries[i].index = i;
                 entries[i].key = (TKey)kpi.GetValue(innerList[i]);
+
+                keyIndex[i] = i;
+                indexKey[i] = i;
             }
 
             KeySort();
@@ -519,10 +538,17 @@ namespace WizLib
         {
             var item = innerList[oldIndex];
 
+            int odx, pdx;
+
+            odx = indexKey[oldIndex];
+            pdx = indexKey[newIndex];
+
             ArrOp(ArrayOperation.Move, ref innerList, oldIndex, newIndex);
+            //ArrOp(ArrayOperation.Move, ref indexKey, oldIndex, newIndex);
+
             //ArrOp(ArrayOperation.Move, ref entries, oldIndex, newIndex);
-            KeySort();
-            //ReIndex();
+            //KeySort();
+            ReIndex();
 
             if (CollectionChanged != null)
             {
@@ -734,6 +760,10 @@ namespace WizLib
                 TValue sw = innerList[i];
                 innerList[i] = innerList[j];
                 innerList[j] = sw;
+
+                var t = indexKey[i];
+                indexKey[i] = indexKey[j];
+                indexKey[j] = t;
             }
         }
 
@@ -771,7 +801,9 @@ namespace WizLib
                 entries[i] = entries[j];
                 entries[j] = sw;
 
-                //int x;
+                var t = keyIndex[i];
+                keyIndex[i] = keyIndex[j];
+                keyIndex[j] = t;
             }
         }
 
