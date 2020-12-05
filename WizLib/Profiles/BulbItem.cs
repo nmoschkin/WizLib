@@ -13,7 +13,7 @@ namespace WizLib.Profiles
     public class BulbItem : IBulb
     {
         [JsonProperty("mac")]
-        public virtual PhysicalAddress MACAddress { get; set; }
+        public virtual BulbAddress MACAddress { get; set; }
 
         [JsonProperty("addr")]
         public virtual IPAddress IPAddress { get; set; }

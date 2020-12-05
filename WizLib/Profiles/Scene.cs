@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,8 +12,8 @@ namespace WizLib.Profiles
     public class Scene : ObservableBase
     {
 
-        private KeyedObservableCollection<BulbParams> bp
-            = new KeyedObservableCollection<BulbParams>(nameof(WizLib.BulbParams.MACAddress));
+        private KeyedObservableCollection<PhysicalAddress, BulbParams> bp
+            = new KeyedObservableCollection<PhysicalAddress, BulbParams>(nameof(WizLib.BulbParams.MACAddress));
 
         private Guid sceneId;
 
@@ -39,7 +40,7 @@ namespace WizLib.Profiles
         }
 
         [JsonProperty("bulbs")]
-        public KeyedObservableCollection<BulbParams> BulbParams
+        public KeyedObservableCollection<PhysicalAddress, BulbParams> BulbParams
         {
             get => bp;
             set

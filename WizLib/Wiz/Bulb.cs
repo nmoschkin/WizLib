@@ -175,7 +175,7 @@ namespace WizLib
             });
         }
 
-        public Bulb(PhysicalAddress macAddr)
+        public Bulb(BulbAddress macAddr)
         {
             port = DefaultPort;
 
@@ -330,7 +330,7 @@ namespace WizLib
         /// <summary>
         /// Gets or sets the MAC address for the bulb.
         /// </summary>
-        public virtual PhysicalAddress MACAddress
+        public virtual BulbAddress MACAddress
         {
             get => Settings?.MACAddress;
             internal set
@@ -538,9 +538,9 @@ namespace WizLib
         /// <param name="localAddr">Local address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <param name="localMac">Local hardware address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <returns></returns>
-        public static async Task<Bulb> GetBulbByMacAddress(string macAddr, ScanCondition scan, IPAddress localAddr = null, PhysicalAddress localMac = null)
+        public static async Task<Bulb> GetBulbByMacAddress(string macAddr, ScanCondition scan, IPAddress localAddr = null, BulbAddress localMac = null)
         {
-            return await GetBulbByMacAddress(PhysicalAddress.Parse(macAddr), scan, localAddr, localMac);
+            return await GetBulbByMacAddress(BulbAddress.Parse(macAddr), scan, localAddr, localMac);
         }
 
         /// <summary>
@@ -551,7 +551,7 @@ namespace WizLib
         /// <param name="localAddr">Local address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <param name="localMac">Local hardware address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <returns></returns>
-        public static async Task<Bulb> GetBulbByMacAddress(PhysicalAddress macAddr, ScanCondition scan, IPAddress localAddr = null, PhysicalAddress localMac = null)
+        public static async Task<Bulb> GetBulbByMacAddress(BulbAddress macAddr, ScanCondition scan, IPAddress localAddr = null, BulbAddress localMac = null)
         {
             string smac = macAddr.ToString();
 
@@ -587,7 +587,7 @@ namespace WizLib
             int timeout = 5000,
             BulbScanCallback callback = null)
         {
-            return await ScanForBulbs(NetworkHelper.DefaultLocalIP, NetworkHelper.DefaultLocalMAC, mode, timeout, callback);
+            return await ScanForBulbs(NetworkHelper.DefaultLocalIP, (BulbAddress)NetworkHelper.DefaultLocalMAC, mode, timeout, callback);
         }
 
         /// <summary>
@@ -601,7 +601,7 @@ namespace WizLib
         /// <returns></returns>
         public static async Task<List<Bulb>> ScanForBulbs(
             IPAddress localAddr,
-            PhysicalAddress macAddr,
+            BulbAddress macAddr,
             ScanMode mode = ScanMode.GetSystemConfig,
             int timeout = 5000,
             BulbScanCallback callback = null)
@@ -622,7 +622,7 @@ namespace WizLib
 
             if (macAddr == null)
             {
-                macAddr = NetworkHelper.DefaultLocalMAC;
+                macAddr = (BulbAddress)NetworkHelper.DefaultLocalMAC;
             }
 
             var udpClient = new UdpClient();
@@ -818,7 +818,7 @@ namespace WizLib
         {
             var cmd = new BulbCommand(BulbMethod.SetPilot);
             cmd.Params = bp;
-            bp.Id = "1";
+            if (bp.Speed != null) bp.Id = "1";
 
             foreach (var b in bulbs)
             {

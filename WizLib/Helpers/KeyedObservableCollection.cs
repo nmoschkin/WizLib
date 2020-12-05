@@ -15,62 +15,188 @@ namespace WizLib
     /// <summary>
     /// Sortable, keyed observable collection.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class KeyedObservableCollection<T> : ObservableBase, IList<T>, INotifyCollectionChanged where T : class
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
+    public class KeyedObservableCollection<TKey, TValue> : ObservableBase, IList<TValue>, INotifyCollectionChanged where TValue : class
     {
-
-        private PropertyInfo kpi;
-
-        private List<T> innerList = new List<T>();
-        private List<string> innerKeys = new List<string>();
-
-        public int Count => innerList.Count;
-
-        public bool IsReadOnly => false;
-
-        private bool isKeySorted = false;
-        public bool IsKeySorted
+        private enum ArrayOperation
         {
-            get => isKeySorted;
-            set
+            Remove,
+            Insert,
+            Move
+        }
+
+        private struct Entry
+        {
+            public int index;
+            public TKey key;
+
+            public Entry(int index, TKey key)
             {
-                if (SetProperty(ref isKeySorted, value))
-                {
-                    if (value == true) Sort();
-                }
+                this.index = index;
+                this.key = key;
             }
         }
 
+        private PropertyInfo kpi;
+
+        private int capacity = 0;
+
+        private TValue[] innerList;
+        private Entry[] entries;
+
+        private int[] indexKey;
+        private int[] keyIndex;
+
+        public int Count => innerList?.Length ?? 0;
+
+        public bool IsReadOnly => false;
+
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
+        /// <summary>
+        /// List of registered <see cref="Comparer{TKey}"/> instances.
+        /// </summary>
+        public static List<Type> Comparers { get; set; } = new List<Type>();
+
+
+        private Comparison<TKey> keycomp;
+
+        /// <summary>
+        /// Gets or sets the <see cref="Comparison{TKey}"/> to use to sort the keys.
+        /// </summary>
+        public Comparison<TKey> KeyComparison
+        {
+            get => keycomp;
+            set
+            {
+                SetProperty(ref keycomp, value);
+            }
+        }
+
+        /// <summary>
+        /// Get the <see cref="PropertyInfo"/> for the <see cref="TKey"/> value.
+        /// </summary>
         public PropertyInfo KeyProperty
         {
             get => kpi;
         }
 
-        public KeyedObservableCollection(string propertyName)
+        /// <summary>
+        /// Create a new <see cref="KeyedObservableCollection{TKey, TValue}"/>
+        /// </summary>
+        /// <param name="propertyName">The name of the property in the class object to use as the key.</param>
+        /// <param name="keyComparison">The <see cref="Comparison{TKey}"/> to use to sort the keys.</param>
+        public KeyedObservableCollection(string propertyName, Comparison<TKey> keyComparison)
         {
-            var tt = typeof(T);
+            if (keyComparison != null)
+            {
+                keycomp = keyComparison;
+            }
+            else
+            {
+                if (!(typeof(IComparable<TKey>).IsAssignableFrom(typeof(TKey))))
+                {
+                    foreach (var c in Comparers)
+                    {                        
+                        if (typeof(IComparer<TKey>).IsAssignableFrom(c))
+                        {
+                            var tc = (IComparer<TKey>)System.Reflection.Assembly.GetExecutingAssembly().CreateInstance(c.FullName);
 
-            kpi = tt.GetProperty(propertyName);
+                            keycomp = new Comparison<TKey>(tc.Compare);
+                            break;
+                        }
+                    }
+
+                    if (keycomp == null)
+                    {
+                        throw new NotSupportedException("No compatible comparer found for type {" + typeof(TKey).Name + "}.");
+                    }
+                }
+            }
+
+            kpi = typeof(TValue).GetProperty(propertyName);
 
             if (kpi == null)
-                throw new ArgumentException(nameof(propertyName), $"Property '{propertyName}' property does not exist in '{tt}'.");
+                throw new ArgumentException(nameof(propertyName), $"Property '{propertyName}' property does not exist in '{typeof(TValue).Name}'.");
+
+            if (kpi.PropertyType != typeof(TKey))
+            {
+                throw new ArgumentException(nameof(propertyName), $"Property '{propertyName}' property is not of type '{typeof(TKey).Name}'.");
+            }
         }
 
-        public KeyedObservableCollection(string propertyName, IEnumerable<T> items) : this(propertyName)
+        /// <summary>
+        /// Create a new <see cref="KeyedObservableCollection{TKey, TValue}"/>
+        /// </summary>
+        /// <param name="propertyName">The name of the property in the class object to use as the key.</param>
+        /// <param name="keyComparison">The <see cref="Comparison{TKey}"/> to use to sort the keys.</param>
+        /// <param name="items">An <see cref="IEnumerable{TValue}"/> of items used to initialize the collection.</param>
+        public KeyedObservableCollection(string propertyName, Comparison<TKey> keyComparison, IEnumerable<TValue> items) : this(propertyName, keyComparison)
         {
-            AddRange(items);
+            AddRange(items, true);
+        }
+        /// <summary>
+        /// Create a new <see cref="KeyedObservableCollection{TKey, TValue}"/>
+        /// </summary>
+        /// <param name="propertyName">The name of the property in the class object to use as the key.</param>
+        public KeyedObservableCollection(string propertyName) : this(propertyName, (Comparison<TKey>)null)
+        {
+        }
+        /// <summary>
+        /// Create a new <see cref="KeyedObservableCollection{TKey, TValue}"/>
+        /// </summary>
+        /// <param name="propertyName">The name of the property in the class object to use as the key.</param>
+        /// <param name="keyComparer">The <see cref="IComparer{TKey}"/> to use to sort the keys.</param>
+        public KeyedObservableCollection(string propertyName, IComparer<TKey> keyComparer) : this(propertyName, new Comparison<TKey>(keyComparer.Compare))
+        {
         }
 
-        public bool ContainsKey(string key)
+        /// <summary>
+        /// Create a new <see cref="KeyedObservableCollection{TKey, TValue}"/>
+        /// </summary>
+        /// <param name="propertyName">The name of the property in the class object to use as the key.</param>
+        /// <param name="keyComparer">The <see cref="IComparer{TKey}"/> to use to sort the keys.</param>
+        /// <param name="items">An <see cref="IEnumerable{TValue}"/> of items used to initialize the collection.</param>
+        public KeyedObservableCollection(string propertyName, IComparer<TKey> keyComparer, IEnumerable<TValue> items) : this(propertyName, new Comparison<TKey>(keyComparer.Compare), items)
+        {
+
+        }
+
+        /// <summary>
+        /// Create a new <see cref="KeyedObservableCollection{TKey, TValue}"/>
+        /// </summary>
+        /// <param name="propertyName">The name of the property in the class object to use as the key.</param>
+        /// <param name="items">An <see cref="IEnumerable{TValue}"/> of items used to initialize the collection.</param>
+        public KeyedObservableCollection(string propertyName, IEnumerable<TValue> items) : this(propertyName, (Comparison<TKey>)null, items)
+        {
+        }
+
+        /// <summary>
+        /// Check whether a key exists in the collection.
+        /// </summary>
+        /// <param name="key">The key to search for.</param>
+        /// <returns>True if the key exists</returns>
+        public bool ContainsKey(TKey key)
         {
             return ContainsKey(key, out _);
         }
 
-        public bool ContainsKey(string key, out T item)
+        /// <summary>
+        /// Check whether a key exists in the collection.
+        /// </summary>
+        /// <param name="key">The key to search for.</param>
+        /// <param name="item">Receives the item at the location indicated by the key.</param>
+        /// <returns>True if the key exists</returns>
+        public bool ContainsKey(TKey key, out TValue item)
         {
-            int i = innerKeys.IndexOf(key);
+            int i;
+            i = Search(key);
+            if (i != -1)
+            {
+                item = innerList[i];
+                return true;
+            }
 
             if (i > -1)
             {
@@ -84,12 +210,56 @@ namespace WizLib
             }
         }
 
-        public T this[int index]
+
+        private TValue getItem(TKey key)
+        {
+            int i;
+            i = Search(key);
+
+            if (i >= 0)
+            {
+                return innerList[i];
+            }
+            else
+            {
+                throw new KeyNotFoundException(key.ToString());
+            }
+        }
+
+        private void setItem(TKey key, TValue value)
+        {
+            if (value == null) throw new ArgumentNullException(nameof(value));
+
+            int i;
+            i = Search(key);
+
+            if (i >= 0)
+            {
+                var item = innerList[i];
+
+                if (item.Equals(value)) return;
+
+                innerList[i] = value;
+
+                if (CollectionChanged != null)
+                {
+                    var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, item);
+                    CollectionChanged.Invoke(this, e);
+                }
+            }
+            else
+            {
+                throw new KeyNotFoundException(key.ToString());
+            }
+
+        }
+
+        TValue IList<TValue>.this[int index]
         {
             get => innerList[index];
             set
             {
-                var item = innerList[index];             
+                var item = innerList[index];
                 innerList[index] = value;
 
                 if (CollectionChanged != null)
@@ -100,72 +270,53 @@ namespace WizLib
             }
         }
 
-        public T this[string key]
+        public TValue this[TKey key]
         {
-            get
-            {
-                int i = innerKeys.IndexOf(key);
-            
-                if (i >= 0)
-                {
-                    return innerList[i];
-                }
-                else
-                {
-                    throw new KeyNotFoundException(key);
-                }
-            }
-            set
-            {
-                if (value == null) throw new ArgumentNullException(nameof(value));
-
-                int i = innerKeys.IndexOf(key);
-
-                if (i >= 0)
-                {
-                    var item = innerList[i];
-                    
-                    if (item.Equals(value)) return;
-
-                    innerList[i] = value;
-
-                    if (CollectionChanged != null)
-                    {
-                        var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, item);
-                        CollectionChanged.Invoke(this, e);
-                    }
-                }
-                else
-                {
-                    throw new KeyNotFoundException(key);
-                }
-            }
+            get => getItem(key);
+            set => setItem(key, value);
         }
 
-        public int IndexOf(T item)
+        public int IndexOf(TValue item)
         {
-            return innerList.IndexOf(item);
+            int i = 0;
+            foreach (var t in innerList)
+            {
+                if (Equals(t, item)) return i;
+                i++;
+            }
+            return -1;
         }
 
-        public void Insert(int index, T item)
+        public int IndexOfKey(TKey key)
         {
+            int i;
+            i = Search(key);
+            return i;
+        }
+        public void Insert(int index, TValue item)
+        {
+            Insert(index, item, false);
+        }
 
+        private void Insert(int index, TValue item, bool suppressEvent)
+        {
             if (item == null) throw new ArgumentNullException(nameof(item));
 
-            string s = kpi.GetValue(item).ToString();
+            TKey k = (TKey)kpi.GetValue(item);
 
-            if (innerKeys.Contains(s))
-                throw new ArgumentException($"Collection already contains key '{s}'.", nameof(item));
+            if (ContainsKey(k))
+                throw new ArgumentException($"Collection already contains key '{k}'.", nameof(item));
 
-            innerList.Insert(index, item);
-            innerKeys.Insert(index, s);
+            ArrOp(ArrayOperation.Insert, ref innerList, newIndex: index);
+            ArrOp(ArrayOperation.Insert, ref entries, newIndex: index);
 
-            if (IsKeySorted)
-            {
-                Sort();
-            }
+            innerList[index] = item;
+            entries[index] = new Entry(index, k);
 
-            if (CollectionChanged != null)
+            capacity++;
+            KeySort();
+
+            if (!suppressEvent && CollectionChanged != null)
             {
                 var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index);
                 CollectionChanged.Invoke(this, e);
@@ -173,69 +324,116 @@ namespace WizLib
             }
         }
 
+        private void EnsureCapacity(int size)
+        {
+            int c = innerList?.Length ?? 0;
+
+            if (size <= c) return;
+
+            Array.Resize(ref innerList, size);
+            Array.Resize(ref entries, size);
+
+            capacity = size;
+        }
+
         public void RemoveAt(int index)
+
+        {
+            RemoveAt(index, false);
+        }
+
+        private void RemoveAt(int index, bool suppressEvent)
         {
             var item = innerList[index];
 
-            innerList.RemoveAt(index);
-            innerKeys.RemoveAt(index);
+            ArrOp(ArrayOperation.Remove, ref innerList, oldIndex: index);
+            ArrOp(ArrayOperation.Remove, ref entries, oldIndex: index);
 
-            if (CollectionChanged != null)
+            capacity--;
+
+            if (!suppressEvent && CollectionChanged != null)
             {
                 var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index);
                 CollectionChanged.Invoke(this, e);
                 OnPropertyChanged(nameof(Count));
             }
-
         }
 
-        public void Add(T item)
+        public void RemoveKey(TKey key)
+        {
+            int i, c;
+
+            i = Search(key, out c);
+
+            RemoveAt(i);
+        }
+
+        public void Add(TValue item)
+        {
+            Add(item, false);
+        }
+
+        private void Add(TValue item, bool suppressEvent)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
-            int x = innerList.Count;
+            int x = innerList?.Length ?? 0;
 
-            string s = kpi.GetValue(item).ToString();
+            TKey s = (TKey)kpi.GetValue(item);
 
-            if (innerKeys.Contains(s)) 
+            if (ContainsKey(s))
                 throw new ArgumentException($"Collection already contains key '{s}'.", nameof(item));
 
-            innerKeys.Add(s);
-            innerList.Add(item);
+            Array.Resize(ref innerList, x + 1);
+            Array.Resize(ref entries, x + 1);
 
-            if (IsKeySorted)
-            {
-                Sort();
-            }
+            innerList[x] = item;
+            entries[x] = new Entry(x, s);
 
-            if (CollectionChanged != null)
+            capacity = x + 1;
+
+            KeySort();
+
+            if (!suppressEvent && CollectionChanged != null)
             {
                 var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, x);
                 CollectionChanged.Invoke(this, e);
                 OnPropertyChanged(nameof(Count));
             }
+
         }
 
-        public void AddRange(IEnumerable<T> items)
+        public void AddRange(IEnumerable<TValue> items) => AddRange(items, false);
+
+        private void AddRange(IEnumerable<TValue> items, bool suppressEvent)
         {
-            foreach (T item in items)
+            int c = 0;
+            int x = innerList?.Length ?? 0;
+
+            foreach (var item in items) c++;
+            var ns = x + c;
+
+            Array.Resize(ref innerList, ns);
+            Array.Resize(ref entries, ns);
+
+            foreach (var item in items)
             {
-                if (item == null) throw new ArgumentNullException(nameof(items), "One or more elements in the source collection is null.");
+                if (item == null) throw new ArgumentNullException(nameof(item));
 
-                string s = kpi.GetValue(item).ToString();
+                TKey k = (TKey)kpi.GetValue(item);
 
-                if (innerKeys.Contains(s))
-                    throw new ArgumentException($"Collection already contains key '{s}'.", nameof(item));
+                if (ContainsKey(k))
+                    throw new ArgumentException($"Collection already contains key '{k}'.", nameof(item));
 
-                innerKeys.Add(s);
-                innerList.Add(item);
+                innerList[x] = item;
+                entries[x] = new Entry(x, k);
+
+                x++;
             }
 
-            if (IsKeySorted)
-            {
-                Sort();
-            }
+            capacity = ns;
+            KeySort();
 
-            if (CollectionChanged != null)
+            if (!suppressEvent && CollectionChanged != null)
             {
                 var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
                 CollectionChanged.Invoke(this, e);
@@ -245,8 +443,9 @@ namespace WizLib
 
         public void Clear()
         {
-            innerList.Clear();
-            innerKeys.Clear();
+            innerList = null;
+            entries = null;
+            capacity = 0;
 
             if (CollectionChanged != null)
             {
@@ -256,33 +455,36 @@ namespace WizLib
             }
         }
 
-        public bool Contains(T item)
+        public bool Contains(TValue item)
         {
             return innerList.Contains(item);
         }
 
-        public void CopyTo(T[] array, int arrayIndex)
+        public void CopyTo(TValue[] array, int arrayIndex)
         {
             innerList.CopyTo(array, arrayIndex);
         }
 
-        public void CopyKeys(string[] array, int arrayIndex)
+        private void ReIndex()
         {
-            innerKeys.CopyTo(array, arrayIndex);
+            int i, c = innerList.Length;
+
+            if (c < 2) return;
+
+            for (i = 0; i < c; i++)
+            {
+                entries[i] = new Entry(i, (TKey)kpi.GetValue(innerList[i]));
+            }
+
+            KeySort();
         }
 
         public void Move(int oldIndex, int newIndex)
         {
             var item = innerList[oldIndex];
-            var key = innerKeys[oldIndex];
 
-            innerList.RemoveAt(oldIndex);
-            innerList.Insert(newIndex, item);
-
-            innerKeys.RemoveAt(oldIndex);
-            innerKeys.Insert(newIndex, key);
-
-            if (IsKeySorted) Sort();
+            ArrOp(ArrayOperation.Move, ref innerList, oldIndex, newIndex);
+            ArrOp(ArrayOperation.Move, ref entries, oldIndex, newIndex);
 
             if (CollectionChanged != null)
             {
@@ -291,20 +493,18 @@ namespace WizLib
             }
         }
 
-        public bool Remove(T item)
+        public bool Remove(TValue item)
         {
             bool ret;
 
-            int i = innerList.IndexOf(item);
+            int i = IndexOf(item);
             ret = i >= 0;
 
             if (ret)
             {
-                innerList.RemoveAt(i);
-                innerKeys.RemoveAt(i);
+                RemoveAt(i);
+                OnPropertyChanged(nameof(Count));
             }
-
-            if (ret) OnPropertyChanged(nameof(Count));
 
             return ret;
         }
@@ -312,15 +512,14 @@ namespace WizLib
         /// <summary>
         /// Sort on keys in ascending order
         /// </summary>
-        public void Sort()
+        public void KeySort()
         {
-            if (innerList.Count < 2) return;
+            if (Count < 2) return;
 
             int lo = 0;
-            int hi = innerList.Count - 1;
+            int hi = Count - 1;
 
-            Sort(ref innerList, ref innerKeys, null, lo, hi, true);
-            IsKeySorted = true;
+            Sort(null, lo, hi, true);
 
             if (CollectionChanged != null)
             {
@@ -329,15 +528,15 @@ namespace WizLib
             }
         }
 
-        public void Sort(Comparison<T> comparison)
+        public void Sort(Comparison<TValue> comparison)
         {
-            if (innerList.Count < 2) return;
+            if (Count < 2) return;
 
             int lo = 0;
-            int hi = innerList.Count - 1;
+            int hi = Count - 1;
 
-            IsKeySorted = false;
-            Sort(ref innerList, ref innerKeys, comparison, lo, hi, false);
+            Sort(comparison, lo, hi, false);
+            ReIndex();
 
             if (CollectionChanged != null)
             {
@@ -345,32 +544,128 @@ namespace WizLib
                 CollectionChanged.Invoke(this, e);
             }
         }
+
+        #region Rim
+
+        /// <summary>
+        /// Remove, Insert, Move operations.
+        /// </summary>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="mode"></param>
+        /// <param name="arr"></param>
+        /// <param name="oldIndex"></param>
+        /// <param name="newIndex"></param>
+        private void ArrOp<U>(
+            ArrayOperation mode, 
+            ref U[] arr, 
+            int oldIndex = -1, 
+            int newIndex = -1) 
+        {
+            U[] a2;
+
+            int i;
+            int c, d;
+
+            c = d = arr.Length;
+
+            if (mode != ArrayOperation.Insert && (oldIndex < 0 || oldIndex >= arr.Length)) 
+                throw new ArgumentOutOfRangeException(nameof(oldIndex));
+
+            if (mode == ArrayOperation.Remove) // remove
+            {
+
+                --d;
+
+                a2 = new U[d]; // dest array
+
+                if (oldIndex > 0)
+                {
+                    Array.Copy(arr, 0, a2, 0, oldIndex);
+                }
+
+                if (oldIndex < (c - 1))
+                {
+                    Array.Copy(arr, oldIndex + 1, a2, oldIndex, d - oldIndex);
+                }
+
+                arr = a2;
+                return;
+            }
+
+            if (newIndex < 0 || newIndex > arr.Length) 
+                throw new ArgumentOutOfRangeException(nameof(newIndex));
+            
+            if (mode == ArrayOperation.Insert) // insert 
+            {
+                ++c;
+
+                a2 = new U[c];
+
+                if (newIndex > 0)
+                {
+                    Array.Copy(arr, 0, a2, 0, newIndex);
+                }
+
+                if (newIndex < (c - 1))
+                {
+                    Array.Copy(arr, newIndex, a2, newIndex + 1, d - newIndex);
+                }
+                arr = a2;
+            }            
+            else if (mode == ArrayOperation.Move) // move
+            {
+                U elem = arr[oldIndex]; 
+
+                if (oldIndex < newIndex)
+                {
+                    i = newIndex - oldIndex;
+                    a2 = new U[i];
+
+                    Array.Copy(arr, oldIndex + 1, a2, 0, i);
+                    Array.Copy(a2, 0, arr, oldIndex, i);
+                }
+                else
+                {
+                    i = oldIndex - newIndex;
+                    a2 = new U[i];
+
+                    Array.Copy(arr, newIndex, a2, 0, i);
+                    Array.Copy(a2, 0, arr, newIndex + 1, i);
+                }
+
+                arr[newIndex] = elem;
+            }
+
+        }
+
+
+        #endregion
 
         #region QuickSort
-        private void Sort(ref List<T> values, ref List<string> keys, Comparison<T> comparison, int lo, int hi, bool onKey)
+        private void Sort(Comparison<TValue> comparison, int lo, int hi, bool onKey)
         {
             if (lo < hi)
             {
                 int p;
-                
+
                 if (onKey)
                 {
-                    p = PartitionOnKey(ref values, ref keys, lo, hi);
+                    p = PartitionOnKey(lo, hi);
                 }
                 else
                 {
-                    p = Partition(ref values, ref keys, comparison, lo, hi);
+                    p = Partition(comparison, lo, hi);
                 }
 
-                Sort(ref values, ref keys, comparison, lo, p, onKey);
-                Sort(ref values, ref keys, comparison, p + 1, hi, onKey);
+                Sort(comparison, lo, p, onKey);
+                Sort(comparison, p + 1, hi, onKey);
             }
         }
 
-        private int Partition(ref List<T> values, ref List<string> keys, Comparison<T> comparison, int lo, int hi)
+        private int Partition(Comparison<TValue> comparison, int lo, int hi)
         {
             var ppt = (hi + lo) / 2;
-            var pivot = values[ppt];
+            var pivot = innerList[ppt];
 
             int i = lo - 1;
             int j = hi + 1;
@@ -380,67 +675,147 @@ namespace WizLib
                 do
                 {
                     ++i;
-                } while (i <= hi && comparison(values[i], pivot) < 0);
+                } while (i <= hi && comparison(innerList[i], pivot) < 0);
                 do
                 {
                     --j;
-                } while (j >= 0 && comparison(values[j], pivot) > 0);
+                } while (j >= 0 && comparison(innerList[j], pivot) > 0);
 
                 if (i >= j) return j;
 
-                T sw = values[i];
-                string sk = keys[i];
-
-                values[i] = values[j];
-                keys[i] = keys[j];
-
-                values[j] = sw;
-                keys[j] = sk;
+                TValue sw = innerList[i];
+                innerList[i] = innerList[j];
+                innerList[j] = sw;
             }
         }
 
-        private int PartitionOnKey(ref List<T> values, ref List<string> keys, int lo, int hi)
+        private int PartitionOnKey(int lo, int hi)
         {
             var ppt = (hi + lo) / 2;
 
-            string kpivot = keys[ppt];
+            TKey kpivot = entries[ppt].key;
 
             int i = lo - 1;
             int j = hi + 1;
+
+            Comparison<TKey> def = keycomp;
+
+            if (def == null)
+            {
+                def = new Comparison<TKey>((a, b) => ((IComparable<TKey>)a).CompareTo(b));
+            }
 
             while (true)
             {
                 do
                 {
                     ++i;
-                } while (i <= hi && string.Compare(keys[i], kpivot) < 0);
+                } while (i <= hi && def(entries[i].key, kpivot) < 0);
                 do
                 {
                     --j;
-                } while (j >= 0 && string.Compare(keys[j], kpivot) > 0);
+                } while (j >= 0 && def(entries[j].key, kpivot) > 0);
 
                 if (i >= j) return j;
 
-                T sw = values[i];
-                string sk = keys[i];
+                Entry sw = entries[i];
 
-                values[i] = values[j];
-                keys[i] = keys[j];
+                entries[i] = entries[j];
+                entries[j] = sw;
 
-                values[j] = sw;
-                keys[j] = sk;
+                //int x;
             }
         }
+
         #endregion
 
-        public IEnumerator<T> GetEnumerator()
+        #region Binary Search 
+
+        private int Search(TKey value)
         {
-            return innerList.GetEnumerator();
+            return Search(value, out _);
+        }
+
+        private int Search(TKey value, out int index)
+        {
+            int lo = 0, hi = Count - 1;
+            Comparison<TKey> def = keycomp;
+
+            if (def == null)
+            {
+                def = new Comparison<TKey>((a, b) => ((IComparable<TKey>)a).CompareTo(b));
+            }
+
+            while (true)
+            {
+                if (lo > hi) break;
+
+                int p = ((hi + lo) / 2);
+                Entry elem = entries[p];
+                int c;
+
+                c = def(value, elem.key);
+
+                if (c == 0)
+                {
+                    index = p;
+                    return elem.index;
+                }
+                else if (c < 0)
+                {
+                    hi = p - 1;
+                }
+                else
+                {
+                    lo = p + 1;
+                }
+            }
+
+            index = -1;
+            return -1;
+        }
+
+        #endregion
+
+        public IEnumerator<TValue> GetEnumerator()
+        {
+            return new KeyedCollectionEnumerator(innerList);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable)innerList).GetEnumerator();
+            return new KeyedCollectionEnumerator(innerList);
+        }
+
+        private class KeyedCollectionEnumerator : IEnumerator<TValue>
+        {
+            private int idx = -1;
+            private TValue[] objs;
+
+            public KeyedCollectionEnumerator(TValue[] list)
+            {
+                objs = list;
+            }
+
+            public TValue Current => objs[idx];
+
+            object IEnumerator.Current => objs[idx];
+
+            public void Dispose()
+            {
+                idx = -1;
+                objs = null;
+            }
+
+            public bool MoveNext()
+            {
+                return ++idx < (objs?.Length ?? 0);
+            }
+
+            public void Reset()
+            {
+                idx = -1;
+            }
         }
 
     }

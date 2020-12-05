@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,14 +12,14 @@ namespace WizLib.Profiles
 {
     public class Room : ObservableBase
     {
-        private string roomId;
+        private int roomId;
         private string name;
 
-        private KeyedObservableCollection<BulbItem> bulbs = new KeyedObservableCollection<BulbItem>(nameof(Bulb.MACAddress));
+        private KeyedObservableCollection<BulbAddress, BulbItem> bulbs = new KeyedObservableCollection<BulbAddress, BulbItem>(nameof(Bulb.MACAddress));
 
-        private KeyedObservableCollection<Scene> scenes = new KeyedObservableCollection<Scene>(nameof(Scene.SceneId));
+        private KeyedObservableCollection<Guid, Scene> scenes = new KeyedObservableCollection<Guid, Scene>(nameof(Scene.SceneId));
 
-        public static KeyedObservableCollection<Room> RoomCache { get; private set; } = new KeyedObservableCollection<Room>(nameof(RoomId));
+        public static KeyedObservableCollection<int, Room> RoomCache { get; private set; } = new KeyedObservableCollection<int, Room>(nameof(RoomId));
 
 
         private Scene currentScene;
@@ -34,12 +35,12 @@ namespace WizLib.Profiles
         }
 
         [JsonProperty("roomId")]
-        public string RoomId
+        public int RoomId
         {
             get => roomId;
             set
             {
-                if (SetProperty(ref roomId, value) && value != null)
+                if (SetProperty(ref roomId, value))
                 {
                     if (RoomCache.ContainsKey(roomId))
                     {
@@ -64,7 +65,7 @@ namespace WizLib.Profiles
         }
 
         [JsonProperty("bulbs")]
-        public KeyedObservableCollection<BulbItem> Bulbs
+        public KeyedObservableCollection<BulbAddress, BulbItem> Bulbs
         {
             get => bulbs;
             set
@@ -74,7 +75,7 @@ namespace WizLib.Profiles
         }
 
         [JsonProperty("scenes")]
-        public KeyedObservableCollection<Scene> Scenes
+        public KeyedObservableCollection<Guid, Scene> Scenes
         {
             get => scenes;
             set

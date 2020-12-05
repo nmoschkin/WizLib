@@ -41,12 +41,9 @@
                     <TextBlock HorizontalAlignment="Center" Text="{Binding}" />
                     <Path
                         x:Name="arrow"
-                        Data="M 5,10 L 15,10 L 10,5 L 5,10"
+                        Data="M 5,5 L 15,5 L 10,10 L 5,5"
                         Fill="gray"
                         StrokeThickness="1">
-                        <Path.LayoutTransform>
-                            <RotateTransform Angle="180" />
-                        </Path.LayoutTransform>
                     </Path>
                 </DockPanel>
             </DataTemplate>

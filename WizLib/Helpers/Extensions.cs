@@ -21,12 +21,12 @@ namespace System.Net
         public static IPAddress Clone(this IPAddress original)
         {
             if (original == null) return null;
-            return IPAddress.Parse(original.ToString());
+            return new IPAddress(original.GetAddressBytes());
         }
     }
 
     /// <summary>
-    /// <see cref="IPAddress"/> extensions.
+    /// <see cref="PhysicalAddress"/> extensions.
     /// </summary>
     public static class PhysicalAddressExtensions
     {
@@ -38,9 +38,31 @@ namespace System.Net
         public static PhysicalAddress Clone(this PhysicalAddress original)
         {
             if (original == null) return null;
-            return PhysicalAddress.Parse(original.ToString());
+            return new PhysicalAddress(original?.GetAddressBytes());
         }
     }
 
+
+}
+
+namespace WizLib
+{
+
+    /// <summary>
+    /// <see cref="BulbAddress"/> extensions.
+    /// </summary>
+    public static class BulbAddressExtensions
+    {
+        /// <summary>
+        /// Make a copy of an <see cref="BulbAddress"/>
+        /// </summary>
+        /// <param name="original"><see cref="BulbAddress"/> object to copy.</param>
+        /// <returns>A copy of original <see cref="BulbAddress"/>.</returns>
+        public static BulbAddress Clone(this BulbAddress original)
+        {
+            if (original == null) return null;
+            return new BulbAddress(original?.GetAddressBytes());
+        }
+    }
 
 }

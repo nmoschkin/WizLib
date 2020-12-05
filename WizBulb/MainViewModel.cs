@@ -17,6 +17,7 @@ using WizBulb.Localization.Resources;
 
 using WizLib;
 using WizLib.Profiles;
+using System.Net.NetworkInformation;
 
 namespace WizBulb
 {
@@ -50,7 +51,7 @@ namespace WizBulb
 
         private AdaptersCollection adapters;
 
-        private KeyedObservableCollection<Bulb> allBulbs = new KeyedObservableCollection<Bulb>(nameof(Bulb.MACAddress));
+        private KeyedObservableCollection<BulbAddress, Bulb> allBulbs = new KeyedObservableCollection<BulbAddress, Bulb>(nameof(Bulb.MACAddress));
 
         private bool autoChangeBulb = true;
 
@@ -58,13 +59,13 @@ namespace WizBulb
 
         private bool btnsEnabled = true;
 
-        private KeyedObservableCollection<Bulb> bulbs = new KeyedObservableCollection<Bulb>(nameof(Bulb.MACAddress));
+        private KeyedObservableCollection<BulbAddress, Bulb> bulbs = new KeyedObservableCollection<BulbAddress, Bulb>(nameof(Bulb.MACAddress));
 
         private bool changed = false;
 
         private CancellationTokenSource cts;
 
-        private KeyedObservableCollection<Home> homes = new KeyedObservableCollection<Home>(nameof(Home.HomeId));
+        private KeyedObservableCollection<int, Home> homes = new KeyedObservableCollection<int, Home>(nameof(Home.HomeId));
 
         private string networkStatus;
 
@@ -72,7 +73,7 @@ namespace WizBulb
 
         private string projFile;
 
-        private KeyedObservableCollection<Room> rooms = new KeyedObservableCollection<Room>(nameof(Room.RoomId));
+        private KeyedObservableCollection<int, Room> rooms = new KeyedObservableCollection<int, Room>(nameof(Room.RoomId));
 
         private NetworkAdapter selAdapter;
 
@@ -140,7 +141,7 @@ namespace WizBulb
             }
         }
 
-        public KeyedObservableCollection<Bulb> Bulbs
+        public KeyedObservableCollection<BulbAddress, Bulb> Bulbs
         {
             get => bulbs;
             protected set
@@ -167,7 +168,7 @@ namespace WizBulb
             }
         }
 
-        public KeyedObservableCollection<Home> Homes
+        public KeyedObservableCollection<int, Home> Homes
         {
             get => homes;
             set
@@ -203,7 +204,7 @@ namespace WizBulb
             }
         }
 
-        public KeyedObservableCollection<Room> Rooms
+        public KeyedObservableCollection<int, Room> Rooms
         {
             get => rooms;
             set
@@ -266,7 +267,7 @@ namespace WizBulb
                         }
                         else
                         {
-                            Bulbs = new KeyedObservableCollection<Bulb>(
+                            Bulbs = new KeyedObservableCollection<BulbAddress, Bulb>(
                                             nameof(Bulb.MACAddress),
                                             await BulbItem.CreateBulbsFromInterfaceList(selRoom.Bulbs)
                                             );
@@ -397,12 +398,21 @@ namespace WizBulb
             SelectedHome = null;
 
             Profile = (Profile)j.Deserialize();
-            Homes = new KeyedObservableCollection<Home>(nameof(Home.HomeId), Profile.Homes);
+            Homes = new KeyedObservableCollection<int, Home>(nameof(Home.HomeId), Profile.Homes);
 
-            allBulbs = Bulbs = new KeyedObservableCollection<Bulb>(
+            allBulbs = Bulbs = new KeyedObservableCollection<BulbAddress, Bulb>(
                             nameof(Bulb.MACAddress),
                             await BulbItem.CreateBulbsFromInterfaceList(Profile.Bulbs)
                             );
+
+            var b = new Bulb("192.168.50.222");
+            b.Settings.MACAddress = BulbAddress.Parse("aabbcceedd00");
+
+            allBulbs.Insert(5, b);
+
+            allBulbs.Move(5, 7);
+
+            allBulbs.RemoveAt(7);
 
             allBulbs.Sort((a, b) =>
             {
@@ -413,6 +423,8 @@ namespace WizBulb
                 }
                 return x;
             });
+
+
 
             Settings.AddRecentFile(fileName, Profile.ProjectId);
             ProjectFile = fileName;
@@ -633,7 +645,7 @@ namespace WizBulb
 
             if (Bulbs == null)
             {
-                Bulbs = new KeyedObservableCollection<Bulb>(nameof(Bulb.MACAddress));
+                Bulbs = new KeyedObservableCollection<BulbAddress, Bulb>(nameof(Bulb.MACAddress));
             }
             else
             {
@@ -648,7 +660,7 @@ namespace WizBulb
                 var aw = AutoWatch;
                 if (aw) WatchAbort();
 
-                await Bulb.ScanForBulbs(selAdapter.IPV4Address, selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
+                await Bulb.ScanForBulbs(selAdapter.IPV4Address, (BulbAddress)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
                 (b) =>
                 {
                     disp.Invoke(() =>
@@ -720,19 +732,19 @@ namespace WizBulb
                 {
                     while (cts != null && !cts.IsCancellationRequested)
                     {
-                        await Bulb.ScanForBulbs(selAdapter.IPV4Address, selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
+                        await Bulb.ScanForBulbs(selAdapter.IPV4Address, (BulbAddress)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
                         (b) =>
                         {
                             disp.Invoke(async () =>
                             {
-                                if (b.MACAddress?.ToString() is string s && !Bulbs.ContainsKey(s))
+                                if (!Bulbs.ContainsKey(b.MACAddress))
                                 {
-                                    string selRoom = null;
+                                    int? selRoom = null;
 
                                     if (SelectedRoom != null)
                                     {
                                         selRoom = SelectedRoom.RoomId;
-                                        if (b.Settings.RoomId?.ToString() != selRoom) return;
+                                        if (b.Settings.RoomId != selRoom) return;
                                     }
 
                                     Bulbs.Add(b);

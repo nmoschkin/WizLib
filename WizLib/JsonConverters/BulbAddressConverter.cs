@@ -10,15 +10,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace WizLib
 {
-    public class PhysicalAddressConverter : JsonConverter<PhysicalAddress>
+    public class BulbAddressConverter : JsonConverter<BulbAddress>
     {
-        public override PhysicalAddress ReadJson(JsonReader reader, Type objectType, [AllowNull] PhysicalAddress existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override BulbAddress ReadJson(JsonReader reader, Type objectType, [AllowNull] BulbAddress existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             if (reader.Value is string s)
             {
-                PhysicalAddress p;
+                BulbAddress p;
 
-                if (PhysicalAddress.TryParse(s, out p))
+                if (BulbAddress.TryParse(s, out p))
                 {
                     return p;
                 }
@@ -27,7 +27,7 @@ namespace WizLib
             return null;
         }
 
-        public override void WriteJson(JsonWriter writer, [AllowNull] PhysicalAddress value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, [AllowNull] BulbAddress value, JsonSerializer serializer)
         {
             if (value == null)
             {

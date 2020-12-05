@@ -11,7 +11,7 @@ namespace WizLib.Profiles
 {
     public interface IBulb
     {
-        PhysicalAddress MACAddress { get; }
+        BulbAddress MACAddress { get; }
 
         IPAddress IPAddress { get; }
         

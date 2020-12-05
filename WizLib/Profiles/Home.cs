@@ -17,13 +17,13 @@ namespace WizLib.Profiles
     public class Home : ObservableBase
     {
 
-        private string homeId;
+        private int homeId;
         private string name;
 
-        private KeyedObservableCollection<Room> rooms = new KeyedObservableCollection<Room>(nameof(Room.RoomId));
+        private KeyedObservableCollection<int, Room> rooms = new KeyedObservableCollection<int, Room>(nameof(Room.RoomId));
 
         [JsonProperty("rooms")]
-        public KeyedObservableCollection<Room> Rooms
+        public KeyedObservableCollection<int, Room> Rooms
         {
             get => rooms;
             set
@@ -33,7 +33,7 @@ namespace WizLib.Profiles
         }
 
         [JsonProperty("homeId")]
-        public string HomeId
+        public int HomeId
         {
             get => homeId;
             set
@@ -52,19 +52,19 @@ namespace WizLib.Profiles
             }
         }
 
-        public static KeyedObservableCollection<Home> GenerateHomes(IEnumerable<Bulb> bulbs)
+        public static KeyedObservableCollection<int, Home> GenerateHomes(IEnumerable<Bulb> bulbs)
         {
             Room nr;
             Home nh;
 
-            var kh = new KeyedObservableCollection<Home>(nameof(HomeId));
+            var kh = new KeyedObservableCollection<int, Home>(nameof(HomeId));
 
             foreach (var b in bulbs)
             {
                 if (b.Settings?.HomeId != null && b.Settings?.RoomId != null)
                 {
-                    var hid = b.Settings.HomeId.Value.ToString();
-                    var rid = b.Settings.RoomId.Value.ToString();
+                    var hid = (int)b.Settings.HomeId;
+                    var rid = (int)b.Settings.RoomId;
 
                     var nb = BulbItem.CreateItemFromBulb(b);
 
@@ -73,7 +73,7 @@ namespace WizLib.Profiles
 
                         if (nh.Rooms.ContainsKey(rid, out nr))
                         {
-                            var smac = b.MACAddress?.ToString();
+                            var smac = b.MACAddress;
 
                             if (smac != null && nr.Bulbs.ContainsKey(smac))
                             {
@@ -86,7 +86,7 @@ namespace WizLib.Profiles
                         }
                         else
                         {
-                            nr = new Room() { RoomId = b.Settings.RoomId.ToString() };
+                            nr = new Room() { RoomId = b.Settings.RoomId ?? -1 };
 
                             nr.Bulbs.Add(nb);
                             nh.Rooms.Add(nr);
@@ -94,8 +94,8 @@ namespace WizLib.Profiles
                     }
                     else
                     {
-                        nh = new Home() { HomeId = b.Settings.HomeId.ToString() };
-                        nr = new Room() { RoomId = b.Settings.RoomId.ToString() };
+                        nh = new Home() { HomeId = b.Settings.HomeId ?? -1 };
+                        nr = new Room() { RoomId = b.Settings.RoomId ?? -1 };
 
                         nr.Bulbs.Add(nb);
                         nh.Rooms.Add(nr);

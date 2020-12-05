@@ -335,6 +335,31 @@ namespace WizLib
         }
 
         /// <summary>
+        /// Get the light mode for the specified code.
+        /// </summary>
+        /// <param name="code">Code to search for.</param>
+        /// <param name="defaultCode">Default code to use if no item is found.</param>
+        /// <returns></returns>
+        internal static LightMode GetLightMode(int code, int defaultCode)
+        {
+            if (LightModes.ContainsKey(code))
+            {
+                return LightModes[code];
+            }
+            else
+            {
+                return LightModes[defaultCode];
+            }
+        }
+
+        /// <summary>
+        /// Get the light mode for the specified code.
+        /// </summary>
+        /// <param name="code">Code to search for.</param>
+        /// <returns></returns>
+        public static LightMode GetLightMode(int code) => GetLightMode(code, 0);
+
+        /// <summary>
         /// Get a localized text description for a <see cref="LightModeType"/> value.
         /// </summary>
         /// <param name="type"></param>
@@ -463,13 +488,21 @@ namespace WizLib
             return val.name;
         }
 
+        public static explicit operator LightMode(int val)
+        {
+            return GetLightMode(val);
+        }
 
+        public static explicit operator LightMode(int? val)
+        {
+            return GetLightMode((int)val);
+        }
 
         #region Built-In Lighting Modes
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
-        public static LightMode Off { get; } = RegisterLightMode(0, "Custom", true, LightModeType.CustomColor);
+        public static LightMode Custom { get; } = RegisterLightMode(0, "Custom", true, LightModeType.CustomColor);
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>

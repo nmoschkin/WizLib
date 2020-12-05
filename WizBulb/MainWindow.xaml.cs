@@ -71,11 +71,9 @@ namespace WizBulb
             iconv.ConverterError += Iconv_ConverterError;
 
             vm = new MainViewModel();
-
             vm.PopulateLightModesMenu(mnuModes);
 
             vm.PropertyChanged += Vm_PropertyChanged;
-
             vm.PopulateRecentFiles(mnuRecents);
 
             DataContext = vm;
@@ -131,10 +129,6 @@ namespace WizBulb
                     var columnBinding = headerClicked.Column.DisplayMemberBinding as Binding;
                     var sortBy = columnBinding?.Path.Path ?? headerClicked.Column.Header as string;
 
-
-
-                    
-
                     Sort(sortBy, direction);
 
                     if (direction == ListSortDirection.Ascending)
@@ -158,6 +152,72 @@ namespace WizBulb
                     _lastDirection = direction;
                 }
             }
+        }
+
+        private void Sort(string sortBy, ListSortDirection direction)
+        {
+            var dataView =
+              CollectionViewSource.GetDefaultView(BulbList.ItemsSource);
+
+            dataView.SortDescriptions.Clear();
+
+            if (sortBy == "Bulbs")
+            {
+                if (direction == ListSortDirection.Descending)
+                {
+                    if (BulbList.ItemsSource is KeyedObservableCollection<BulbAddress, Bulb> c)
+                    {
+                        c.Sort((a, b) =>
+                        {
+                            return -string.Compare(a.Name?.ToString(), b.Name?.ToString());
+                        });
+
+                    }
+                }
+                else
+                {
+                    if (BulbList.ItemsSource is KeyedObservableCollection<BulbAddress, Bulb> c)
+                    {
+                        c.Sort((a, b) =>
+                        {
+                            return string.Compare(a.Name?.ToString(), b.Name?.ToString());
+                        });
+
+                    }
+                }
+            }
+            else if (sortBy == "IPAddress")
+            {
+                if (direction == ListSortDirection.Descending)
+                {
+                    if (BulbList.ItemsSource is KeyedObservableCollection<BulbAddress, Bulb> c)
+                    {
+                        c.Sort((a, b) =>
+                        {
+                            return -string.Compare(a.IPAddress?.ToString(), b.IPAddress?.ToString());
+                        });
+
+                    }
+                }
+                else
+                {
+                    if (BulbList.ItemsSource is KeyedObservableCollection<BulbAddress, Bulb> c)
+                    {
+                        c.Sort((a, b) =>
+                        {
+                            return string.Compare(a.IPAddress?.ToString(), b.IPAddress?.ToString());
+                        });
+
+                    }
+                }
+            }
+            else
+            {
+                SortDescription sd = new SortDescription(sortBy, direction);
+                dataView.SortDescriptions.Add(sd);
+            }
+
+            dataView.Refresh();
         }
 
         private async void BulbList_KeyDown(object sender, KeyEventArgs e)
@@ -416,24 +476,6 @@ namespace WizBulb
             await Bulb.SetLights(vm.SelectedBulbs, brightness: i);
         }
 
-        private void Sort(string sortBy, ListSortDirection direction)
-        {
-
-
-
-            //var dataView =
-            //  CollectionViewSource.GetDefaultView(BulbList.ItemsSource);
-
-            ////if (sortBy == "Scene")
-            ////{
-            ////    dataView.CustomSort = new BulbComparer();
-            ////}
-            //dataView.SortDescriptions.Clear();
-            //SortDescription sd = new SortDescription(sortBy, direction);
-            //dataView.SortDescriptions.Add(sd);
-            //dataView.Refresh();
-        }
-
         private void TextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             if (sender is TextBox tb)
@@ -452,14 +494,82 @@ namespace WizBulb
 
         private void Vm_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(MainViewModel.Bulbs))
+            {
+                GridView view = (GridView)BulbList.View;
+                RoutedEventArgs v;
+                var header = GetHeader(AppResources.RoomId);
+
+                v = new RoutedEventArgs(GridViewColumnHeader.ClickEvent, header);
+                this.BulbList_Click(BulbList, v);
+            }
+
             if (e.PropertyName == nameof(MainViewModel.SelectedBulb) && vm.SelectedBulb != null && vm.SelectedBulb.Brightness != null)
             {
                 notch = true;
-                Slide.Value = (double)vm.SelectedBulb.Brightness;
-                Speed.Value = (double)vm.SelectedBulb.Speed;
+                Slide.Value = vm.SelectedBulb?.Brightness ?? 10;
+                Speed.Value = vm.SelectedBulb?.Speed ?? 10;
                 notch = false;
             }
         }
+
+        private GridViewColumnHeader GetHeader(string text)
+        {
+
+            GridViewHeaderRowPresenter presenter = GetDescendantByType(BulbList, typeof(GridViewHeaderRowPresenter)) as GridViewHeaderRowPresenter;
+
+            GridView gridView = BulbList.View as GridView;
+
+            for (int i = 0; i < gridView.Columns.Count; i++)
+
+            {
+
+                GridViewColumnHeader header = VisualTreeHelper.GetChild(presenter, i) as GridViewColumnHeader;
+                GridViewColumn colunmn = header.Column;
+
+                if (colunmn != null && colunmn.Header.ToString() == text)
+                {
+                    return header;
+                }
+
+            }
+
+            return null;
+
+        }
+
+        static Visual GetDescendantByType(Visual element, Type type)
+        {
+
+            if (element == null) return null;
+
+            if (element.GetType() == type) return element;
+
+            Visual foundElement = null;
+
+            if (element is FrameworkElement)
+
+                (element as FrameworkElement).ApplyTemplate();
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
+
+            {
+
+                Visual visual = VisualTreeHelper.GetChild(element, i) as Visual;
+
+                foundElement = GetDescendantByType(visual, type);
+
+                if (foundElement != null)
+
+                    break;
+
+            }
+
+            return foundElement;
+
+        }
+
+
 
         #endregion Private Methods
 

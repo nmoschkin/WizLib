@@ -24,7 +24,7 @@ namespace WizLib
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
             NullValueHandling = NullValueHandling.Ignore,
-            Converters = { new TupleConverter(), new PhysicalAddressConverter(), new BulbMethodJsonConverter(), new IPAddressConverter() }
+            Converters = { new TupleConverter(), new BulbAddressConverter(), new BulbMethodJsonConverter(), new IPAddressConverter() }
         };
 
         #endregion Internal Fields
