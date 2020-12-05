@@ -15,11 +15,11 @@ namespace WizLib.Profiles
         private int roomId;
         private string name;
 
-        private KeyedObservableCollection<BulbAddress, BulbItem> bulbs = new KeyedObservableCollection<BulbAddress, BulbItem>(nameof(Bulb.MACAddress));
+        private ObservableDictionary<BulbAddress, BulbItem> bulbs = new ObservableDictionary<BulbAddress, BulbItem>(nameof(Bulb.MACAddress));
 
-        private KeyedObservableCollection<Guid, Scene> scenes = new KeyedObservableCollection<Guid, Scene>(nameof(Scene.SceneId));
+        private ObservableDictionary<Guid, Scene> scenes = new ObservableDictionary<Guid, Scene>(nameof(Scene.SceneId));
 
-        public static KeyedObservableCollection<int, Room> RoomCache { get; private set; } = new KeyedObservableCollection<int, Room>(nameof(RoomId));
+        public static ObservableDictionary<int, Room> RoomCache { get; private set; } = new ObservableDictionary<int, Room>(nameof(RoomId));
 
 
         private Scene currentScene;
@@ -65,7 +65,7 @@ namespace WizLib.Profiles
         }
 
         [JsonProperty("bulbs")]
-        public KeyedObservableCollection<BulbAddress, BulbItem> Bulbs
+        public ObservableDictionary<BulbAddress, BulbItem> Bulbs
         {
             get => bulbs;
             set
@@ -75,7 +75,7 @@ namespace WizLib.Profiles
         }
 
         [JsonProperty("scenes")]
-        public KeyedObservableCollection<Guid, Scene> Scenes
+        public ObservableDictionary<Guid, Scene> Scenes
         {
             get => scenes;
             set

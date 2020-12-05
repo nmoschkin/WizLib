@@ -10,15 +10,16 @@ using System.Text;
 using System.Threading.Tasks;
 using WizLib.Profiles;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace WizLib
 {
     /// <summary>
-    /// Sortable, keyed observable collection.
+    /// Sortable, keyed observable dictionary for classes.
     /// </summary>
-    /// <typeparam name="TKey"></typeparam>
-    /// <typeparam name="TValue"></typeparam>
-    public class KeyedObservableCollection<TKey, TValue> : ObservableBase, IList<TValue>, IEnumerable<KeyValuePair<TKey, TValue>>, INotifyCollectionChanged where TValue : class
+    /// <typeparam name="TKey">The key type.  <see cref="TKey"/> must implement <see cref="IComparable{TKey}"/> or a suitable comparison must be provided.</typeparam>
+    /// <typeparam name="TValue">The value type.  <see cref="TValue"/> must contain a property of type <see cref="TKey"/>.</typeparam>
+    public class ObservableDictionary<TKey, TValue> : ObservableBase, IDictionary<TKey, TValue>, IList<TValue>, INotifyCollectionChanged where TValue : class
     {
         private enum ArrayOperation
         {
@@ -27,25 +28,17 @@ namespace WizLib
             Move
         }
 
-        private struct KeyEntry
-        {
-            public int index;
-            public TKey key;
-
-            public override string ToString()
-            {
-                return key?.ToString() + ", " + index.ToString();
-            }
-        }
-
         private PropertyInfo keyProp;
+        private string keyPropName;
 
         private int _size = 0;
 
         private TValue[] innerList;
-        private KeyEntry[] innerKeys;
+        private TKey[] innerKeys;
+        private int[] lookup;
         private int[] revLookup;
 
+        [JsonIgnore]
         public int Count => _size;
 
         public bool IsReadOnly => false;
@@ -65,6 +58,7 @@ namespace WizLib
         /// <summary>
         /// Gets or sets the <see cref="Comparison{TKey}"/> to use to sort the keys.
         /// </summary>
+        [JsonIgnore]
         public Comparison<TKey> KeyComparison
         {
             get => keycomp;
@@ -77,17 +71,27 @@ namespace WizLib
         /// <summary>
         /// Get the <see cref="PropertyInfo"/> for the <see cref="TKey"/> value.
         /// </summary>
+        [JsonIgnore]
         public PropertyInfo KeyProperty
         {
-            get => keyProp;
+            get => keyProp;        
         }
 
         /// <summary>
-        /// Create a new <see cref="KeyedObservableCollection{TKey, TValue}"/>
+        /// Gets the name of the key property.
+        /// </summary>
+        [JsonProperty("KeyProperty")]
+        public string KeyPropertyName
+        {
+            get => keyPropName;
+        }
+
+        /// <summary>
+        /// Create a new <see cref="ObservableDictionary{TKey, TValue}"/>
         /// </summary>
         /// <param name="propertyName">The name of the property in the class object to use as the key.</param>
         /// <param name="keyComparison">The <see cref="Comparison{TKey}"/> to use to sort the keys.</param>
-        public KeyedObservableCollection(string propertyName, Comparison<TKey> keyComparison)
+        public ObservableDictionary(string propertyName, Comparison<TKey> keyComparison)
         {
             if (keyComparison != null)
             {
@@ -124,51 +128,56 @@ namespace WizLib
             {
                 throw new ArgumentException(nameof(propertyName), $"Property '{propertyName}' property is not of type '{typeof(TKey).Name}'.");
             }
+
+            keyPropName = propertyName;
         }
 
         /// <summary>
-        /// Create a new <see cref="KeyedObservableCollection{TKey, TValue}"/>
+        /// Create a new <see cref="ObservableDictionary{TKey, TValue}"/>
         /// </summary>
         /// <param name="propertyName">The name of the property in the class object to use as the key.</param>
         /// <param name="keyComparison">The <see cref="Comparison{TKey}"/> to use to sort the keys.</param>
         /// <param name="items">An <see cref="IEnumerable{TValue}"/> of items used to initialize the collection.</param>
-        public KeyedObservableCollection(string propertyName, Comparison<TKey> keyComparison, IEnumerable<TValue> items) : this(propertyName, keyComparison)
+        public ObservableDictionary(string propertyName, Comparison<TKey> keyComparison, IEnumerable<TValue> items) : this(propertyName, keyComparison)
         {
             AddRange(items, true);
         }
         /// <summary>
-        /// Create a new <see cref="KeyedObservableCollection{TKey, TValue}"/>
+        /// Create a new <see cref="ObservableDictionary{TKey, TValue}"/>
         /// </summary>
         /// <param name="propertyName">The name of the property in the class object to use as the key.</param>
-        public KeyedObservableCollection(string propertyName) : this(propertyName, (Comparison<TKey>)null)
+        public ObservableDictionary(string propertyName) : this(propertyName, (Comparison<TKey>)null)
         {
         }
         /// <summary>
-        /// Create a new <see cref="KeyedObservableCollection{TKey, TValue}"/>
+        /// Create a new <see cref="ObservableDictionary{TKey, TValue}"/>
         /// </summary>
         /// <param name="propertyName">The name of the property in the class object to use as the key.</param>
         /// <param name="keyComparer">The <see cref="IComparer{TKey}"/> to use to sort the keys.</param>
-        public KeyedObservableCollection(string propertyName, IComparer<TKey> keyComparer) : this(propertyName, new Comparison<TKey>(keyComparer.Compare))
+        public ObservableDictionary(string propertyName, IComparer<TKey> keyComparer) : this(propertyName, new Comparison<TKey>(keyComparer.Compare))
         {
         }
 
         /// <summary>
-        /// Create a new <see cref="KeyedObservableCollection{TKey, TValue}"/>
+        /// Create a new <see cref="ObservableDictionary{TKey, TValue}"/>
         /// </summary>
         /// <param name="propertyName">The name of the property in the class object to use as the key.</param>
         /// <param name="keyComparer">The <see cref="IComparer{TKey}"/> to use to sort the keys.</param>
         /// <param name="items">An <see cref="IEnumerable{TValue}"/> of items used to initialize the collection.</param>
-        public KeyedObservableCollection(string propertyName, IComparer<TKey> keyComparer, IEnumerable<TValue> items) : this(propertyName, new Comparison<TKey>(keyComparer.Compare), items)
+        public ObservableDictionary(string propertyName, IComparer<TKey> keyComparer, IEnumerable<TValue> items) : this(propertyName, new Comparison<TKey>(keyComparer.Compare), items)
         {
 
         }
 
         /// <summary>
-        /// Create a new <see cref="KeyedObservableCollection{TKey, TValue}"/>
+        /// Create a new <see cref="ObservableDictionary{TKey, TValue}"/>
         /// </summary>
         /// <param name="propertyName">The name of the property in the class object to use as the key.</param>
         /// <param name="items">An <see cref="IEnumerable{TValue}"/> of items used to initialize the collection.</param>
-        public KeyedObservableCollection(string propertyName, IEnumerable<TValue> items) : this(propertyName, (Comparison<TKey>)null, items)
+        public ObservableDictionary(string propertyName, IEnumerable<TValue> items) : this(propertyName, (Comparison<TKey>)null, items)
+        {
+        }
+        private ObservableDictionary()
         {
         }
 
@@ -221,7 +230,6 @@ namespace WizLib
             }
         }
 
-
         public TValue[] ToArray()
         {
             var x = new TValue[_size];
@@ -231,27 +239,28 @@ namespace WizLib
             return x;
         }
 
-        public IEnumerable<TValue> Values
+        public ICollection<TValue> Values
         {
             get => ToArray();
         }
 
-        public IEnumerable<TKey> Keys
+        public ICollection<TKey> Keys
         {
             get
             {
-                if (_size < 1) return new TKey[0];
+                var x = new TKey[_size];
+                if (_size == 0) return x;
 
-                List<TKey> x = new List<TKey>();
-
-                foreach (var k in innerKeys)
-                {
-                    x.Add(k.key);
-                }
-
-                return x.ToArray();
+                innerKeys.CopyTo(x, 0);
+                return x;
             }
         }
+
+
+        int ICollection<KeyValuePair<TKey, TValue>>.Count => _size;
+
+        bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly => false;
+
 
         public bool TryGetValue(TKey key, out TValue value)
         {
@@ -311,7 +320,8 @@ namespace WizLib
                 }
                 else
                 {
-                    throw new KeyNotFoundException(key.ToString());
+                    Add(key, value);
+                    //throw new KeyNotFoundException(key.ToString());
                 }
             }
         }
@@ -351,7 +361,7 @@ namespace WizLib
 
             for (int g = index; g < _size; g++)
             {
-                innerKeys[revLookup[g]].index++;
+                lookup[revLookup[g]]++;
             }
 
             ArrOp(ArrayOperation.Insert, ref innerList, newIndex: index);
@@ -360,8 +370,8 @@ namespace WizLib
             int idx;
             Search(key, out idx, true);
 
-            innerKeys[idx].index = index;
-            innerKeys[idx].key = key;
+            lookup[idx] = index;
+            innerKeys[idx] = key;
 
             innerList[index] = item;
             revLookup[index] = idx;
@@ -376,17 +386,19 @@ namespace WizLib
             }
         }
 
-        //private void EnsureCapacity(int size)
-        //{
-        //    int c = innerList?.Length ?? 0;
+        internal void EnsureCapacity(int size)
+        {
+            int c = _size;
 
-        //    if (size <= c) return;
+            if (size <= c) return;
 
-        //    Array.Resize(ref innerList, size);
-        //    Array.Resize(ref entries, size);
+            Array.Resize(ref innerList, size);
+            Array.Resize(ref innerKeys, size);
+            Array.Resize(ref lookup, size);
+            Array.Resize(ref revLookup, size);
 
-        //    capacity = size;
-        //}
+            _size = size;
+        }
 
         public void RemoveAt(int index)
 
@@ -402,14 +414,15 @@ namespace WizLib
             ArrOp(ArrayOperation.Remove, ref innerList, oldIndex: index);
             ArrOp(ArrayOperation.Remove, ref revLookup, oldIndex: index);
             ArrOp(ArrayOperation.Remove, ref innerKeys, oldIndex: idx);
+            ArrOp(ArrayOperation.Remove, ref lookup, oldIndex: idx);
 
             --_size;
 
             for (int g = 0; g < _size; g++)
             {
-                if (innerKeys[g].index >= index)
+                if (lookup[g] >= index)
                 {
-                    innerKeys[g].index--;
+                    lookup[g]--;
                 }
                 if (revLookup[g] >= idx)
                 {
@@ -429,13 +442,12 @@ namespace WizLib
         /// Remove an item by its key.
         /// </summary>
         /// <param name="key">Key of item to remove.</param>
-        public void RemoveKey(TKey key)
+        public bool RemoveKey(TKey key)
         {
-            int i, c;
-
-            i = Search(key, out _, false);
-
+            int i = Search(key);
+            if (i == -1) return false;
             RemoveAt(i);
+            return true;
         }
 
         public void Add(TValue item)
@@ -459,8 +471,8 @@ namespace WizLib
             int idx;
             Search(key, out idx, true);
 
-            innerKeys[idx].index = x;
-            innerKeys[idx].key = key;
+            lookup[idx] = x;
+            innerKeys[idx] = key;
 
             innerList[x] = item;
             revLookup[x] = idx;
@@ -494,6 +506,7 @@ namespace WizLib
             Array.Resize(ref innerList, ns);
             Array.Resize(ref revLookup, ns);
             Array.Resize(ref innerKeys, ns);
+            Array.Resize(ref lookup, ns);
 
             foreach (var item in items)
             {
@@ -507,8 +520,8 @@ namespace WizLib
                 int idx;
                 Search(key, out idx, true, true, x);
 
-                innerKeys[idx].index = x;
-                innerKeys[idx].key = key;
+                lookup[idx] = x;
+                innerKeys[idx] = key;
 
                 innerList[x] = item;
                 revLookup[x] = idx;
@@ -801,8 +814,8 @@ namespace WizLib
                     innerList[i] = innerList[j];
                     innerList[j] = sw;
 
-                    innerKeys[revLookup[i]].index = i;
-                    innerKeys[revLookup[j]].index = j;
+                    lookup[revLookup[i]] = i;
+                    lookup[revLookup[j]] = j;
                 }
                 catch (Exception ex)
                 {
@@ -815,7 +828,7 @@ namespace WizLib
         {
             var ppt = (hi + lo) / 2;
 
-            TKey kpivot = innerKeys[ppt].key;
+            TKey kpivot = innerKeys[ppt];
 
             int i = lo - 1;
             int j = hi + 1;
@@ -832,21 +845,26 @@ namespace WizLib
                 do
                 {
                     ++i;
-                } while (i <= hi && def(innerKeys[i].key, kpivot) < 0);
+                } while (i <= hi && def(innerKeys[i], kpivot) < 0);
                 do
                 {
                     --j;
-                } while (j >= 0 && def(innerKeys[j].key, kpivot) > 0);
+                } while (j >= 0 && def(innerKeys[j], kpivot) > 0);
 
                 if (i >= j) return j;
 
-                KeyEntry sw = innerKeys[i];
+                TKey sw = innerKeys[i];
 
                 innerKeys[i] = innerKeys[j];
                 innerKeys[j] = sw;
 
-                revLookup[innerKeys[i].index] = i;
-                revLookup[innerKeys[j].index] = j;
+                int si = lookup[i];
+
+                lookup[i] = lookup[j];
+                lookup[j] = si;
+
+                revLookup[lookup[i]] = i;
+                revLookup[lookup[j]] = j;
             }
         }
 
@@ -881,7 +899,7 @@ namespace WizLib
                     {
                         if (hi >= 0)
                         {
-                            p = def(value, innerKeys[hi].key);
+                            p = def(value, innerKeys[hi]);
                             if (p < 0) p = hi - 1;
                             else if (p > 0) p = hi + 1;
                         }                       
@@ -894,7 +912,7 @@ namespace WizLib
                         {
                             for (int g = p; g <= max; g++)
                             {
-                                revLookup[innerKeys[g].index]++;
+                                revLookup[lookup[g]]++;
                             }
                         }
 
@@ -902,6 +920,12 @@ namespace WizLib
                             ref innerKeys, 
                             newIndex: p, 
                             expanded: expanded, 
+                            virtSize: max + 1);
+
+                        ArrOp(ArrayOperation.Insert,
+                            ref lookup,
+                            newIndex: p,
+                            expanded: expanded,
                             virtSize: max + 1);
 
                         index = p;
@@ -913,15 +937,15 @@ namespace WizLib
                 p = ((hi + lo) / 2);
 
 
-                KeyEntry elem = innerKeys[p];
+                TKey elem = innerKeys[p];
                 int c;
 
-                c = def(value, elem.key);
+                c = def(value, elem);
 
                 if (c == 0)
                 {
                     index = p;
-                    return elem.index;
+                    return lookup[p];
                 }
                 else if (c < 0)
                 {
@@ -956,12 +980,48 @@ namespace WizLib
             return new KeyValueEnumerator(this);
         }
 
+        public void Add(TKey key, TValue value)
+        {
+            TKey kchk = (TKey)keyProp.GetValue(value);
+            if (!Equals(kchk, key))
+                throw new InvalidOperationException("Key must match key property of object.");
+
+            this.Add(value);
+        }
+
+        bool IDictionary<TKey, TValue>.Remove(TKey key) => RemoveKey(key);
+
+        void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => Add(item.Key, item.Value);
+
+        void ICollection<KeyValuePair<TKey, TValue>>.Clear() => Clear();
+
+        bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item) => ContainsKey(item.Key);
+
+        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+        {
+            int x = arrayIndex;
+
+            foreach(KeyValuePair<TKey, TValue> item in (IDictionary<TKey, TValue>) this)
+            {
+                array[x] = item;
+            }
+        }
+
+        bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
+        {
+            TKey kchk = (TKey)keyProp.GetValue(item.Value);
+            if (!Equals(kchk, item.Key))
+                throw new InvalidOperationException("Key must match key property of object.");
+
+            return Remove(item.Value);
+        }
+
         private class KeyedCollectionEnumerator : IEnumerator<TValue>
         {
             private int idx = -1;
             private IList<TValue> objs;
 
-            public KeyedCollectionEnumerator(KeyedObservableCollection<TKey, TValue> list)
+            public KeyedCollectionEnumerator(ObservableDictionary<TKey, TValue> list)
             {
                 objs = list;
             }
@@ -990,16 +1050,16 @@ namespace WizLib
         private class KeyValueEnumerator : IEnumerator<KeyValuePair<TKey, TValue>>
         {
             private int idx = -1;
-            private KeyedObservableCollection<TKey, TValue> objs;
+            private ObservableDictionary<TKey, TValue> objs;
 
-            public KeyValueEnumerator(KeyedObservableCollection<TKey, TValue> list)
+            public KeyValueEnumerator(ObservableDictionary<TKey, TValue> list)
             {
-                objs = list;
+                objs = list;               
             }
 
-            public KeyValuePair<TKey, TValue> Current => new KeyValuePair<TKey, TValue>(objs.innerKeys[objs.revLookup[idx]].key, objs.innerList[idx]);
+            public KeyValuePair<TKey, TValue> Current => new KeyValuePair<TKey, TValue>(objs.innerKeys[objs.revLookup[idx]], objs.innerList[idx]);
 
-            object IEnumerator.Current => new KeyValuePair<TKey, TValue>(objs.innerKeys[objs.revLookup[idx]].key, objs.innerList[idx]);
+            object IEnumerator.Current => new KeyValuePair<TKey, TValue>(objs.innerKeys[objs.revLookup[idx]], objs.innerList[idx]);
 
             public void Dispose()
             {

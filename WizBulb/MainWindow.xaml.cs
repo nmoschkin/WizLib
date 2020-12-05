@@ -165,7 +165,7 @@ namespace WizBulb
             {
                 if (direction == ListSortDirection.Descending)
                 {
-                    if (BulbList.ItemsSource is KeyedObservableCollection<BulbAddress, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<BulbAddress, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {
@@ -176,7 +176,7 @@ namespace WizBulb
                 }
                 else
                 {
-                    if (BulbList.ItemsSource is KeyedObservableCollection<BulbAddress, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<BulbAddress, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {
@@ -190,7 +190,7 @@ namespace WizBulb
             {
                 if (direction == ListSortDirection.Descending)
                 {
-                    if (BulbList.ItemsSource is KeyedObservableCollection<BulbAddress, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<BulbAddress, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {
@@ -201,7 +201,7 @@ namespace WizBulb
                 }
                 else
                 {
-                    if (BulbList.ItemsSource is KeyedObservableCollection<BulbAddress, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<BulbAddress, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {

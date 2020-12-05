@@ -20,10 +20,10 @@ namespace WizLib.Profiles
         private int homeId;
         private string name;
 
-        private KeyedObservableCollection<int, Room> rooms = new KeyedObservableCollection<int, Room>(nameof(Room.RoomId));
+        private ObservableDictionary<int, Room> rooms = new ObservableDictionary<int, Room>(nameof(Room.RoomId));
 
         [JsonProperty("rooms")]
-        public KeyedObservableCollection<int, Room> Rooms
+        public ObservableDictionary<int, Room> Rooms
         {
             get => rooms;
             set
@@ -52,12 +52,12 @@ namespace WizLib.Profiles
             }
         }
 
-        public static KeyedObservableCollection<int, Home> GenerateHomes(IEnumerable<Bulb> bulbs)
+        public static ObservableDictionary<int, Home> GenerateHomes(IEnumerable<Bulb> bulbs)
         {
             Room nr;
             Home nh;
 
-            var kh = new KeyedObservableCollection<int, Home>(nameof(HomeId));
+            var kh = new ObservableDictionary<int, Home>(nameof(HomeId));
 
             foreach (var b in bulbs)
             {

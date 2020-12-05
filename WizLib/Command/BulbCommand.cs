@@ -23,8 +23,9 @@ namespace WizLib
         internal static readonly JsonSerializerSettings DefaultJsonSettings = new JsonSerializerSettings()
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+            Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
-            Converters = { new TupleConverter(), new BulbAddressConverter(), new BulbMethodJsonConverter(), new IPAddressConverter() }
+            Converters = { new TupleConverter(), new BulbAddressConverter(), new ODJsonConverter<BulbAddress, Bulb>(nameof(Bulb.MACAddress)), new ODJsonConverter<int, Room>(nameof(Room.RoomId)), new BulbMethodJsonConverter(), new IPAddressConverter() }
         };
 
         #endregion Internal Fields

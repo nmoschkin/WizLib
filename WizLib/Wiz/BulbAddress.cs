@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -52,12 +53,12 @@ namespace WizLib
             value = new BulbAddress(p.GetAddressBytes());
             return b;
         }
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BulbAddress"/> class.
         /// </summary>
         /// <param name="address">A byte array containing the address.</param>
-        public BulbAddress(byte[] address) 
+        public BulbAddress(byte[] address)
         {
             this.address = address;
         }
@@ -142,6 +143,43 @@ namespace WizLib
             return Compare(other?.GetAddressBytes());
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+
+            return (this.ToString() == obj.ToString());
+
+            //if (obj is BulbAddress ba && ba != null)
+            //{
+            //    if ((address?.Length ?? 0) != (ba.address?.Length ?? 0)) return false;
+            //    int c = address.Length;
+            //    for (int i = 0; i < c; i++)
+            //    {
+            //        if (address[i] != ba.address[i]) return false;
+            //    }
+
+            //    return true;                
+            //}
+            //else
+            //{
+            //    return false;
+            //}
+        }
+
+        //public void GetObjectData(SerializationInfo info, StreamingContext context)
+        //{
+        //    info.AddValue(nameof(address), ToString());
+        //}
+
+        //public BulbAddress(SerializationInfo info, StreamingContext context) 
+        //{
+
+        //    var s = (string)info.GetValue(nameof(address), typeof(string));
+        //    var p = PhysicalAddress.Parse(s);
+
+        //    this.address = p.GetAddressBytes();
+        //}
+
         public static explicit operator PhysicalAddress(BulbAddress value)
         {
             return new PhysicalAddress(value.address);
@@ -150,6 +188,11 @@ namespace WizLib
         public static explicit operator BulbAddress(PhysicalAddress value)
         {
             return new BulbAddress(value.GetAddressBytes());
+        }
+
+        public static explicit operator BulbAddress(string value)
+        {
+            return Parse(value);
         }
 
         public static explicit operator byte[](BulbAddress value)

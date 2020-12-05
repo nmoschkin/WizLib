@@ -51,7 +51,7 @@ namespace WizBulb
 
         private AdaptersCollection adapters;
 
-        private KeyedObservableCollection<BulbAddress, Bulb> allBulbs = new KeyedObservableCollection<BulbAddress, Bulb>(nameof(Bulb.MACAddress));
+        private ObservableDictionary<BulbAddress, Bulb> allBulbs = new ObservableDictionary<BulbAddress, Bulb>(nameof(Bulb.MACAddress));
 
         private bool autoChangeBulb = true;
 
@@ -59,13 +59,13 @@ namespace WizBulb
 
         private bool btnsEnabled = true;
 
-        private KeyedObservableCollection<BulbAddress, Bulb> bulbs = new KeyedObservableCollection<BulbAddress, Bulb>(nameof(Bulb.MACAddress));
+        private ObservableDictionary<BulbAddress, Bulb> bulbs = new ObservableDictionary<BulbAddress, Bulb>(nameof(Bulb.MACAddress));
 
         private bool changed = false;
 
         private CancellationTokenSource cts;
 
-        private KeyedObservableCollection<int, Home> homes = new KeyedObservableCollection<int, Home>(nameof(Home.HomeId));
+        private ObservableDictionary<int, Home> homes = new ObservableDictionary<int, Home>(nameof(Home.HomeId));
 
         private string networkStatus;
 
@@ -73,7 +73,7 @@ namespace WizBulb
 
         private string projFile;
 
-        private KeyedObservableCollection<int, Room> rooms = new KeyedObservableCollection<int, Room>(nameof(Room.RoomId));
+        private ObservableDictionary<int, Room> rooms = new ObservableDictionary<int, Room>(nameof(Room.RoomId));
 
         private NetworkAdapter selAdapter;
 
@@ -141,7 +141,7 @@ namespace WizBulb
             }
         }
 
-        public KeyedObservableCollection<BulbAddress, Bulb> Bulbs
+        public ObservableDictionary<BulbAddress, Bulb> Bulbs
         {
             get => bulbs;
             protected set
@@ -168,7 +168,7 @@ namespace WizBulb
             }
         }
 
-        public KeyedObservableCollection<int, Home> Homes
+        public ObservableDictionary<int, Home> Homes
         {
             get => homes;
             set
@@ -204,7 +204,7 @@ namespace WizBulb
             }
         }
 
-        public KeyedObservableCollection<int, Room> Rooms
+        public ObservableDictionary<int, Room> Rooms
         {
             get => rooms;
             set
@@ -267,7 +267,7 @@ namespace WizBulb
                         }
                         else
                         {
-                            Bulbs = new KeyedObservableCollection<BulbAddress, Bulb>(
+                            Bulbs = new ObservableDictionary<BulbAddress, Bulb>(
                                             nameof(Bulb.MACAddress),
                                             await BulbItem.CreateBulbsFromInterfaceList(selRoom.Bulbs)
                                             );
@@ -390,50 +390,53 @@ namespace WizBulb
 
         public virtual async Task<bool> OpenProject(string fileName)
         {
-            if (!File.Exists(fileName)) return false;
-
-            var j = new JsonProfileSerializer(fileName);
-
-            SelectedRoom = null;
-            SelectedHome = null;
-
-            Profile = (Profile)j.Deserialize();
-            Homes = new KeyedObservableCollection<int, Home>(nameof(Home.HomeId), Profile.Homes);
-
-            allBulbs = Bulbs = new KeyedObservableCollection<BulbAddress, Bulb>(
-                            nameof(Bulb.MACAddress),
-                            await BulbItem.CreateBulbsFromInterfaceList(Profile.Bulbs)
-                            );
-
-            var b = new Bulb("192.168.50.222");
-            b.Settings.MACAddress = BulbAddress.Parse("A8BB5091EFE1");
-
-            allBulbs.Insert(5, b);
-
-            allBulbs.Move(5, 7);
-
-            allBulbs.RemoveAt(7);
-
-            allBulbs.Sort((a, b) =>
+            try
             {
-                int x = (a.Settings.RoomId ?? 0) - (b.Settings.RoomId ?? 0);
-                if (x == 0)
+
+                if (!File.Exists(fileName)) return false;
+
+                var j = new JsonProfileSerializer(fileName);
+
+                SelectedRoom = null;
+                SelectedHome = null;
+
+                Profile = (Profile)j.Deserialize();
+                Homes = new ObservableDictionary<int, Home>(nameof(Home.HomeId), Profile.Homes);
+
+                allBulbs = Bulbs = new ObservableDictionary<BulbAddress, Bulb>(
+                                nameof(Bulb.MACAddress),
+                                await BulbItem.CreateBulbsFromInterfaceList(Profile.Bulbs)
+                                );
+
+                var b = new Bulb("192.168.50.222");
+                b.Settings.MACAddress = BulbAddress.Parse("A8BB5091EFE1");
+
+                allBulbs.Sort((a, b) =>
                 {
-                    x = string.Compare(a.Name, b.Name);
-                }
-                return x;
-            });
+                    int x = (a.Settings.RoomId ?? 0) - (b.Settings.RoomId ?? 0);
+                    if (x == 0)
+                    {
+                        x = string.Compare(a.Name, b.Name);
+                    }
+                    return x;
+                });
 
-            var key = ((IList<Bulb>)allBulbs)[4].MACAddress;
+                var key = ((IList<Bulb>)allBulbs)[4].MACAddress;
 
-            var item = allBulbs[key];
+                var item = allBulbs[key];
 
-            Settings.AddRecentFile(fileName, Profile.ProjectId);
-            ProjectFile = fileName;
+                Settings.AddRecentFile(fileName, Profile.ProjectId);
+                ProjectFile = fileName;
 
-            OnPropertyChanged(nameof(WindowTitle));
+                OnPropertyChanged(nameof(WindowTitle));
 
-            return true;
+                return true;
+
+            }
+            catch
+            {
+                return false;
+            }
         }
 
 
@@ -647,7 +650,7 @@ namespace WizBulb
 
             if (Bulbs == null)
             {
-                Bulbs = new KeyedObservableCollection<BulbAddress, Bulb>(nameof(Bulb.MACAddress));
+                Bulbs = new ObservableDictionary<BulbAddress, Bulb>(nameof(Bulb.MACAddress));
             }
             else
             {

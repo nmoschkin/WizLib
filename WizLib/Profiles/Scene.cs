@@ -12,8 +12,8 @@ namespace WizLib.Profiles
     public class Scene : ObservableBase
     {
 
-        private KeyedObservableCollection<PhysicalAddress, BulbParams> bp
-            = new KeyedObservableCollection<PhysicalAddress, BulbParams>(nameof(WizLib.BulbParams.MACAddress));
+        private ObservableDictionary<PhysicalAddress, BulbParams> bp
+            = new ObservableDictionary<PhysicalAddress, BulbParams>(nameof(WizLib.BulbParams.MACAddress));
 
         private Guid sceneId;
 
@@ -40,7 +40,7 @@ namespace WizLib.Profiles
         }
 
         [JsonProperty("bulbs")]
-        public KeyedObservableCollection<PhysicalAddress, BulbParams> BulbParams
+        public ObservableDictionary<PhysicalAddress, BulbParams> BulbParams
         {
             get => bp;
             set
