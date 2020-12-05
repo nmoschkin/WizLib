@@ -270,11 +270,17 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Gets or sets the value of the item represented by the specified key.
+        /// </summary>
+        /// <param name="key">The key of the item.</param>
+        /// <returns></returns>
         public TValue this[TKey key]
         {
             get => getItem(key);
             set => setItem(key, value);
         }
+
 
         public int IndexOf(TValue item)
         {
@@ -287,6 +293,12 @@ namespace WizLib
             return -1;
         }
 
+
+        /// <summary>
+        /// Gets the index of the item by key.
+        /// </summary>
+        /// <param name="key">The key of the item.</param>
+        /// <returns></returns>
         public int IndexOfKey(TKey key)
         {
             int i;
@@ -324,17 +336,17 @@ namespace WizLib
             }
         }
 
-        private void EnsureCapacity(int size)
-        {
-            int c = innerList?.Length ?? 0;
+        //private void EnsureCapacity(int size)
+        //{
+        //    int c = innerList?.Length ?? 0;
 
-            if (size <= c) return;
+        //    if (size <= c) return;
 
-            Array.Resize(ref innerList, size);
-            Array.Resize(ref entries, size);
+        //    Array.Resize(ref innerList, size);
+        //    Array.Resize(ref entries, size);
 
-            capacity = size;
-        }
+        //    capacity = size;
+        //}
 
         public void RemoveAt(int index)
 
@@ -359,6 +371,10 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Remove an item by its key.
+        /// </summary>
+        /// <param name="key">Key of item to remove.</param>
         public void RemoveKey(TKey key)
         {
             int i, c;
@@ -402,6 +418,10 @@ namespace WizLib
 
         }
 
+        /// <summary>
+        /// Add a range of items to the collection.
+        /// </summary>
+        /// <param name="items">The list of items to add.</param>
         public void AddRange(IEnumerable<TValue> items) => AddRange(items, false);
 
         private void AddRange(IEnumerable<TValue> items, bool suppressEvent)
@@ -479,6 +499,11 @@ namespace WizLib
             KeySort();
         }
 
+        /// <summary>
+        /// Move an item in the collection from one index to another.
+        /// </summary>
+        /// <param name="oldIndex">The source item index.</param>
+        /// <param name="newIndex">The destination item index.</param>
         public void Move(int oldIndex, int newIndex)
         {
             var item = innerList[oldIndex];
@@ -510,9 +535,9 @@ namespace WizLib
         }
 
         /// <summary>
-        /// Sort on keys in ascending order
+        /// Sort keys in ascending order
         /// </summary>
-        public void KeySort()
+        private void KeySort()
         {
             if (Count < 2) return;
 
@@ -528,10 +553,14 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Sort the collection using the specified <see cref="Comparison{T}"/>.
+        /// </summary>
+        /// <param name="comparison">The comparison to use to sort the collection.</param>
         public void Sort(Comparison<TValue> comparison)
         {
             if (Count < 2) return;
-
+            
             int lo = 0;
             int hi = Count - 1;
 
@@ -545,7 +574,7 @@ namespace WizLib
             }
         }
 
-        #region Rim
+        #region ArrOp
 
         /// <summary>
         /// Remove, Insert, Move operations.
@@ -777,6 +806,8 @@ namespace WizLib
 
         #endregion
 
+        #region IEnumerable
+
         public IEnumerator<TValue> GetEnumerator()
         {
             return new KeyedCollectionEnumerator(innerList);
@@ -817,6 +848,8 @@ namespace WizLib
                 idx = -1;
             }
         }
+
+        #endregion
 
     }
 
