@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WizLib.Profiles;
+using System.Threading;
 
 namespace WizLib
 {
@@ -36,6 +37,11 @@ namespace WizLib
                 this.index = index;
                 this.key = key;
             }
+
+            public override string ToString()
+            {
+                return key?.ToString();
+            }
         }
 
         private PropertyInfo kpi;
@@ -61,6 +67,8 @@ namespace WizLib
 
 
         private Comparison<TKey> keycomp;
+
+        SynchronizationContext sc = new SynchronizationContext();
 
         /// <summary>
         /// Gets or sets the <see cref="Comparison{TKey}"/> to use to sort the keys.
@@ -512,9 +520,9 @@ namespace WizLib
             var item = innerList[oldIndex];
 
             ArrOp(ArrayOperation.Move, ref innerList, oldIndex, newIndex);
-            ArrOp(ArrayOperation.Move, ref entries, oldIndex, newIndex);
-
-            ReIndex();
+            //ArrOp(ArrayOperation.Move, ref entries, oldIndex, newIndex);
+            KeySort();
+            //ReIndex();
 
             if (CollectionChanged != null)
             {
@@ -562,12 +570,6 @@ namespace WizLib
             int hi = Count - 1;
 
             Sort(null, lo, hi, true);
-
-            if (CollectionChanged != null)
-            {
-                var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
-                CollectionChanged.Invoke(this, e);
-            }
         }
 
         /// <summary>
@@ -827,20 +829,20 @@ namespace WizLib
 
         public IEnumerator<TValue> GetEnumerator()
         {
-            return new KeyedCollectionEnumerator(innerList);
+            return new KeyedCollectionEnumerator(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new KeyedCollectionEnumerator(innerList);
+            return new KeyedCollectionEnumerator(this);
         }
 
         private class KeyedCollectionEnumerator : IEnumerator<TValue>
         {
             private int idx = -1;
-            private TValue[] objs;
+            private IList<TValue> objs;
 
-            public KeyedCollectionEnumerator(TValue[] list)
+            public KeyedCollectionEnumerator(KeyedObservableCollection<TKey, TValue> list)
             {
                 objs = list;
             }
@@ -857,7 +859,7 @@ namespace WizLib
 
             public bool MoveNext()
             {
-                return ++idx < (objs?.Length ?? 0);
+                return ++idx < (objs?.Count ?? -1);
             }
 
             public void Reset()
