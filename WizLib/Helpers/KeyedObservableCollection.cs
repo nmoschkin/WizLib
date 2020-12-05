@@ -359,7 +359,9 @@ namespace WizLib
             var item = innerList[index];
 
             ArrOp(ArrayOperation.Remove, ref innerList, oldIndex: index);
-            ArrOp(ArrayOperation.Remove, ref entries, oldIndex: index);
+            
+            int idx = KeyForItemAt(index);
+            ArrOp(ArrayOperation.Remove, ref entries, oldIndex: idx);
 
             capacity--;
 
@@ -493,7 +495,8 @@ namespace WizLib
 
             for (i = 0; i < c; i++)
             {
-                entries[i] = new Entry(i, (TKey)kpi.GetValue(innerList[i]));
+                entries[i].index = i;
+                entries[i].key = (TKey)kpi.GetValue(innerList[i]);
             }
 
             KeySort();
@@ -510,6 +513,8 @@ namespace WizLib
 
             ArrOp(ArrayOperation.Move, ref innerList, oldIndex, newIndex);
             ArrOp(ArrayOperation.Move, ref entries, oldIndex, newIndex);
+
+            ReIndex();
 
             if (CollectionChanged != null)
             {
@@ -532,6 +537,18 @@ namespace WizLib
             }
 
             return ret;
+        }
+
+        int KeyForItemAt(int index)
+        {
+            int c = entries?.Length ?? 0;
+            int i;
+            for (i = 0; i < c; i++)
+            {
+                if (entries[i].index == index) return i;
+            }
+
+            return -1;
         }
 
         /// <summary>
