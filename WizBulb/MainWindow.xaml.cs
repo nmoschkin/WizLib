@@ -26,6 +26,7 @@ using System.ComponentModel;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using WizLib.Profiles;
+using DataTools.Win32Api;
 
 namespace WizBulb
 {
@@ -91,6 +92,41 @@ namespace WizBulb
             //WizLib.Helpers.ConsoleHelper.AllocConsole();
 
             InitializeComponent();
+
+            var lonc = new List<NamedColor>(NamedColor.Catalog);
+
+            lonc.Sort((a, b) =>
+            {
+                return (a.Color.IntValue - b.Color.IntValue);
+            });
+
+            //int c = lonc.Count - 1;
+            //int i;
+
+            //for (i = c; i >= 0; i--)
+            //{
+            //    if (i > 0)
+            //    {
+            //        if (lonc[i].Color.IntValue == lonc[i - 1].Color.IntValue)
+            //        {
+            //            lonc.RemoveAt(i);
+            //        }
+            //    }
+            //}
+
+            //var testing = new ObservableDictionary<UniColor, NamedColor>(nameof(NamedColor.Color), lonc);
+
+
+            var c1 = lonc[200];
+
+            HSVDATA h = new HSVDATA();
+            HSVDATA h2 = new HSVDATA();
+
+            DataTools.Desktop.ColorMath.ColorToHSV(c1, ref h);
+            UniColor c2 = DataTools.Desktop.ColorMath.HSVToColorRaw(h);
+
+            DataTools.Desktop.ColorMath.ColorToHSV(c2, ref h2);
+
 
             //ObservableDictionary<string, TestClass> testing = new ObservableDictionary<string, TestClass>();
 

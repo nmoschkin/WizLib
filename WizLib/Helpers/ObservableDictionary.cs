@@ -227,7 +227,7 @@ namespace WizLib
 
                     if (keycomp == null)
                     {
-                        throw new NotSupportedException("No compatible comparer found for type {" + typeof(TKey).Name + "}.");
+                        throw new NotSupportedException("No compatible comparer found for type '" + typeof(TKey).FullName + "'.");
                     }
                 }
             }
@@ -850,7 +850,12 @@ namespace WizLib
                 TKey key = (TKey)keyProp.GetValue(item);
 
                 if (ContainsKey(key))
+                {
+                    TValue tv;
+                    var tk = ContainsKey(key, out tv);
+
                     throw new ArgumentException($"Collection already contains key '{key}'.", nameof(item));
+                }
 
                 int idx;
                 Search(key, out idx, true);
