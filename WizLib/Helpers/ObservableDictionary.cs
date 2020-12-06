@@ -730,9 +730,9 @@ namespace WizLib
             
             if (mode == ArrayOperation.Insert) // insert 
             {
+                ++c;
                 if (!expanded)
                 {
-                    ++c;
                     a2 = new U[c];
 
                     if (newIndex > 0)

@@ -614,29 +614,50 @@ namespace WizBulb
 
             var disp = App.Current.Dispatcher;
 
-            await Bulb.ScanForBulbs(selAdapter.IPV4Address, (MACADDRESS)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
+            var bulbs = await Bulb.ScanForBulbs(selAdapter.IPV4Address, (MACADDRESS)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
             async (b) =>
             {
-                await disp.Invoke(async () =>
-                {
-                    if (!Bulbs.ContainsKey(b.MACAddress))
-                    {
-                        int? selRoom = null;
+                //await disp.Invoke(async () =>
+                //{
+                //    if (!Bulbs.ContainsKey(b.MACAddress))
+                //    {
+                //        int? selRoom = null;
 
-                        if (SelectedRoom != null)
-                        {
-                            selRoom = SelectedRoom.RoomId;
-                            if (b.Settings.RoomId != selRoom) return;
-                        }
+                //        if (SelectedRoom != null)
+                //        {
+                //            selRoom = SelectedRoom.RoomId;
+                //            if (b.Settings.RoomId != selRoom) return;
+                //        }
 
-                        Bulbs.Add(b);
-                    }
-                    else
-                    {
-                        await b.GetPilot();
-                    }
-                });
+                //        Bulbs.Add(b);
+                //    }
+                //    else
+                //    {
+                //        await b.GetPilot();
+                //    }
+                //});
             });
+
+            foreach(var b in bulbs)
+            {
+                if (!Bulbs.ContainsKey(b.MACAddress))
+                {
+                    int? selRoom = null;
+
+                    if (SelectedRoom != null)
+                    {
+                        selRoom = SelectedRoom.RoomId;
+                        if (b.Settings.RoomId != selRoom) return;
+                    }
+
+                    Bulbs.Add(b);
+                }
+                else
+                {
+                    await b.GetPilot();
+                }
+
+            }
         }
 
         public virtual async Task RefreshSelected()
