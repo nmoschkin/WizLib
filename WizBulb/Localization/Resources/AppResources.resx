@@ -288,6 +288,9 @@
   <data name="Link" xml:space="preserve">
     <value>Link</value>
   </data>
+  <data name="LiveMonitor" xml:space="preserve">
+    <value>Live Monitor</value>
+  </data>
   <data name="Load" xml:space="preserve">
     <value>Load</value>
   </data>
@@ -395,6 +398,9 @@
   </data>
   <data name="RefreshAll" xml:space="preserve">
     <value>Refresh All</value>
+  </data>
+  <data name="RefreshInterval" xml:space="preserve">
+    <value>Refresh Interval</value>
   </data>
   <data name="Remove" xml:space="preserve">
     <value>Remove</value>

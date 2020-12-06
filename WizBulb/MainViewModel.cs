@@ -51,7 +51,7 @@ namespace WizBulb
 
         private AdaptersCollection adapters;
 
-        private ObservableDictionary<BulbAddress, Bulb> allBulbs = new ObservableDictionary<BulbAddress, Bulb>(nameof(Bulb.MACAddress));
+        private ObservableDictionary<MACADDRESS, Bulb> allBulbs = new ObservableDictionary<MACADDRESS, Bulb>(nameof(Bulb.MACAddress));
 
         private bool autoChangeBulb = true;
 
@@ -59,13 +59,15 @@ namespace WizBulb
 
         private bool btnsEnabled = true;
 
-        private ObservableDictionary<BulbAddress, Bulb> bulbs = new ObservableDictionary<BulbAddress, Bulb>(nameof(Bulb.MACAddress));
+        private ObservableDictionary<MACADDRESS, Bulb> bulbs = new ObservableDictionary<MACADDRESS, Bulb>(nameof(Bulb.MACAddress));
 
         private bool changed = false;
 
         private CancellationTokenSource cts;
 
         private ObservableDictionary<int, Home> homes = new ObservableDictionary<int, Home>(nameof(Home.HomeId));
+
+        private int interval = 2500;
 
         private string networkStatus;
 
@@ -101,9 +103,13 @@ namespace WizBulb
 
         #region Public Constructors
 
-        public MainViewModel()
+        public MainViewModel(bool populate)
         {
-            RefreshNetworks();
+
+            if (populate)
+            {
+                _ = RefreshNetworks().ContinueWith(async (t) => await RefreshAll());
+            }
         }
 
         #endregion Public Constructors
@@ -120,7 +126,7 @@ namespace WizBulb
 
         public ObservableCollection<NetworkAdapter> Adapters
         {
-            get => adapters.Adapters;
+            get => adapters?.Adapters;
         }
 
         public bool AutoChangeBulb
@@ -137,11 +143,21 @@ namespace WizBulb
             get => autoWatch;
             set
             {
-                SetProperty(ref autoWatch, value);
+                if (autoWatch == value) return;
+
+
+                if (value)
+                {
+                    WatchBulbs();
+                }
+                else
+                {
+                    WatchAbort();
+                }
             }
         }
 
-        public ObservableDictionary<BulbAddress, Bulb> Bulbs
+        public ObservableDictionary<MACADDRESS, Bulb> Bulbs
         {
             get => bulbs;
             protected set
@@ -175,6 +191,17 @@ namespace WizBulb
             {
                 SetProperty(ref homes, value);
             }
+        }
+
+
+        public int Interval
+        {
+            get => interval;
+            set
+            {
+                SetProperty(ref interval, value);
+            }
+
         }
 
         public string NetworkStatus
@@ -267,7 +294,7 @@ namespace WizBulb
                         }
                         else
                         {
-                            Bulbs = new ObservableDictionary<BulbAddress, Bulb>(
+                            Bulbs = new ObservableDictionary<MACADDRESS, Bulb>(
                                             nameof(Bulb.MACAddress),
                                             await BulbItem.CreateBulbsFromInterfaceList(selRoom.Bulbs)
                                             );
@@ -403,13 +430,10 @@ namespace WizBulb
                 Profile = (Profile)j.Deserialize();
                 Homes = new ObservableDictionary<int, Home>(nameof(Home.HomeId), Profile.Homes);
 
-                allBulbs = Bulbs = new ObservableDictionary<BulbAddress, Bulb>(
+                allBulbs = Bulbs = new ObservableDictionary<MACADDRESS, Bulb>(
                                 nameof(Bulb.MACAddress),
                                 await BulbItem.CreateBulbsFromInterfaceList(Profile.Bulbs)
                                 );
-
-                var b = new Bulb("192.168.50.222");
-                b.Settings.MACAddress = BulbAddress.Parse("A8BB5091EFE1");
 
                 allBulbs.Sort((a, b) =>
                 {
@@ -420,10 +444,6 @@ namespace WizBulb
                     }
                     return x;
                 });
-
-                var key = ((IList<Bulb>)allBulbs)[4].MACAddress;
-
-                var item = allBulbs[key];
 
                 Settings.AddRecentFile(fileName, Profile.ProjectId);
                 ProjectFile = fileName;
@@ -496,7 +516,7 @@ namespace WizBulb
             var lmts = LightMode.AllLightModeTypes;
 
 
-            ObservableCollection<MenuItem> subBowers = new ObservableCollection<MenuItem>();
+            ObservableCollection<MenuItem> submnu = new ObservableCollection<MenuItem>();
 
             foreach (var lmt in lmts)
             {
@@ -561,22 +581,15 @@ namespace WizBulb
 
         public virtual async Task RefreshAll()
         {
-            foreach (var bulb in Bulbs)
-            {
-                GC.Collect(0);
-                StatusMessage = string.Format(AppResources.GettingBulbInfoForX, bulb.ToString());
-
-                await bulb.GetPilot();
-            }
-
-            StatusMessage = "";
+            await RefreshNetworks();
+            ScanForBulbs();
         }
 
-        public virtual void RefreshNetworks()
+        public virtual async Task RefreshNetworks()
         {
             var disp = App.Current.Dispatcher;
 
-            disp.Invoke(() =>
+            await disp.BeginInvoke(() =>
             {
                 adapters = new AdaptersCollection();
                 OnPropertyChanged("Adapters");
@@ -584,16 +597,45 @@ namespace WizBulb
                 SelectedAdapter = null;
             });
 
-            _ = Task.Run(() =>
+            foreach (var net in Adapters)
             {
-                foreach (var net in Adapters)
+                if (net.HasInternet == InternetStatus.HasInternet)
                 {
-                    if (net.HasInternet == InternetStatus.HasInternet)
-                    {
-                        disp.Invoke(() => SelectedAdapter = net);
-                        return;
-                    }
+                    await disp.BeginInvoke(() => SelectedAdapter = net);
+                    return;
                 }
+            }
+            
+        }
+
+        public virtual async Task RefreshOnce()
+        {
+            if (App.Current == null || App.Current.Dispatcher == null) return;
+
+            var disp = App.Current.Dispatcher;
+
+            await Bulb.ScanForBulbs(selAdapter.IPV4Address, (MACADDRESS)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
+            async (b) =>
+            {
+                await disp.Invoke(async () =>
+                {
+                    if (!Bulbs.ContainsKey(b.MACAddress))
+                    {
+                        int? selRoom = null;
+
+                        if (SelectedRoom != null)
+                        {
+                            selRoom = SelectedRoom.RoomId;
+                            if (b.Settings.RoomId != selRoom) return;
+                        }
+
+                        Bulbs.Add(b);
+                    }
+                    else
+                    {
+                        await b.GetPilot();
+                    }
+                });
             });
         }
 
@@ -650,7 +692,7 @@ namespace WizBulb
 
             if (Bulbs == null)
             {
-                Bulbs = new ObservableDictionary<BulbAddress, Bulb>(nameof(Bulb.MACAddress));
+                Bulbs = new ObservableDictionary<MACADDRESS, Bulb>(nameof(Bulb.MACAddress));
             }
             else
             {
@@ -665,7 +707,7 @@ namespace WizBulb
                 var aw = AutoWatch;
                 if (aw) WatchAbort();
 
-                await Bulb.ScanForBulbs(selAdapter.IPV4Address, (BulbAddress)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
+                await Bulb.ScanForBulbs(selAdapter.IPV4Address, (MACADDRESS)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
                 (b) =>
                 {
                     disp.Invoke(() =>
@@ -692,9 +734,9 @@ namespace WizBulb
                 {
                     allBulbs.Sort((a, b) =>
                     {
-                        if (a.Settings.RoomId == null && b.Settings.RoomId == null) return 0;
-                        else if (a.Settings.RoomId == null) return 1;
-                        else if (b.Settings.RoomId == null) return -1;
+                        if (a.Settings?.RoomId == null && b.Settings?.RoomId == null) return 0;
+                        else if (a.Settings?.RoomId == null) return 1;
+                        else if (b.Settings?.RoomId == null) return -1;
 
                         return (int)a.Settings.RoomId - (int)b.Settings.RoomId;
                     });
@@ -717,22 +759,25 @@ namespace WizBulb
 
         public void WatchAbort()
         {
-            if (AutoWatch && cts != null && watchTask != null) 
+            if (cts != null) 
             {
                 cts.Cancel();
-                watchTask.Wait();
+                watchTask?.Wait();
 
-                AutoWatch = false;
+                autoWatch = false;
+                watchTask = null;
+                cts = null;
+
+                OnPropertyChanged(nameof(AutoWatch));
             }
         }
 
         public bool WatchBulbs()
         {
-            if (AutoWatch) return false;
-            var disp = App.Current.Dispatcher;
+            if (autoWatch) return false;
 
             cts = new CancellationTokenSource();
-            AutoWatch = true;
+            int ival = interval / 100;
 
             watchTask = Task.Run(async () =>
             {
@@ -740,31 +785,9 @@ namespace WizBulb
                 {
                     while (cts != null && !cts.IsCancellationRequested)
                     {
-                        await Bulb.ScanForBulbs(selAdapter.IPV4Address, (BulbAddress)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
-                        (b) =>
-                        {
-                            disp.Invoke(async () =>
-                            {
-                                if (!Bulbs.ContainsKey(b.MACAddress))
-                                {
-                                    int? selRoom = null;
+                        await RefreshOnce();
 
-                                    if (SelectedRoom != null)
-                                    {
-                                        selRoom = SelectedRoom.RoomId;
-                                        if (b.Settings.RoomId != selRoom) return;
-                                    }
-
-                                    Bulbs.Add(b);
-                                }
-                                else
-                                {
-                                    await b.GetPilot();
-                                }
-                            });
-                        });
-
-                        for (int i = 0; i < 22; i++)
+                        for (int i = 0; i < ival; i++)
                         {
                             if (cts?.IsCancellationRequested ?? true) break;
                             await Task.Delay(100);
@@ -778,6 +801,9 @@ namespace WizBulb
                 }
 
             }, cts.Token);
+
+            autoWatch = true;
+            OnPropertyChanged(nameof(AutoWatch));
 
             return true;
         }

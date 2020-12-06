@@ -46,11 +46,60 @@ namespace WizBulb
 
         #region Public Constructors
 
+        class TestClass
+        {
+            public string Title { get; set; }
+
+            public string Key { get; set; }
+
+
+            public TestClass(string key, string value)
+            {
+                Title = value;
+                Key = key;
+            }
+
+            public override string ToString()
+            {
+                return $"{Key}: {Title}";
+            }
+
+        }
+
         public MainWindow()
         {
             //WizLib.Helpers.ConsoleHelper.AllocConsole();
 
             InitializeComponent();
+
+            ObservableDictionary<string, TestClass> testing = new ObservableDictionary<string, TestClass>(nameof(TestClass.Key));
+
+            testing.Add(new TestClass("A1", "Bob"));
+            testing.Add(new TestClass("B1", "Sally"));
+            testing.Add(new TestClass("B3", "Janice"));
+            testing.Add(new TestClass("A3", "Doug"));
+            testing.Add(new TestClass("E2", "Michael"));
+            testing.Add(new TestClass("C1", "Henry"));
+            testing.Add(new TestClass("D1", "Jeff"));
+            testing.Add(new TestClass("E1", "Nate"));
+            testing.Add(new TestClass("A2", "Gina"));
+            testing.Add(new TestClass("F2", "Philip"));
+            testing.Add(new TestClass("F1", "Martha"));
+            testing.Add(new TestClass("D3", "Gilbert"));
+            testing.Add(new TestClass("E3", "Robert"));
+            testing.Add(new TestClass("F3", "Daniel"));
+            testing.Add(new TestClass("B2", "Frank"));
+            testing.Add(new TestClass("C2", "Delilah"));
+            testing.Add(new TestClass("C3", "Adrienne"));
+            testing.Add(new TestClass("D2", "Sean"));
+            testing.Add(new TestClass("F4", "Elaine"));
+
+
+
+
+
+
+
 
             var loc = Settings.LastWindowLocation;
             var size = Settings.LastWindowSize;
@@ -70,13 +119,41 @@ namespace WizBulb
 
             iconv.ConverterError += Iconv_ConverterError;
 
-            vm = new MainViewModel();
-            vm.PopulateLightModesMenu(mnuModes);
-
+            vm = new MainViewModel(false);
             vm.PropertyChanged += Vm_PropertyChanged;
+
+            vm.PopulateLightModesMenu(mnuModes);
             vm.PopulateRecentFiles(mnuRecents);
 
             DataContext = vm;
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            var loc = Settings.LastWindowLocation;
+            var size = Settings.LastWindowSize;
+            WizLib.Helpers.ConsoleHelper.AllocConsole();
+
+            Left = loc.X;
+            Top = loc.Y;
+
+            Width = size.Width;
+            Height = size.Height;
+            mnuLoadLast.IsChecked = Settings.OpenLastOnStartup;
+
+            _ = vm.RefreshAll();
+            //_ = vm.RefreshAll().ContinueWith(async (t) =>
+            //{
+            //    await App.Current.Dispatcher.Invoke(async () =>
+            //    {
+            //        if (Settings.OpenLastOnStartup && await vm.LoadLastProject())
+            //        {
+            //            await Task.Delay(vm.Interval);
+            //            vm.WatchBulbs();
+            //        }
+            //    });
+            //});
+
         }
 
         #endregion Public Constructors
@@ -98,7 +175,9 @@ namespace WizBulb
 
         private void BtnScan_Click(object sender, RoutedEventArgs e)
         {
-            vm.ScanForBulbs();
+
+            _ = vm.RefreshOnce();
+            //vm.ScanForBulbs();
         }
 
         private void BulbList_Click(object sender, RoutedEventArgs e)
@@ -165,7 +244,7 @@ namespace WizBulb
             {
                 if (direction == ListSortDirection.Descending)
                 {
-                    if (BulbList.ItemsSource is ObservableDictionary<BulbAddress, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<MACADDRESS, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {
@@ -176,7 +255,7 @@ namespace WizBulb
                 }
                 else
                 {
-                    if (BulbList.ItemsSource is ObservableDictionary<BulbAddress, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<MACADDRESS, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {
@@ -190,7 +269,7 @@ namespace WizBulb
             {
                 if (direction == ListSortDirection.Descending)
                 {
-                    if (BulbList.ItemsSource is ObservableDictionary<BulbAddress, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<MACADDRESS, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {
@@ -201,11 +280,36 @@ namespace WizBulb
                 }
                 else
                 {
-                    if (BulbList.ItemsSource is ObservableDictionary<BulbAddress, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<MACADDRESS, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {
                             return string.Compare(a.IPAddress?.ToString(), b.IPAddress?.ToString());
+                        });
+
+                    }
+                }
+            }
+            else if (sortBy == "MACAddress")
+            {
+                if (direction == ListSortDirection.Descending)
+                {
+                    if (BulbList.ItemsSource is ObservableDictionary<MACADDRESS, Bulb> c)
+                    {
+                        c.Sort((a, b) =>
+                        {
+                            return -string.Compare(a.MACAddress.ToString(), b.MACAddress.ToString());
+                        });
+
+                    }
+                }
+                else
+                {
+                    if (BulbList.ItemsSource is ObservableDictionary<MACADDRESS, Bulb> c)
+                    {
+                        c.Sort((a, b) =>
+                        {
+                            return string.Compare(a.MACAddress.ToString(), b.MACAddress.ToString());
                         });
 
                     }
@@ -307,23 +411,6 @@ namespace WizBulb
         {
             vm.TimeoutStatus = e.Message;
             vm.ShowTimeoutStatus = Visibility.Visible;
-        }
-
-        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            var loc = Settings.LastWindowLocation;
-            var size = Settings.LastWindowSize;
-
-            Left = loc.X;
-            Top = loc.Y;
-
-            Width = size.Width;
-            Height = size.Height;
-            mnuLoadLast.IsChecked = Settings.OpenLastOnStartup;
-
-            await vm.LoadLastProject();
-            //await vm.RefreshAll();
-            vm.WatchBulbs();
         }
 
         private void MainWindow_LocationChanged(object sender, EventArgs e)

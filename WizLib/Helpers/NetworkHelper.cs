@@ -15,7 +15,7 @@ namespace WizLib
     public static class NetworkHelper
     {
         private static IPAddress defAddr;
-        private static PhysicalAddress defMac;
+        private static MACADDRESS defMac;
 
         /// <summary>
         /// The default remote IP address to use to test internet connectivity.
@@ -49,11 +49,11 @@ namespace WizLib
         /// <summary>
         /// The default local interface to bind to for UDP calls to bulbs.
         /// </summary>
-        public static PhysicalAddress DefaultLocalMAC
+        public static MACADDRESS DefaultLocalMAC
         {
             get
             {
-                if (defMac == null)
+                if (defMac == MACADDRESS.None)
                 {
                     RefreshDefaultIP();
                 }
@@ -100,16 +100,16 @@ namespace WizLib
         }
 
         /// <summary>
-        /// Gets an dictionary of all active local network interfaces keyed by <see cref="PhysicalAddress"/>.
+        /// Gets an dictionary of all active local network interfaces keyed by <see cref="MACADDRESS"/>.
         /// </summary>
         /// <param name="withGatewaysOnly">Only include addresses with default gateways.</param>
         /// <returns></returns>
-        public static Dictionary<PhysicalAddress, List<IPAddress>> GetLocalAddresses(bool withGatewaysOnly = false)
+        public static Dictionary<MACADDRESS, List<IPAddress>> GetLocalAddresses(bool withGatewaysOnly = false)
         {
             var net = NetworkInterface.GetAllNetworkInterfaces();
 
-            Dictionary<PhysicalAddress, List<IPAddress>> addrs = new Dictionary<PhysicalAddress, List<IPAddress>>();
-            KeyValuePair<PhysicalAddress, List<IPAddress>> kvp;
+            Dictionary<MACADDRESS, List<IPAddress>> addrs = new Dictionary<MACADDRESS, List<IPAddress>>();
+            KeyValuePair<MACADDRESS, List<IPAddress>> kvp;
 
             foreach (var iface in net)
             {
@@ -130,7 +130,7 @@ namespace WizLib
 
                 if (!withGatewaysOnly || gpass)
                 {
-                    kvp = new KeyValuePair<PhysicalAddress, List<IPAddress>>(iface.GetPhysicalAddress(), new List<IPAddress>());
+                    kvp = new KeyValuePair<MACADDRESS, List<IPAddress>>((MACADDRESS)iface.GetPhysicalAddress(), new List<IPAddress>());
                     
                     foreach (var la in ipprops.UnicastAddresses)
                     {

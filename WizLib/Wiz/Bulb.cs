@@ -80,7 +80,7 @@ namespace WizLib
 
         #region Protected Fields
 
-        protected static Dictionary<string, Bulb> bulbCache = new Dictionary<string, Bulb>();
+        protected static Dictionary<MACADDRESS, Bulb> bulbCache = new Dictionary<MACADDRESS, Bulb>();
         protected static bool allUdpActive;
         protected bool udpActive;
         protected IPAddress addr;
@@ -156,9 +156,11 @@ namespace WizLib
 
             GetPilot().ContinueWith((a) =>
             {
+                if (MACAddress == null) return;
+
                 Monitor.Enter(bulbCache);
 
-                string smac = MACAddress.ToString();
+                var smac = MACAddress;
                 if (BulbCache.ContainsKey(smac))
                 {
                     if (BulbCache[smac] != this)
@@ -175,7 +177,7 @@ namespace WizLib
             });
         }
 
-        public Bulb(BulbAddress macAddr)
+        public Bulb(MACADDRESS macAddr)
         {
             port = DefaultPort;
 
@@ -184,7 +186,7 @@ namespace WizLib
 
             Monitor.Enter(bulbCache);
 
-            string smac = MACAddress.ToString();
+            var smac = MACAddress;
             if (BulbCache.ContainsKey(smac))
             {
                 if (BulbCache[smac] != this)
@@ -205,7 +207,7 @@ namespace WizLib
 
         #region Public Properties
 
-        public static Dictionary<string, Bulb> BulbCache
+        public static Dictionary<MACADDRESS, Bulb> BulbCache
         {
             get => bulbCache;
             protected set
@@ -330,9 +332,9 @@ namespace WizLib
         /// <summary>
         /// Gets or sets the MAC address for the bulb.
         /// </summary>
-        public virtual BulbAddress MACAddress
+        public virtual MACADDRESS MACAddress
         {
-            get => Settings?.MACAddress;
+            get => Settings?.MACAddress ?? MACADDRESS.None;
             internal set
             {
                 if (Settings == null)
@@ -538,9 +540,9 @@ namespace WizLib
         /// <param name="localAddr">Local address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <param name="localMac">Local hardware address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <returns></returns>
-        public static async Task<Bulb> GetBulbByMacAddress(string macAddr, ScanCondition scan, IPAddress localAddr = null, BulbAddress localMac = null)
+        public static async Task<Bulb> GetBulbByMacAddress(string macAddr, ScanCondition scan, IPAddress localAddr = null, MACADDRESS? localMac = null)
         {
-            return await GetBulbByMacAddress(BulbAddress.Parse(macAddr), scan, localAddr, localMac);
+            return await GetBulbByMacAddress(MACADDRESS.Parse(macAddr), scan, localAddr, localMac);
         }
 
         /// <summary>
@@ -551,9 +553,9 @@ namespace WizLib
         /// <param name="localAddr">Local address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <param name="localMac">Local hardware address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <returns></returns>
-        public static async Task<Bulb> GetBulbByMacAddress(BulbAddress macAddr, ScanCondition scan, IPAddress localAddr = null, BulbAddress localMac = null)
+        public static async Task<Bulb> GetBulbByMacAddress(MACADDRESS macAddr, ScanCondition scan, IPAddress localAddr = null, MACADDRESS? localMac = null)
         {
-            string smac = macAddr.ToString();
+            var smac = macAddr;
 
             if (scan != ScanCondition.Always)
             {
@@ -587,7 +589,7 @@ namespace WizLib
             int timeout = 5000,
             BulbScanCallback callback = null)
         {
-            return await ScanForBulbs(NetworkHelper.DefaultLocalIP, (BulbAddress)NetworkHelper.DefaultLocalMAC, mode, timeout, callback);
+            return await ScanForBulbs(NetworkHelper.DefaultLocalIP, NetworkHelper.DefaultLocalMAC, mode, timeout, callback);
         }
 
         /// <summary>
@@ -601,7 +603,7 @@ namespace WizLib
         /// <returns></returns>
         public static async Task<List<Bulb>> ScanForBulbs(
             IPAddress localAddr,
-            BulbAddress macAddr,
+            MACADDRESS? macAddr,
             ScanMode mode = ScanMode.GetSystemConfig,
             int timeout = 5000,
             BulbScanCallback callback = null)
@@ -622,7 +624,7 @@ namespace WizLib
 
             if (macAddr == null)
             {
-                macAddr = (BulbAddress)NetworkHelper.DefaultLocalMAC;
+                macAddr = (MACADDRESS)NetworkHelper.DefaultLocalMAC;
             }
 
             var udpClient = new UdpClient();
@@ -659,9 +661,11 @@ namespace WizLib
                             if (json != null)
                             {
                                 p = new BulbCommand(json);
-                                string smac = p.Result?.MACAddress.ToString();
+                                if (p.Result?.MACAddress == null) continue;
 
-                                if (BulbCache.ContainsKey(smac))
+                                var smac = p.Result?.MACAddress ?? MACADDRESS.None;
+
+                                if (smac != MACADDRESS.None && BulbCache.ContainsKey(smac))
                                 {
                                     bulb = BulbCache[smac];
 
@@ -680,7 +684,12 @@ namespace WizLib
 
                                 foreach (var bchk in bulbs)
                                 {
-                                    if (bulb.Settings.MACAddress.Equals(bchk.Settings?.MACAddress))
+                                    if (bulb.Settings == null)
+                                    {
+                                        throw new ArgumentNullException();
+                                    }
+
+                                    if (bulb.Settings?.MACAddress.Equals(bchk.Settings?.MACAddress) ?? false)
                                     {
                                         already = true;
                                         break;
@@ -710,12 +719,12 @@ namespace WizLib
 
                     await Task.Delay(10);
 
-                    tdelc++;
-                    if (tdelc >= 50)
-                    {
-                        udpClient.Send(buffer, buffer.Length, "255.255.255.255", port);
-                        tdelc = 0;
-                    }
+                    //tdelc++;
+                    //if (tdelc >= 50)
+                    //{
+                    //    udpClient.Send(buffer, buffer.Length, "255.255.255.255", port);
+                    //    tdelc = 0;
+                    //}
                 }
             });
 

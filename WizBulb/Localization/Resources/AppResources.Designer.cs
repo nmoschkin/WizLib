@@ -574,6 +574,15 @@ namespace WizBulb.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Live Monitor.
+        /// </summary>
+        internal static string LiveMonitor {
+            get {
+                return ResourceManager.GetString("LiveMonitor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Load.
         /// </summary>
         internal static string Load {
@@ -894,6 +903,15 @@ namespace WizBulb.Localization.Resources {
         internal static string RefreshAll {
             get {
                 return ResourceManager.GetString("RefreshAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Refresh Interval.
+        /// </summary>
+        internal static string RefreshInterval {
+            get {
+                return ResourceManager.GetString("RefreshInterval", resourceCulture);
             }
         }
         

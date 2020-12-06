@@ -61,6 +61,17 @@ namespace WizLib.Profiles
                 bulb.GetBulb().Wait();
             }
 
+            foreach (var home in p.Homes)
+            {
+                foreach (var room in home.Rooms)
+                {
+                    foreach (var bulb in room.Bulbs)
+                    {
+                        bulb.GetBulb().Wait();
+                    }
+                }
+            }
+
             return p;
         }
 

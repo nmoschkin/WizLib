@@ -43,8 +43,7 @@
                         x:Name="arrow"
                         Data="M 5,5 L 15,5 L 10,10 L 5,5"
                         Fill="gray"
-                        StrokeThickness="1">
-                    </Path>
+                        StrokeThickness="1" />
                 </DockPanel>
             </DataTemplate>
 
@@ -271,6 +270,10 @@
                                 Width="100"
                                 DisplayMemberBinding="{Binding IPAddress}"
                                 Header="{i18n:Translate ResourceKey=IPAddress}" />
+                            <GridViewColumn
+                                Width="100"
+                                DisplayMemberBinding="{Binding MACAddress}"
+                                Header="{i18n:Translate ResourceKey=MACAddress}" />
                             <GridViewColumn
                                 Width="120"
                                 DisplayMemberBinding="{Binding Scene}"
@@ -668,6 +671,38 @@
                 Click="BtnScan_Click"
                 Content="{i18n:Translate ResourceKey=ScanForBulbs}"
                 IsEnabled="{Binding ButtonsEnabled}" />
+
+            <Grid>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <CheckBox Margin="0,8,0,8" IsChecked="{Binding AutoWatch, Mode=TwoWay}">
+                    <TextBlock Text="{i18n:Translate ResourceKey=LiveMonitor}" />
+                </CheckBox>
+
+                <TextBlock
+                    Grid.Row="1"
+                    Margin="0,2,0,8"
+                    Text="{i18n:Translate ResourceKey=RefreshInterval,
+                                          AddColon=True}" />
+
+                <TextBox
+                    x:Name="txtInterval"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="0,2,0,8"
+                    Text="{Binding Interval, Mode=TwoWay, Converter={StaticResource intConv}}" />
+
+            </Grid>
+
         </StackPanel>
 
 

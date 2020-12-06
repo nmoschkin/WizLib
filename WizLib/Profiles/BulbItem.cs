@@ -13,7 +13,7 @@ namespace WizLib.Profiles
     public class BulbItem : IBulb
     {
         [JsonProperty("mac")]
-        public virtual BulbAddress MACAddress { get; set; }
+        public virtual MACADDRESS MACAddress { get; set; }
 
         [JsonProperty("addr")]
         public virtual IPAddress IPAddress { get; set; }
@@ -65,10 +65,20 @@ namespace WizLib.Profiles
 
         public async Task<Bulb> GetBulb(ScanCondition sc)
         {
-            if (Bulb.BulbCache.ContainsKey(MACAddress.ToString()))
-                return Bulb.BulbCache[MACAddress.ToString()];
-
             Bulb b;
+
+            if (Bulb.BulbCache.ContainsKey(MACAddress))
+            {
+
+                b = Bulb.BulbCache[MACAddress];
+
+                b.Name = Name;
+                b.Icon = Icon;
+                b.HomeId = HomeId;
+                b.RoomId = RoomId;
+
+                return b;
+            }
 
             b = await Bulb.GetBulbByMacAddress(MACAddress, sc);
 
@@ -85,6 +95,11 @@ namespace WizLib.Profiles
             return b;
         }
 
+
+        public override string ToString()
+        {
+            return Name ?? MACAddress.ToString();
+        }
     }
 
 }

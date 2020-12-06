@@ -20,12 +20,32 @@ namespace WizLib
 
         #region Internal Fields
 
+        internal static List<JsonConverter> JsonConverters { get; } = new List<JsonConverter>(
+            new JsonConverter[] 
+            { 
+                new TupleConverter(), 
+                new MACADDRESSConverter(), 
+                new ODJsonConverter<MACADDRESS, Bulb>(nameof(Bulb.MACAddress)), 
+                new ODJsonConverter<int, Room>(nameof(Room.RoomId)),
+                new ODJsonConverter<int, Home>(nameof(Home.HomeId)),
+                new ODJsonConverter<Guid, Scene>(nameof(Scene.SceneId)),
+                new BulbMethodJsonConverter(), 
+                new IPAddressConverter() 
+            });
+
         internal static readonly JsonSerializerSettings DefaultJsonSettings = new JsonSerializerSettings()
+        {
+            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+            NullValueHandling = NullValueHandling.Ignore,
+            Converters = JsonConverters
+        };
+
+        internal static readonly JsonSerializerSettings DefaultProjectJsonSettings = new JsonSerializerSettings()
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore,
-            Converters = { new TupleConverter(), new BulbAddressConverter(), new ODJsonConverter<BulbAddress, Bulb>(nameof(Bulb.MACAddress)), new ODJsonConverter<int, Room>(nameof(Room.RoomId)), new BulbMethodJsonConverter(), new IPAddressConverter() }
+            Converters = JsonConverters
         };
 
         #endregion Internal Fields

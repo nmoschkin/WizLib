@@ -33,10 +33,10 @@ namespace WizLib
 
         private int _size = 0;
 
-        private TValue[] innerList;
-        private TKey[] innerKeys;
-        private int[] lookup;
-        private int[] revLookup;
+        private TValue[] _Values;
+        private TKey[] _Keys;
+        private int[] keyToIdx;
+        private int[] idxToKey;
 
         [JsonIgnore]
         public int Count => _size;
@@ -200,10 +200,23 @@ namespace WizLib
         public bool ContainsKey(TKey key, out TValue item)
         {
             int i;
+            //foreach (var witem in this)
+            //{
+            //    var wkey = (TKey)keyProp.GetValue(witem);
+            //    if (key.Equals(wkey))
+            //    {
+            //        item = witem;
+            //        return true;
+            //    }
+            //}
+            //item = null;
+            //return false;
+
             i = Search(key);
+
             if (i != -1)
             {
-                item = innerList[i];
+                item = _Values[i];
                 return true;
             }
             else
@@ -213,14 +226,13 @@ namespace WizLib
             }
         }
 
-
         TValue IList<TValue>.this[int index]
         {
-            get => innerList[index];
+            get => _Values[index];
             set
             {
-                var item = innerList[index];
-                innerList[index] = value;
+                var item = _Values[index];
+                _Values[index] = value;
 
                 if (CollectionChanged != null)
                 {
@@ -235,7 +247,7 @@ namespace WizLib
             var x = new TValue[_size];
             if (_size == 0) return x;
 
-            innerList.CopyTo(x, 0);
+            _Values.CopyTo(x, 0);
             return x;
         }
 
@@ -251,7 +263,7 @@ namespace WizLib
                 var x = new TKey[_size];
                 if (_size == 0) return x;
 
-                innerKeys.CopyTo(x, 0);
+                _Keys.CopyTo(x, 0);
                 return x;
             }
         }
@@ -272,7 +284,7 @@ namespace WizLib
             }
             else
             {
-                value = innerList[i];
+                value = _Values[i];
                 return true;
             }
         }
@@ -290,7 +302,7 @@ namespace WizLib
 
                 if (i >= 0)
                 {
-                    return innerList[i];
+                    return _Values[i];
                 }
                 else
                 {
@@ -306,11 +318,11 @@ namespace WizLib
 
                 if (i >= 0)
                 {
-                    var item = innerList[i];
+                    var item = _Values[i];
 
                     if (item.Equals(value)) return;
 
-                    innerList[i] = value;
+                    _Values[i] = value;
 
                     if (CollectionChanged != null)
                     {
@@ -329,7 +341,7 @@ namespace WizLib
         public int IndexOf(TValue item)
         {
             int i = 0;
-            foreach (var t in innerList)
+            foreach (var t in _Values)
             {
                 if (t == item) return i;
                 i++;
@@ -361,20 +373,20 @@ namespace WizLib
 
             for (int g = index; g < _size; g++)
             {
-                lookup[revLookup[g]]++;
+                keyToIdx[idxToKey[g]]++;
             }
 
-            ArrOp(ArrayOperation.Insert, ref innerList, newIndex: index);
-            ArrOp(ArrayOperation.Insert, ref revLookup, newIndex: index);
+            ArrOp(ArrayOperation.Insert, ref _Values, newIndex: index);
+            ArrOp(ArrayOperation.Insert, ref idxToKey, newIndex: index);
 
             int idx;
             Search(key, out idx, true);
 
-            lookup[idx] = index;
-            innerKeys[idx] = key;
+            keyToIdx[idx] = index;
+            _Keys[idx] = key;
 
-            innerList[index] = item;
-            revLookup[index] = idx;
+            _Values[index] = item;
+            idxToKey[index] = idx;
 
             _size++;
             
@@ -392,10 +404,10 @@ namespace WizLib
 
             if (size <= c) return;
 
-            Array.Resize(ref innerList, size);
-            Array.Resize(ref innerKeys, size);
-            Array.Resize(ref lookup, size);
-            Array.Resize(ref revLookup, size);
+            Array.Resize(ref _Values, size);
+            Array.Resize(ref _Keys, size);
+            Array.Resize(ref keyToIdx, size);
+            Array.Resize(ref idxToKey, size);
 
             _size = size;
         }
@@ -408,25 +420,25 @@ namespace WizLib
 
         private void RemoveAt(int index, bool suppressEvent)
         {
-            var item = innerList[index];
-            var idx = revLookup[index];
+            var item = _Values[index];
+            var idx = idxToKey[index];
 
-            ArrOp(ArrayOperation.Remove, ref innerList, oldIndex: index);
-            ArrOp(ArrayOperation.Remove, ref revLookup, oldIndex: index);
-            ArrOp(ArrayOperation.Remove, ref innerKeys, oldIndex: idx);
-            ArrOp(ArrayOperation.Remove, ref lookup, oldIndex: idx);
+            ArrOp(ArrayOperation.Remove, ref _Values, oldIndex: index);
+            ArrOp(ArrayOperation.Remove, ref idxToKey, oldIndex: index);
+            ArrOp(ArrayOperation.Remove, ref _Keys, oldIndex: idx);
+            ArrOp(ArrayOperation.Remove, ref keyToIdx, oldIndex: idx);
 
             --_size;
 
             for (int g = 0; g < _size; g++)
             {
-                if (lookup[g] >= index)
+                if (keyToIdx[g] >= index)
                 {
-                    lookup[g]--;
+                    keyToIdx[g]--;
                 }
-                if (revLookup[g] >= idx)
+                if (idxToKey[g] >= idx)
                 {
-                    revLookup[g]--;
+                    idxToKey[g]--;
                 }
             }
             
@@ -458,26 +470,26 @@ namespace WizLib
         private void Add(TValue item, bool suppressEvent)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
-            int x = innerList?.Length ?? 0;
+            int x = _size;
 
             TKey key = (TKey)keyProp.GetValue(item);
 
             if (ContainsKey(key))
                 throw new ArgumentException($"Collection already contains key '{key}'.", nameof(item));
 
-            Array.Resize(ref innerList, x + 1);
-            Array.Resize(ref revLookup, x + 1);
+            Array.Resize(ref _Values, x + 1);
+            Array.Resize(ref idxToKey, x + 1);
 
             int idx;
             Search(key, out idx, true);
 
-            lookup[idx] = x;
-            innerKeys[idx] = key;
+            keyToIdx[idx] = x;
+            _Keys[idx] = key;
 
-            innerList[x] = item;
-            revLookup[x] = idx;
+            _Values[x] = item;
+            idxToKey[x] = idx;
 
-            _size = x + 1;
+            _size++;
 
             // KeySort();
 
@@ -503,10 +515,10 @@ namespace WizLib
 
             var ns = x + c;
 
-            Array.Resize(ref innerList, ns);
-            Array.Resize(ref revLookup, ns);
-            Array.Resize(ref innerKeys, ns);
-            Array.Resize(ref lookup, ns);
+            Array.Resize(ref _Values, ns);
+            Array.Resize(ref idxToKey, ns);
+            Array.Resize(ref _Keys, ns);
+            Array.Resize(ref keyToIdx, ns);
 
             foreach (var item in items)
             {
@@ -520,11 +532,11 @@ namespace WizLib
                 int idx;
                 Search(key, out idx, true, true, x);
 
-                lookup[idx] = x;
-                innerKeys[idx] = key;
+                keyToIdx[idx] = x;
+                _Keys[idx] = key;
 
-                innerList[x] = item;
-                revLookup[x] = idx;
+                idxToKey[x] = idx;
+                _Values[x] = item;
 
                 x++;
             }
@@ -542,10 +554,12 @@ namespace WizLib
 
         public void Clear()
         {
-            Array.Clear(innerList, 0, innerList?.Length ?? 0);
+            if (_Values == null) return;
 
-            innerList = null;
-            innerKeys = null;
+            Array.Clear(_Values, 0, _Values?.Length ?? 0);
+
+            _Values = null;
+            _Keys = null;
             _size = 0;
 
             if (CollectionChanged != null)
@@ -565,7 +579,7 @@ namespace WizLib
 
         public void CopyTo(TValue[] array, int arrayIndex)
         {
-            innerList.CopyTo(array, arrayIndex);
+            _Values.CopyTo(array, arrayIndex);
         }
 
         /// <summary>
@@ -575,7 +589,7 @@ namespace WizLib
         /// <param name="newIndex">The destination item index.</param>
         public void Move(int oldIndex, int newIndex)
         {
-            var item = innerList[oldIndex];
+            var item = _Values[oldIndex];
 
             RemoveAt(oldIndex, true);
             Insert(newIndex, item, true);
@@ -790,7 +804,7 @@ namespace WizLib
         private int Partition(Comparison<TValue> comparison, int lo, int hi)
         {
             var ppt = (hi + lo) / 2;
-            var pivot = innerList[ppt];
+            var pivot = _Values[ppt];
 
             int i = lo - 1;
             int j = hi + 1;
@@ -802,20 +816,20 @@ namespace WizLib
                     do
                     {
                         ++i;
-                    } while (i <= hi && comparison(innerList[i], pivot) < 0);
+                    } while (i <= hi && comparison(_Values[i], pivot) < 0);
                     do
                     {
                         --j;
-                    } while (j >= 0 && comparison(innerList[j], pivot) > 0);
+                    } while (j >= 0 && comparison(_Values[j], pivot) > 0);
 
                     if (i >= j) return j;
 
-                    TValue sw = innerList[i];
-                    innerList[i] = innerList[j];
-                    innerList[j] = sw;
+                    TValue sw = _Values[i];
+                    _Values[i] = _Values[j];
+                    _Values[j] = sw;
 
-                    lookup[revLookup[i]] = i;
-                    lookup[revLookup[j]] = j;
+                    keyToIdx[idxToKey[i]] = i;
+                    keyToIdx[idxToKey[j]] = j;
                 }
                 catch (Exception ex)
                 {
@@ -828,7 +842,7 @@ namespace WizLib
         {
             var ppt = (hi + lo) / 2;
 
-            TKey kpivot = innerKeys[ppt];
+            TKey kpivot = _Keys[ppt];
 
             int i = lo - 1;
             int j = hi + 1;
@@ -845,26 +859,26 @@ namespace WizLib
                 do
                 {
                     ++i;
-                } while (i <= hi && def(innerKeys[i], kpivot) < 0);
+                } while (i <= hi && def(_Keys[i], kpivot) < 0);
                 do
                 {
                     --j;
-                } while (j >= 0 && def(innerKeys[j], kpivot) > 0);
+                } while (j >= 0 && def(_Keys[j], kpivot) > 0);
 
                 if (i >= j) return j;
 
-                TKey sw = innerKeys[i];
+                TKey sw = _Keys[i];
 
-                innerKeys[i] = innerKeys[j];
-                innerKeys[j] = sw;
+                _Keys[i] = _Keys[j];
+                _Keys[j] = sw;
 
-                int si = lookup[i];
+                int si = keyToIdx[i];
 
-                lookup[i] = lookup[j];
-                lookup[j] = si;
+                keyToIdx[i] = keyToIdx[j];
+                keyToIdx[j] = si;
 
-                revLookup[lookup[i]] = i;
-                revLookup[lookup[j]] = j;
+                idxToKey[keyToIdx[i]] = i;
+                idxToKey[keyToIdx[j]] = j;
             }
         }
 
@@ -877,7 +891,7 @@ namespace WizLib
             return Search(value, out _, false);
         }
 
-        private int Search(TKey value, out int index, bool insert, bool expanded = false, int virtSize = -1)
+        private int Search(TKey value, out int keyIdx, bool insert, bool expanded = false, int virtSize = -1)
         {
             int max = virtSize > -1 ? virtSize - 1 : _size - 1;
             int lo = 0, hi = max;
@@ -886,7 +900,20 @@ namespace WizLib
 
             if (def == null)
             {
-                def = new Comparison<TKey>((a, b) => ((IComparable<TKey>)a).CompareTo(b));
+                def = new Comparison<TKey>((a, b) => {
+
+                    if (a == null && b == null) return 0;
+
+                    if (a == null && b != null) return -1;
+
+                    if (a != null && b == null) return 1;
+
+                    return ((IComparable<TKey>)a).CompareTo(b);
+
+
+                    });
+
+                KeyComparison = def;
             }
 
             while (true)
@@ -897,38 +924,32 @@ namespace WizLib
                 {
                     if (insert)
                     {
-                        if (hi >= 0)
-                        {
-                            p = def(value, innerKeys[hi]);
-                            if (p < 0) p = hi - 1;
-                            else if (p > 0) p = hi + 1;
-                        }                       
-                        else
-                        {
-                            p = 0;
-                        }
-
-                        if (max >= 0)
-                        {
-                            for (int g = p; g <= max; g++)
-                            {
-                                revLookup[lookup[g]]++;
-                            }
-                        }
+                        p = GetInsertIndex(lo, hi, value, def, max);
 
                         ArrOp(ArrayOperation.Insert, 
-                            ref innerKeys, 
+                            ref _Keys, 
                             newIndex: p, 
                             expanded: expanded, 
                             virtSize: max + 1);
 
                         ArrOp(ArrayOperation.Insert,
-                            ref lookup,
+                            ref keyToIdx,
                             newIndex: p,
                             expanded: expanded,
                             virtSize: max + 1);
 
-                        index = p;
+                        if (max >= 0)
+                        {
+                            for (int g = 0; g <= max + 1; g++)
+                            {
+                                if (idxToKey[g] >= p)
+                                {
+                                    idxToKey[g]++;
+                                }
+                            }
+                        }
+
+                        keyIdx = p;
                         return -1;
                     }
                     break;
@@ -937,15 +958,15 @@ namespace WizLib
                 p = ((hi + lo) / 2);
 
 
-                TKey elem = innerKeys[p];
+                TKey elem = _Keys[p];
                 int c;
 
                 c = def(value, elem);
 
                 if (c == 0)
                 {
-                    index = p;
-                    return lookup[p];
+                    keyIdx = p;
+                    return keyToIdx[p];
                 }
                 else if (c < 0)
                 {
@@ -957,8 +978,41 @@ namespace WizLib
                 }
             }
 
-            index = -1;
+            keyIdx = -1;
             return -1;
+        }
+
+        private int GetInsertIndex(int inLo, int inHi, TKey value, Comparison<TKey> comp, int max)
+        {
+            if (max < 0) return 0;
+
+            int lo = inLo <= inHi ? inLo : inHi;
+            int hi = inLo >= inHi ? inLo : inHi;
+
+            int i, test;
+            int lt = -1;
+
+            for (i = lo - 1; i <= hi + 1; i++)
+            {
+                if (i >= 0 && i <= max)
+                {
+                    test = comp(value, _Keys[i]);
+
+                    if (test <= 0)
+                    {
+                        return i;
+                    }
+                    else
+                    {
+                        lt = i;
+                    }
+                }
+            }
+        
+            if (lt != -1) 
+                return lt + 1;
+            else
+                return i;
         }
 
         #endregion
@@ -1057,9 +1111,9 @@ namespace WizLib
                 objs = list;               
             }
 
-            public KeyValuePair<TKey, TValue> Current => new KeyValuePair<TKey, TValue>(objs.innerKeys[objs.revLookup[idx]], objs.innerList[idx]);
+            public KeyValuePair<TKey, TValue> Current => new KeyValuePair<TKey, TValue>(objs._Keys[objs.idxToKey[idx]], objs._Values[idx]);
 
-            object IEnumerator.Current => new KeyValuePair<TKey, TValue>(objs.innerKeys[objs.revLookup[idx]], objs.innerList[idx]);
+            object IEnumerator.Current => new KeyValuePair<TKey, TValue>(objs._Keys[objs.idxToKey[idx]], objs._Values[idx]);
 
             public void Dispose()
             {
