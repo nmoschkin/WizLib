@@ -684,13 +684,17 @@
                     <RowDefinition />
                 </Grid.RowDefinitions>
 
-                <CheckBox Margin="0,8,0,8" IsChecked="{Binding AutoWatch, Mode=TwoWay}">
-                    <TextBlock Text="{i18n:Translate ResourceKey=LiveMonitor}" />
+                <CheckBox
+                    Margin="0,8,0,8"
+                    VerticalAlignment="Center"
+                    IsChecked="{Binding AutoWatch, Mode=TwoWay}">
+                    <TextBlock VerticalAlignment="Center" Text="{i18n:Translate ResourceKey=LiveMonitor}" />
                 </CheckBox>
 
                 <TextBlock
                     Grid.Row="1"
                     Margin="0,2,0,8"
+                    VerticalAlignment="Center"
                     Text="{i18n:Translate ResourceKey=RefreshInterval,
                                           AddColon=True}" />
 
@@ -699,6 +703,8 @@
                     Grid.Row="1"
                     Grid.Column="1"
                     Margin="0,2,0,8"
+                    Padding="4"
+                    VerticalAlignment="Center"
                     Text="{Binding Interval, Mode=TwoWay, Converter={StaticResource intConv}}" />
 
             </Grid>

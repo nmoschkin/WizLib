@@ -10,24 +10,24 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace WizLib
 {
-    public class MACADDRESSConverter : JsonConverter<MACADDRESS>
+    public class MACAddressConverter : JsonConverter<MACAddress>
     {
-        public override MACADDRESS ReadJson(JsonReader reader, Type objectType, [AllowNull] MACADDRESS existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override MACAddress ReadJson(JsonReader reader, Type objectType, [AllowNull] MACAddress existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             if (reader.Value is string s)
             {
-                MACADDRESS p;
+                MACAddress p;
 
-                if (MACADDRESS.TryParse(s, "", out p))
+                if (MACAddress.TryParse(s, "", out p))
                 {
                     return p;
                 }
             }
 
-            return MACADDRESS.None;
+            return MACAddress.None;
         }
 
-        public override void WriteJson(JsonWriter writer, [AllowNull] MACADDRESS value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, [AllowNull] MACAddress value, JsonSerializer serializer)
         {
             if (value == null)
             {

@@ -15,7 +15,7 @@ namespace WizLib.Profiles
         private int roomId;
         private string name;
 
-        private ObservableDictionary<MACADDRESS, BulbItem> bulbs = new ObservableDictionary<MACADDRESS, BulbItem>(nameof(Bulb.MACAddress));
+        private ObservableDictionary<MACAddress, BulbItem> bulbs = new ObservableDictionary<MACAddress, BulbItem>(nameof(Bulb.MACAddress));
 
         private ObservableDictionary<Guid, Scene> scenes = new ObservableDictionary<Guid, Scene>(nameof(Scene.SceneId));
 
@@ -65,7 +65,7 @@ namespace WizLib.Profiles
         }
 
         [JsonProperty("bulbs")]
-        public ObservableDictionary<MACADDRESS, BulbItem> Bulbs
+        public ObservableDictionary<MACAddress, BulbItem> Bulbs
         {
             get => bulbs;
             set

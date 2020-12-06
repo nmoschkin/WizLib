@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -29,33 +30,30 @@ namespace WizLib
     /// <remarks></remarks>
     [StructLayout(LayoutKind.Sequential)]
     [TypeConverter(typeof(ExpandableObjectConverter))]
-    public struct MACADDRESS : IComparable<MACADDRESS>
+    public struct MACAddress : IComparable<MACAddress>, IComparable<PhysicalAddress>, IComparable<byte[]>
     {
         public const int MAX_ADAPTER_ADDRESS_LENGTH = 8;
 
-        public static readonly MACADDRESS None = new MACADDRESS(new byte[0]);
+        public static readonly MACAddress None = new MACAddress(new byte[0]);
 
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = MAX_ADAPTER_ADDRESS_LENGTH)]
         private byte[] address;
 
-        public static bool operator ==(MACADDRESS val1, MACADDRESS val2)
+        public static bool operator ==(MACAddress val1, MACAddress val2)
         {
             return val1.Equals(val2);
         }
 
-        public static bool operator !=(MACADDRESS val1, MACADDRESS val2)
+        public static bool operator !=(MACAddress val1, MACAddress val2)
         {
             return !val1.Equals(val2);
         }
 
-        public static MACADDRESS Parse(string s) => Parse(s, "");
+        public static MACAddress Parse(string s) => Parse(s, "");
 
-        public static MACADDRESS Parse(string s, string partition)
+        public static MACAddress Parse(string s, string partition)
         {
-            if (!string.IsNullOrEmpty(partition))
-                s = s.Replace(partition, "").Trim();
-            else s = s.Trim();
-
+            s = s.Replace(":", "").Replace("-", "").Replace(" ", "").Trim();
 
             List<string> sv = new List<string>();
 
@@ -75,12 +73,12 @@ namespace WizLib
                 j--;
             }
 
-            return new MACADDRESS(b);
+            return new MACAddress(b);
         }
 
-        public static bool TryParse(string s, out MACADDRESS value) => TryParse(s, "", out value);
+        public static bool TryParse(string s, out MACAddress value) => TryParse(s, "", out value);
 
-        public static bool TryParse(string s, string partition, out MACADDRESS value)
+        public static bool TryParse(string s, string partition, out MACAddress value)
         {
             try
             {
@@ -89,36 +87,54 @@ namespace WizLib
             }
             catch
             {
-                value = new MACADDRESS();
+                value = new MACAddress();
                 return false;
             }
         }
 
-        public MACADDRESS(byte[] hwaddr)
+        public MACAddress(byte[] address)
         {
-            int i, c = hwaddr?.Length - 1 ?? throw new ArgumentNullException(nameof(hwaddr));
+            int i, c = address?.Length - 1 ?? throw new ArgumentNullException(nameof(address));
 
-            address = new byte[MAX_ADAPTER_ADDRESS_LENGTH];
-            int j = address.Length - 1;
+            this.address = new byte[MAX_ADAPTER_ADDRESS_LENGTH];
+            int j = this.address.Length - 1;
 
             for (i = c; i >= 0; i--)
             {
-                address[j] = hwaddr[i];
+                this.address[j] = address[i];
                 j--;
             }
         }
 
-        public static explicit operator byte[](MACADDRESS obj) => obj.address ?? new byte[0];
+        public static explicit operator byte[](MACAddress obj) => obj.address ?? new byte[0];
 
         public byte[] GetAddressBytes()
         {
-            return address ?? new byte[0];
+            var addr = address ?? new byte[0];
+            int x = 0, c = addr.Length;
+
+            for (int i = 0; i < c; i++)
+            {
+                if (addr[i] != 0) break;
+                x++;
+            }
+
+            var outaddr = new byte[c - x];
+
+            Array.Copy(addr, x, outaddr, 0, c - x);
+
+            return outaddr;
         }
 
-        public int CompareTo(MACADDRESS other)
+
+        public int CompareTo(PhysicalAddress other) => CompareTo(other?.GetAddressBytes());
+
+        public int CompareTo(MACAddress other) => /*string.Compare(ToString(), other.ToString());*/ CompareTo(other.GetAddressBytes());
+
+        public int CompareTo(byte[] other)
         {
-            byte[] b1 = address ?? new byte[0];
-            byte[] b2 = other.address ?? new byte[0];
+            byte[] b1 = GetAddressBytes();
+            byte[] b2 = other ?? new byte[0];
 
             if (b1.Length != b2.Length) return b1.Length - b2.Length;
 
@@ -131,7 +147,6 @@ namespace WizLib
             }
 
             return 0;
-
         }
 
         public override bool Equals(object obj)
@@ -139,7 +154,7 @@ namespace WizLib
             byte[] b1 = address ?? new byte[0];
             byte[] b2;
 
-            if (obj is MACADDRESS ma)
+            if (obj is MACAddress ma)
             {
                 b2 = ma.address ?? new byte[0];
             }
@@ -149,7 +164,7 @@ namespace WizLib
             }
             else if (obj is string s)
             {
-                MACADDRESS other;
+                MACAddress other;
 
                 bool b = TryParse(s, out other);
                 if (!b) return false;
@@ -180,31 +195,32 @@ namespace WizLib
 
         public override string ToString()
         {
-            return ToString(false, true);
+            //return ToString(true, false);
+            return ToString(true, true, ":");
         }
 
 
-        public static explicit operator string(MACADDRESS b)
+        public static explicit operator string(MACAddress b)
         {
             return b.ToString();
         }
 
-        public static explicit operator MACADDRESS(string s)
+        public static explicit operator MACAddress(string s)
         {
             return Parse(s);
         }
 
-        public static explicit operator System.Net.NetworkInformation.PhysicalAddress(MACADDRESS src)
+        public static explicit operator System.Net.NetworkInformation.PhysicalAddress(MACAddress src)
         {
-            return new System.Net.NetworkInformation.PhysicalAddress(src.address);
+            return new System.Net.NetworkInformation.PhysicalAddress(src.GetAddressBytes());
         }
 
-        public static explicit operator MACADDRESS(System.Net.NetworkInformation.PhysicalAddress src)
+        public static explicit operator MACAddress(System.Net.NetworkInformation.PhysicalAddress src)
         {
-            return new MACADDRESS(src?.GetAddressBytes() ?? new byte[0]);
+            return new MACAddress(src?.GetAddressBytes() ?? new byte[0]);
         }
 
-        public string ToString(bool delineate, bool upperCase = false)
+        public string ToString(bool delineate, bool upperCase = false, string sep = ":")
         {
             int i, c = address?.Length ?? 0;
             if (c == 0) return "None";
@@ -233,7 +249,7 @@ namespace WizLib
 
                 if (delineate)
                 {
-                    if (sb.Length != 0) sb.Append(':');
+                    if (sb.Length != 0) sb.Append(sep);
                 }
 
                 sb.Append(address[i].ToString(fmt));

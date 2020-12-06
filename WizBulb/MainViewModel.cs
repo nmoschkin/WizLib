@@ -51,7 +51,7 @@ namespace WizBulb
 
         private AdaptersCollection adapters;
 
-        private ObservableDictionary<MACADDRESS, Bulb> allBulbs = new ObservableDictionary<MACADDRESS, Bulb>(nameof(Bulb.MACAddress));
+        private ObservableDictionary<MACAddress, Bulb> allBulbs = new ObservableDictionary<MACAddress, Bulb>(nameof(Bulb.MACAddress));
 
         private bool autoChangeBulb = true;
 
@@ -59,7 +59,7 @@ namespace WizBulb
 
         private bool btnsEnabled = true;
 
-        private ObservableDictionary<MACADDRESS, Bulb> bulbs = new ObservableDictionary<MACADDRESS, Bulb>(nameof(Bulb.MACAddress));
+        private ObservableDictionary<MACAddress, Bulb> bulbs = new ObservableDictionary<MACAddress, Bulb>(nameof(Bulb.MACAddress));
 
         private bool changed = false;
 
@@ -157,7 +157,7 @@ namespace WizBulb
             }
         }
 
-        public ObservableDictionary<MACADDRESS, Bulb> Bulbs
+        public ObservableDictionary<MACAddress, Bulb> Bulbs
         {
             get => bulbs;
             protected set
@@ -294,7 +294,7 @@ namespace WizBulb
                         }
                         else
                         {
-                            Bulbs = new ObservableDictionary<MACADDRESS, Bulb>(
+                            Bulbs = new ObservableDictionary<MACAddress, Bulb>(
                                             nameof(Bulb.MACAddress),
                                             await BulbItem.CreateBulbsFromInterfaceList(selRoom.Bulbs)
                                             );
@@ -430,7 +430,7 @@ namespace WizBulb
                 Profile = (Profile)j.Deserialize();
                 Homes = new ObservableDictionary<int, Home>(nameof(Home.HomeId), Profile.Homes);
 
-                allBulbs = Bulbs = new ObservableDictionary<MACADDRESS, Bulb>(
+                allBulbs = Bulbs = new ObservableDictionary<MACAddress, Bulb>(
                                 nameof(Bulb.MACAddress),
                                 await BulbItem.CreateBulbsFromInterfaceList(Profile.Bulbs)
                                 );
@@ -614,50 +614,46 @@ namespace WizBulb
 
             var disp = App.Current.Dispatcher;
 
-            var bulbs = await Bulb.ScanForBulbs(selAdapter.IPV4Address, (MACADDRESS)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
+            var bulbs = await Bulb.ScanForBulbs(selAdapter.IPV4Address, (MACAddress)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
             async (b) =>
             {
-                //await disp.Invoke(async () =>
-                //{
-                //    if (!Bulbs.ContainsKey(b.MACAddress))
-                //    {
-                //        int? selRoom = null;
-
-                //        if (SelectedRoom != null)
-                //        {
-                //            selRoom = SelectedRoom.RoomId;
-                //            if (b.Settings.RoomId != selRoom) return;
-                //        }
-
-                //        Bulbs.Add(b);
-                //    }
-                //    else
-                //    {
-                //        await b.GetPilot();
-                //    }
-                //});
-            });
-
-            foreach(var b in bulbs)
-            {
-                if (!Bulbs.ContainsKey(b.MACAddress))
+                try
                 {
-                    int? selRoom = null;
-
-                    if (SelectedRoom != null)
+                    await disp.Invoke(async () =>
                     {
-                        selRoom = SelectedRoom.RoomId;
-                        if (b.Settings.RoomId != selRoom) return;
-                    }
+                        try
+                        {
+                            if (!Bulbs.ContainsKey(b.MACAddress))
+                            {
+                                int? selRoom = null;
 
-                    Bulbs.Add(b);
+                                if (SelectedRoom != null)
+                                {
+                                    selRoom = SelectedRoom.RoomId;
+                                    if (b.Settings.RoomId != selRoom) return;
+                                }
+
+                                Bulbs.Add(b);
+                            }
+
+                            if (allBulbs != Bulbs && !allBulbs.ContainsKey(b.MACAddress))
+                            {
+                                allBulbs.Add(b);
+                            }
+
+                            await b.GetPilot();
+                        }
+                        catch
+                        {
+                            return;
+                        }
+                    });
                 }
-                else
+                catch
                 {
-                    await b.GetPilot();
+                    return;
                 }
-
-            }
+            });
         }
 
         public virtual async Task RefreshSelected()
@@ -713,7 +709,7 @@ namespace WizBulb
 
             if (Bulbs == null)
             {
-                Bulbs = new ObservableDictionary<MACADDRESS, Bulb>(nameof(Bulb.MACAddress));
+                Bulbs = new ObservableDictionary<MACAddress, Bulb>(nameof(Bulb.MACAddress));
             }
             else
             {
@@ -728,7 +724,7 @@ namespace WizBulb
                 var aw = AutoWatch;
                 if (aw) WatchAbort();
 
-                await Bulb.ScanForBulbs(selAdapter.IPV4Address, (MACADDRESS)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
+                await Bulb.ScanForBulbs(selAdapter.IPV4Address, (MACAddress)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
                 (b) =>
                 {
                     disp.Invoke(() =>

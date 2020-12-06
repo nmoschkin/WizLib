@@ -49,19 +49,19 @@ namespace WizLib
 {
 
     /// <summary>
-    /// <see cref="MACADDRESS"/> extensions.
+    /// <see cref="MACAddress"/> extensions.
     /// </summary>
     public static class BulbAddressExtensions
     {
         /// <summary>
-        /// Make a copy of an <see cref="MACADDRESS"/>
+        /// Make a copy of an <see cref="MACAddress"/>
         /// </summary>
-        /// <param name="original"><see cref="MACADDRESS"/> object to copy.</param>
-        /// <returns>A copy of original <see cref="MACADDRESS"/>.</returns>
-        public static MACADDRESS Clone(this MACADDRESS original)
+        /// <param name="original"><see cref="MACAddress"/> object to copy.</param>
+        /// <returns>A copy of original <see cref="MACAddress"/>.</returns>
+        public static MACAddress Clone(this MACAddress original)
         {
-            if (original == null) return MACADDRESS.None;
-            return new MACADDRESS(original.GetAddressBytes());
+            if (original == null) return MACAddress.None;
+            return new MACAddress(original.GetAddressBytes());
         }
     }
 

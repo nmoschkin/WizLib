@@ -80,7 +80,7 @@ namespace WizLib
 
         #region Protected Fields
 
-        protected static Dictionary<MACADDRESS, Bulb> bulbCache = new Dictionary<MACADDRESS, Bulb>();
+        protected static Dictionary<MACAddress, Bulb> bulbCache = new Dictionary<MACAddress, Bulb>();
         protected static bool allUdpActive;
         protected bool udpActive;
         protected IPAddress addr;
@@ -177,7 +177,7 @@ namespace WizLib
             });
         }
 
-        public Bulb(MACADDRESS macAddr)
+        public Bulb(MACAddress macAddr)
         {
             port = DefaultPort;
 
@@ -207,7 +207,7 @@ namespace WizLib
 
         #region Public Properties
 
-        public static Dictionary<MACADDRESS, Bulb> BulbCache
+        public static Dictionary<MACAddress, Bulb> BulbCache
         {
             get => bulbCache;
             protected set
@@ -332,9 +332,9 @@ namespace WizLib
         /// <summary>
         /// Gets or sets the MAC address for the bulb.
         /// </summary>
-        public virtual MACADDRESS MACAddress
+        public virtual MACAddress MACAddress
         {
-            get => Settings?.MACAddress ?? MACADDRESS.None;
+            get => Settings?.MACAddress ?? MACAddress.None;
             internal set
             {
                 if (Settings == null)
@@ -540,9 +540,9 @@ namespace WizLib
         /// <param name="localAddr">Local address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <param name="localMac">Local hardware address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <returns></returns>
-        public static async Task<Bulb> GetBulbByMacAddress(string macAddr, ScanCondition scan, IPAddress localAddr = null, MACADDRESS? localMac = null)
+        public static async Task<Bulb> GetBulbByMacAddress(string macAddr, ScanCondition scan, IPAddress localAddr = null, MACAddress? localMac = null)
         {
-            return await GetBulbByMacAddress(MACADDRESS.Parse(macAddr), scan, localAddr, localMac);
+            return await GetBulbByMacAddress(MACAddress.Parse(macAddr), scan, localAddr, localMac);
         }
 
         /// <summary>
@@ -553,7 +553,7 @@ namespace WizLib
         /// <param name="localAddr">Local address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <param name="localMac">Local hardware address for the scan.  If none is provided, one will be automatically selected.</param>
         /// <returns></returns>
-        public static async Task<Bulb> GetBulbByMacAddress(MACADDRESS macAddr, ScanCondition scan, IPAddress localAddr = null, MACADDRESS? localMac = null)
+        public static async Task<Bulb> GetBulbByMacAddress(MACAddress macAddr, ScanCondition scan, IPAddress localAddr = null, MACAddress? localMac = null)
         {
             var smac = macAddr;
 
@@ -603,7 +603,7 @@ namespace WizLib
         /// <returns></returns>
         public static async Task<List<Bulb>> ScanForBulbs(
             IPAddress localAddr,
-            MACADDRESS? macAddr,
+            MACAddress? macAddr,
             ScanMode mode = ScanMode.GetSystemConfig,
             int timeout = 5000,
             BulbScanCallback callback = null)
@@ -624,7 +624,7 @@ namespace WizLib
 
             if (macAddr == null)
             {
-                macAddr = (MACADDRESS)NetworkHelper.DefaultLocalMAC;
+                macAddr = (MACAddress)NetworkHelper.DefaultLocalMAC;
             }
 
             var udpClient = new UdpClient();
@@ -663,9 +663,9 @@ namespace WizLib
                                 p = new BulbCommand(json);
                                 if (p.Result?.MACAddress == null) continue;
 
-                                var smac = p.Result?.MACAddress ?? MACADDRESS.None;
+                                var smac = p.Result?.MACAddress ?? MACAddress.None;
 
-                                if (smac != MACADDRESS.None && BulbCache.ContainsKey(smac))
+                                if (smac != MACAddress.None && BulbCache.ContainsKey(smac))
                                 {
                                     bulb = BulbCache[smac];
 

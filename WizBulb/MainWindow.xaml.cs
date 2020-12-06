@@ -72,34 +72,33 @@ namespace WizBulb
 
             InitializeComponent();
 
-            ObservableDictionary<string, TestClass> testing = new ObservableDictionary<string, TestClass>(nameof(TestClass.Key));
+            //ObservableDictionary<string, TestClass> testing = new ObservableDictionary<string, TestClass>(nameof(TestClass.Key));
 
-            testing.Add(new TestClass("A1", "Bob"));
-            testing.Add(new TestClass("B1", "Sally"));
-            testing.Add(new TestClass("B3", "Janice"));
-            testing.Add(new TestClass("A3", "Doug"));
-            testing.Add(new TestClass("E2", "Michael"));
-            testing.Add(new TestClass("C1", "Henry"));
-            testing.Add(new TestClass("D1", "Jeff"));
-            testing.Add(new TestClass("E1", "Nate"));
-            testing.Add(new TestClass("A2", "Gina"));
-            testing.Add(new TestClass("F2", "Philip"));
-            testing.Add(new TestClass("F1", "Martha"));
-            testing.Add(new TestClass("D3", "Gilbert"));
-            testing.Add(new TestClass("E3", "Robert"));
-            testing.Add(new TestClass("F3", "Daniel"));
-            testing.Add(new TestClass("B2", "Frank"));
-            testing.Add(new TestClass("C2", "Delilah"));
-            testing.Add(new TestClass("C3", "Adrienne"));
-            testing.Add(new TestClass("D2", "Sean"));
-            testing.Add(new TestClass("F4", "Elaine"));
-
-
+            //testing.Add(new TestClass("A1", "Bob"));
+            //testing.Add(new TestClass("B1", "Sally"));
+            //testing.Add(new TestClass("B3", "Janice"));
+            //testing.Add(new TestClass("A3", "Doug"));
+            //testing.Add(new TestClass("E2", "Michael"));
+            //testing.Add(new TestClass("C1", "Henry"));
+            //testing.Add(new TestClass("D1", "Jeff"));
+            //testing.Add(new TestClass("E1", "Nate"));
+            //testing.Add(new TestClass("A2", "Gina"));
+            //testing.Add(new TestClass("F2", "Philip"));
+            //testing.Add(new TestClass("F1", "Martha"));
+            //testing.Add(new TestClass("D3", "Gilbert"));
+            //testing.Add(new TestClass("E3", "Robert"));
+            //testing.Add(new TestClass("F3", "Daniel"));
+            //testing.Add(new TestClass("B2", "Frank"));
+            //testing.Add(new TestClass("C2", "Delilah"));
+            //testing.Add(new TestClass("C3", "Adrienne"));
+            //testing.Add(new TestClass("D2", "Sean"));
+            //testing.Add(new TestClass("F4", "Elaine"));
 
 
-
-
-
+            //testing.Sort((a, b) =>
+            //{
+            //    return string.Compare(a.Title, b.Title);
+            //});
 
             var loc = Settings.LastWindowLocation;
             var size = Settings.LastWindowSize;
@@ -141,18 +140,17 @@ namespace WizBulb
             Height = size.Height;
             mnuLoadLast.IsChecked = Settings.OpenLastOnStartup;
 
-            _ = vm.RefreshAll();
-            //_ = vm.RefreshAll().ContinueWith(async (t) =>
-            //{
-            //    await App.Current.Dispatcher.Invoke(async () =>
-            //    {
-            //        if (Settings.OpenLastOnStartup && await vm.LoadLastProject())
-            //        {
-            //            await Task.Delay(vm.Interval);
-            //            vm.WatchBulbs();
-            //        }
-            //    });
-            //});
+            _ = vm.RefreshAll().ContinueWith(async (t) =>
+            {
+                await App.Current.Dispatcher.Invoke(async () =>
+                {
+                    if (Settings.OpenLastOnStartup && await vm.LoadLastProject())
+                    {
+                        await Task.Delay(vm.Interval);
+                        vm.WatchBulbs();
+                    }
+                });
+            });
 
         }
 
@@ -176,8 +174,7 @@ namespace WizBulb
         private void BtnScan_Click(object sender, RoutedEventArgs e)
         {
 
-            _ = vm.RefreshOnce();
-            //vm.ScanForBulbs();
+            vm.ScanForBulbs();
         }
 
         private void BulbList_Click(object sender, RoutedEventArgs e)
@@ -244,7 +241,7 @@ namespace WizBulb
             {
                 if (direction == ListSortDirection.Descending)
                 {
-                    if (BulbList.ItemsSource is ObservableDictionary<MACADDRESS, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<MACAddress, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {
@@ -255,7 +252,7 @@ namespace WizBulb
                 }
                 else
                 {
-                    if (BulbList.ItemsSource is ObservableDictionary<MACADDRESS, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<MACAddress, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {
@@ -269,7 +266,7 @@ namespace WizBulb
             {
                 if (direction == ListSortDirection.Descending)
                 {
-                    if (BulbList.ItemsSource is ObservableDictionary<MACADDRESS, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<MACAddress, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {
@@ -280,7 +277,7 @@ namespace WizBulb
                 }
                 else
                 {
-                    if (BulbList.ItemsSource is ObservableDictionary<MACADDRESS, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<MACAddress, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {
@@ -294,22 +291,22 @@ namespace WizBulb
             {
                 if (direction == ListSortDirection.Descending)
                 {
-                    if (BulbList.ItemsSource is ObservableDictionary<MACADDRESS, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<MACAddress, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {
-                            return -string.Compare(a.MACAddress.ToString(), b.MACAddress.ToString());
+                            return -a.MACAddress.CompareTo(b.MACAddress);
                         });
 
                     }
                 }
                 else
                 {
-                    if (BulbList.ItemsSource is ObservableDictionary<MACADDRESS, Bulb> c)
+                    if (BulbList.ItemsSource is ObservableDictionary<MACAddress, Bulb> c)
                     {
                         c.Sort((a, b) =>
                         {
-                            return string.Compare(a.MACAddress.ToString(), b.MACAddress.ToString());
+                            return a.MACAddress.CompareTo(b.MACAddress);
                         });
 
                     }

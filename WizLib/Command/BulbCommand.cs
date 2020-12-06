@@ -24,8 +24,8 @@ namespace WizLib
             new JsonConverter[] 
             { 
                 new TupleConverter(), 
-                new MACADDRESSConverter(), 
-                new ODJsonConverter<MACADDRESS, Bulb>(nameof(Bulb.MACAddress)), 
+                new MACAddressConverter(), 
+                new ODJsonConverter<MACAddress, Bulb>(nameof(Bulb.MACAddress)), 
                 new ODJsonConverter<int, Room>(nameof(Room.RoomId)),
                 new ODJsonConverter<int, Home>(nameof(Home.HomeId)),
                 new ODJsonConverter<Guid, Scene>(nameof(Scene.SceneId)),

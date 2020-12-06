@@ -78,7 +78,7 @@ namespace WizLib
 
         private string src;
 
-        private MACADDRESS? macaddr;
+        private MACAddress? macaddr;
 
         private bool? success;
 
@@ -715,7 +715,7 @@ namespace WizLib
         /// Bulb Mac address.
         /// </summary>
         [JsonProperty("mac")]
-        public MACADDRESS? MACAddress
+        public MACAddress? MACAddress
         {
             get => macaddr;
             set
