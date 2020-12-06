@@ -24,6 +24,8 @@ using DataTools.Hardware.Network;
 using WizBulb.Localization.Resources;
 using System.ComponentModel;
 using System.Collections;
+using System.Runtime.CompilerServices;
+using WizLib.Profiles;
 
 namespace WizBulb
 {
@@ -46,19 +48,37 @@ namespace WizBulb
 
         #region Public Constructors
 
-        class TestClass
+        class TestClass : ObservableBase
         {
-            public string Title { get; set; }
+            private string title;
 
-            public string Key { get; set; }
+            public string Title
+            {
+                get => title;
+                set
+                {
+                    SetProperty(ref title, value);
+                }
+            }
 
+            private string key;
+
+            [KeyProperty]
+            public string Key
+            {
+                get => key;
+                set
+                {
+                    SetProperty(ref key, value);
+                }
+            }
 
             public TestClass(string key, string value)
             {
                 Title = value;
                 Key = key;
             }
-
+           
             public override string ToString()
             {
                 return $"{Key}: {Title}";
@@ -72,7 +92,7 @@ namespace WizBulb
 
             InitializeComponent();
 
-            //ObservableDictionary<string, TestClass> testing = new ObservableDictionary<string, TestClass>(nameof(TestClass.Key));
+            //ObservableDictionary<string, TestClass> testing = new ObservableDictionary<string, TestClass>();
 
             //testing.Add(new TestClass("A1", "Bob"));
             //testing.Add(new TestClass("B1", "Sally"));
@@ -94,11 +114,19 @@ namespace WizBulb
             //testing.Add(new TestClass("D2", "Sean"));
             //testing.Add(new TestClass("F4", "Elaine"));
 
+            //var v = testing.Keys;
 
             //testing.Sort((a, b) =>
             //{
             //    return string.Compare(a.Title, b.Title);
             //});
+
+            //var f4 = testing["F4"];
+
+            //f4.Key = "CF2";
+
+            //f4 = testing["CF2"];
+
 
             var loc = Settings.LastWindowLocation;
             var size = Settings.LastWindowSize;
@@ -139,6 +167,9 @@ namespace WizBulb
             Width = size.Width;
             Height = size.Height;
             mnuLoadLast.IsChecked = Settings.OpenLastOnStartup;
+
+            //vm.RefreshNetworks();
+            //_ = vm.LoadLastProject();
 
             _ = vm.RefreshAll().ContinueWith(async (t) =>
             {

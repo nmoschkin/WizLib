@@ -332,6 +332,7 @@ namespace WizLib
         /// <summary>
         /// Gets or sets the MAC address for the bulb.
         /// </summary>
+        [KeyProperty()]
         public virtual MACAddress MACAddress
         {
             get => Settings?.MACAddress ?? MACAddress.None;
