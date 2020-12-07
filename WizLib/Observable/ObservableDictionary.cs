@@ -412,7 +412,7 @@ namespace WizLib.Observable
                 var x = new TKey[_size];
                 if (_size == 0) return x;
 
-                Array.Copy(_Keys, x, _size);
+                Array.ConstrainedCopy(_Keys, 0, x, 0, _size);
                 return x;
             }
         }
@@ -746,7 +746,7 @@ namespace WizLib.Observable
             var x = new TValue[_size];
             if (_size == 0) return x;
 
-            Array.Copy(_Values, x, _size);
+            Array.ConstrainedCopy(_Values, 0, x, 0, _size);
             return x;
         }
         public bool TryGetValue(TKey key, out TValue value)
@@ -1029,12 +1029,12 @@ namespace WizLib.Observable
 
                 if (oldIndex > 0)
                 {
-                    Array.Copy(arr, 0, a2, 0, oldIndex);
+                    Array.ConstrainedCopy(arr, 0, a2, 0, oldIndex);
                 }
 
                 if (oldIndex < c - 1)
                 {
-                    Array.Copy(arr, oldIndex + 1, a2, oldIndex, d - oldIndex);
+                    Array.ConstrainedCopy(arr, oldIndex + 1, a2, oldIndex, d - oldIndex);
                 }
 
                 arr = a2;
@@ -1053,7 +1053,7 @@ namespace WizLib.Observable
 
                     if (newIndex > 0)
                     {
-                        Array.Copy(arr, 0, a2, 0, newIndex);
+                        Array.ConstrainedCopy(arr, 0, a2, 0, newIndex);
                     }
                 }
                 else
@@ -1063,7 +1063,7 @@ namespace WizLib.Observable
 
                 if (newIndex < c - 1)
                 {
-                    Array.Copy(arr, newIndex, a2, newIndex + 1, d - newIndex);
+                    Array.ConstrainedCopy(arr, newIndex, a2, newIndex + 1, d - newIndex);
                 }
                 arr = a2;
             }
@@ -1076,16 +1076,16 @@ namespace WizLib.Observable
                     i = newIndex - oldIndex;
                     a2 = new U[i];
 
-                    Array.Copy(arr, oldIndex + 1, a2, 0, i);
-                    Array.Copy(a2, 0, arr, oldIndex, i);
+                    Array.ConstrainedCopy(arr, oldIndex + 1, a2, 0, i);
+                    Array.ConstrainedCopy(a2, 0, arr, oldIndex, i);
                 }
                 else
                 {
                     i = oldIndex - newIndex;
                     a2 = new U[i];
 
-                    Array.Copy(arr, newIndex, a2, 0, i);
-                    Array.Copy(a2, 0, arr, newIndex + 1, i);
+                    Array.ConstrainedCopy(arr, newIndex, a2, 0, i);
+                    Array.ConstrainedCopy(a2, 0, arr, newIndex + 1, i);
                 }
 
                 arr[newIndex] = elem;
