@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
+using WizLib.Observable;
+
 namespace WizLib.Profiles
 {
     public class Room : ObservableBase
@@ -15,11 +17,11 @@ namespace WizLib.Profiles
         private int roomId;
         private string name;
 
-        private ObservableDictionary<MACAddress, BulbItem> bulbs = new ObservableDictionary<MACAddress, BulbItem>(nameof(Bulb.MACAddress));
+        private ObservableDictionary<MACAddress, BulbItem> bulbs = new ObservableDictionary<MACAddress, BulbItem>();
 
         private ObservableDictionary<Guid, Scene> scenes = new ObservableDictionary<Guid, Scene>(nameof(Scene.SceneId));
 
-        public static ObservableDictionary<int, Room> RoomCache { get; private set; } = new ObservableDictionary<int, Room>(nameof(RoomId));
+        public static ObservableDictionary<int, Room> RoomCache { get; private set; } = new ObservableDictionary<int, Room>();
 
 
         private Scene currentScene;
@@ -34,6 +36,7 @@ namespace WizLib.Profiles
             }
         }
 
+        [KeyProperty]
         [JsonProperty("roomId")]
         public int RoomId
         {

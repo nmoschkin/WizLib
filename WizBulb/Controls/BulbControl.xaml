@@ -5,15 +5,142 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:WizBulb.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DesignHeight="128"
+    d:DesignWidth="400"
+    Background="SlateBlue"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+
+            <Style x:Key="TitleStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="SmallStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+
+            <Style x:Key="MediumStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
     <Grid>
-
-
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <TextBlock
+            x:Name="lblName"
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Margin="8,2"
+            Style="{StaticResource TitleStyle}"
+            Text="{Binding Name}" />
+
+        <TextBlock
+            x:Name="lblLocation"
+            Grid.Row="0"
+            Grid.Column="1"
+            Margin="8,2"
+            HorizontalAlignment="Right"
+            Style="{StaticResource MediumStyle}"
+            Text="{Binding Location}" />
+
+        <TextBlock
+            x:Name="lblMode"
+            Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Margin="8,2"
+            Style="{StaticResource SmallStyle}"
+            Text="Current Mode" />
+
+        <TextBlock
+            x:Name="lblModeType"
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Margin="8,2"
+            Style="{StaticResource SmallStyle}"
+            Text="Mode Type" />
+
+        <TextBlock
+            x:Name="lblBulbType"
+            Grid.Row="3"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Margin="8,2"
+            Style="{StaticResource SmallStyle}"
+            Text="Philips Color &amp; Tunable White A19" />
+
+        <StackPanel
+            Grid.Row="1"
+            Grid.Column="1"
+            Margin="8,2"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+
+            <TextBlock
+                x:Name="lblColorName"
+                Margin="8,2"
+                HorizontalAlignment="Right"
+                Style="{StaticResource SmallStyle}"
+                Text="Current Color" />
+
+            <Label
+                x:Name="lblColorSwatch"
+                Width="16"
+                Height="16"
+                Background="White"
+                BorderBrush="Black"
+                BorderThickness="1" />
+
+        </StackPanel>
+
+        <TextBlock
+            x:Name="lblBrightness"
+            Grid.Row="2"
+            Grid.Column="1"
+            Margin="8,2"
+            HorizontalAlignment="Right"
+            Style="{StaticResource SmallStyle}"
+            Text="Brightness" />
+
+
+        <TextBlock
+            x:Name="lblSpeed"
+            Grid.Row="3"
+            Grid.Column="1"
+            Margin="8,2"
+            HorizontalAlignment="Right"
+            Style="{StaticResource SmallStyle}"
+            Text="Speed" />
+
+
     </Grid>
 </UserControl>

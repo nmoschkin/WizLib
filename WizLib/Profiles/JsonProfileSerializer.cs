@@ -53,8 +53,14 @@ namespace WizLib.Profiles
             string json = File.ReadAllText(Filename);
 
             IProfile p = new Profile();
-
-            JsonConvert.PopulateObject(json, p, BulbCommand.DefaultJsonSettings);
+            try
+            {
+                JsonConvert.PopulateObject(json, p, BulbCommand.DefaultJsonSettings);
+            }
+            catch
+            {
+                return null;
+            }
 
             foreach (var bulb in p.Bulbs)
             {
@@ -90,7 +96,7 @@ namespace WizLib.Profiles
 
         public void Serialize(IProfile profile)
         {
-            string json = JsonConvert.SerializeObject(profile, BulbCommand.DefaultJsonSettings);
+            string json = JsonConvert.SerializeObject(profile, BulbCommand.DefaultProjectJsonSettings);
 
             if (string.IsNullOrEmpty(Filename)) throw new NullReferenceException(nameof(Filename));
             if (File.Exists(Filename))

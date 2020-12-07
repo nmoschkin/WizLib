@@ -13,7 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Runtime.InteropServices;   
+using System.Runtime.InteropServices;
 using WizLib;
 using System.Net.Sockets;
 using System.Net;
@@ -25,8 +25,8 @@ using WizBulb.Localization.Resources;
 using System.ComponentModel;
 using System.Collections;
 using System.Runtime.CompilerServices;
-using WizLib.Profiles;
 using DataTools.Win32Api;
+using WizLib.Observable;
 
 namespace WizBulb
 {
@@ -100,32 +100,53 @@ namespace WizBulb
                 return (a.Color.IntValue - b.Color.IntValue);
             });
 
-            //int c = lonc.Count - 1;
-            //int i;
+            int c = lonc.Count - 1;
+            int i;
 
-            //for (i = c; i >= 0; i--)
-            //{
-            //    if (i > 0)
-            //    {
-            //        if (lonc[i].Color.IntValue == lonc[i - 1].Color.IntValue)
-            //        {
-            //            lonc.RemoveAt(i);
-            //        }
-            //    }
-            //}
+            for (i = c; i >= 0; i--)
+            {
+                if (i > 0)
+                {
+                    if (lonc[i].Color.IntValue == lonc[i - 1].Color.IntValue)
+                    {
+                        lonc.RemoveAt(i);
+                    }
+                }
+            }
 
-            //var testing = new ObservableDictionary<UniColor, NamedColor>(nameof(NamedColor.Color), lonc);
+            var testing = new ObservableDictionary<UniColor, NamedColor>(nameof(NamedColor.Color), new Comparison<UniColor>((a, b) => {
+                    return (a.IntValue - b.IntValue);
+                    }));
+            foreach (var ck in lonc)
+            {
+                testing.Add(ck);
+            }
 
+            int ecount = 0;
+            foreach (var k in testing.Keys)
+            {
 
-            var c1 = lonc[200];
+                if (k.Value == 0xff000000)
+                {
+                    ecount++;
+                    
+                    var erl = "Break";
 
-            HSVDATA h = new HSVDATA();
-            HSVDATA h2 = new HSVDATA();
+                }
+            }
 
-            DataTools.Desktop.ColorMath.ColorToHSV(c1, ref h);
-            UniColor c2 = DataTools.Desktop.ColorMath.HSVToColorRaw(h);
+            var nc1 = lonc[343];
 
-            DataTools.Desktop.ColorMath.ColorToHSV(c2, ref h2);
+            HSVDATA h;
+            HSVDATA h2;
+
+            h = DataTools.Desktop.ColorMath.ColorToHSV(nc1);
+            UniColor clr = DataTools.Desktop.ColorMath.HSVToColorRaw(h);
+
+            h2 = DataTools.Desktop.ColorMath.ColorToHSV(clr);
+            NamedColor nc2 = NamedColor.FindColor(clr);
+
+            nc1 = testing[clr];
 
 
             //ObservableDictionary<string, TestClass> testing = new ObservableDictionary<string, TestClass>();

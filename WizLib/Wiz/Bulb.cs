@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 
 using WizLib.Helpers;
 using WizLib.Localization;
+using WizLib.Observable;
 using WizLib.Profiles;
 
 namespace WizLib
@@ -257,6 +258,37 @@ namespace WizLib
             }
         }
 
+        /// <summary>
+        /// Gets or sets the brightness of the bulb
+        /// using whole values between 10 and 100.
+        /// </summary>
+        /// <remarks>
+        /// This property is live.
+        /// </remarks>
+        public virtual Color? Color
+        {
+            get => Settings?.Color;
+            set
+            {
+                if (Settings == null)
+                {
+                    Settings = new BulbParams();
+                }
+
+                if (Settings.Color == value) return;
+
+                Settings.Color = value;
+                if (value == null) return;
+
+                var stg = new BulbCommand(BulbMethod.SetPilot);
+                stg.Params.Color = value;
+
+                _ = SendCommand(stg);
+            }
+        }
+
+
+
         public virtual int? HomeId
         {
             get => settings?.HomeId;
@@ -326,6 +358,35 @@ namespace WizLib
                 stg.Params.State = value;
 
                 _ = SendCommand(stg).ContinueWith((a) => _ = GetPilot());
+            }
+        }
+
+
+        /// <summary>
+        /// Gets or sets the light mode (scene Id)
+        /// </summary>
+        /// <remarks>
+        /// This property is live.
+        /// </remarks>
+        public virtual LightMode LightMode
+        {
+            get => Settings?.LightModeInfo;
+            set
+            {
+                if (Settings == null)
+                {
+                    Settings = new BulbParams();
+                }
+
+                if (Settings.Scene == value) return;
+
+                Settings.Scene = value;
+                if (value == null) return;
+
+                var stg = new BulbCommand(BulbMethod.SetPilot);
+                stg.Params.Scene = value;
+
+                _ = SendCommand(stg);
             }
         }
 

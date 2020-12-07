@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 
 using WizLib.Localization;
 using System.Collections.ObjectModel;
+using WizLib.Observable;
 
 namespace WizLib
 {
@@ -57,7 +58,7 @@ namespace WizLib
     /// <summary>
     /// WiZ bulb built-in and custom lighting mode (scene) class.
     /// </summary>
-    public class LightMode : IComparable<LightMode>
+    public class LightMode : IComparable<LightMode>, IComparable<int>
     {
         public const int UserStartIdx = 2000;
 
@@ -138,6 +139,7 @@ namespace WizLib
         /// <summary>
         /// The lighting mode code.
         /// </summary>
+        [KeyProperty]
         [JsonProperty("code")]
         public int Code
         {
@@ -426,6 +428,11 @@ namespace WizLib
         public override string ToString()
         {
             return $"{code}: {name}";
+        }
+
+        public int CompareTo(int other)
+        {
+            return code - other;
         }
 
         /// <summary>

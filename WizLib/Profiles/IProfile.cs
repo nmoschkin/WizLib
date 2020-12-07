@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using WizLib.Observable;    
+
 namespace WizLib.Profiles
 {
 
@@ -13,11 +15,11 @@ namespace WizLib.Profiles
 
         string Name { get; set; }
 
-        List<Home> Homes { get; set; }
+        ObservableDictionary<int, Home> Homes { get; set; }
 
-        List<LightMode> CustomLightModes { get; set; }
+        ObservableDictionary<int, LightMode> CustomLightModes { get; set; }
 
-        List<BulbItem> Bulbs { get; set; }
+        ObservableDictionary<MACAddress, BulbItem> Bulbs { get; set; }
 
         void AddUpdateBulbs(IEnumerable<IBulb> bulbs, bool removeMissing);
 

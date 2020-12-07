@@ -8,17 +8,19 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
+using WizLib.Observable;
+
 namespace WizLib.Profiles
 {
     public class Profile : ObservableBase, IProfile
     {
         private Guid projectId;
 
-        private List<BulbItem> bulbs;
+        private ObservableDictionary<MACAddress, BulbItem> bulbs;
 
-        private List<Home> homes;
+        private ObservableDictionary<int, Home> homes;
 
-        private List<LightMode> lightModes;
+        private ObservableDictionary<int, LightMode> lightModes;
 
         private string name;
 
@@ -41,9 +43,9 @@ namespace WizLib.Profiles
             this.projectId = projectId;
             this.name = name;
 
-            bulbs = new List<BulbItem>();
-            homes = new List<Home>();
-            lightModes = new List<LightMode>();
+            bulbs = new ObservableDictionary<MACAddress, BulbItem>();
+            homes = new ObservableDictionary<int, Home>();
+            lightModes = new ObservableDictionary<int, LightMode>();
         }
 
         [JsonProperty("projectId")]
@@ -67,7 +69,7 @@ namespace WizLib.Profiles
         }
 
         [JsonProperty("homes")]
-        public List<Home> Homes
+        public ObservableDictionary<int, Home> Homes
         {
             get => homes;
             set
@@ -77,7 +79,7 @@ namespace WizLib.Profiles
         }
 
         [JsonProperty("lightModes")]
-        public List<LightMode> CustomLightModes
+        public ObservableDictionary<int, LightMode> CustomLightModes
         {
             get => lightModes;
             set
@@ -87,7 +89,7 @@ namespace WizLib.Profiles
         }
 
         [JsonProperty("bulbs")]
-        public List<BulbItem> Bulbs
+        public ObservableDictionary<MACAddress, BulbItem> Bulbs
         {
             get => bulbs;
             set
@@ -103,13 +105,13 @@ namespace WizLib.Profiles
             foreach (var b in bulbs)
             {
                 bchk = false;
-                if (b.MACAddress == null) continue;
+                if (b.MACAddress == MACAddress.None) continue;
 
                 foreach (var b2 in this.bulbs)
                 {
-                    if (b2.MACAddress == null) continue;
+                    if (b2.MACAddress == MACAddress.None) continue;
 
-                    if (b.MACAddress.ToString() == b2.MACAddress.ToString())
+                    if (b.MACAddress == b2.MACAddress)
                     {
                         b2.Name = b.Name;
                         b2.IPAddress = b.IPAddress.Clone();
@@ -117,6 +119,7 @@ namespace WizLib.Profiles
                         b2.HomeId = b.HomeId;
                         b2.RoomId = b.RoomId;
                         bchk = true;
+
                         break;
                     }
                 }
@@ -131,14 +134,16 @@ namespace WizLib.Profiles
             {
                 int c = this.bulbs.Count - 1;
                 int i;
+                var bwalk = this.bulbs as IList<BulbItem>;
 
                 for (i = c; i >= 0; i--)
                 {
-                    var b = this.bulbs[i];
+                    var b = bwalk[i];
+
                     bchk = false;
                     foreach (var b2 in bulbs)
                     {
-                        if (b.MACAddress.ToString() == b2.MACAddress.ToString())
+                        if (b.MACAddress == b2.MACAddress)
                         {
                             bchk = true;
                             break;
@@ -147,7 +152,7 @@ namespace WizLib.Profiles
 
                     if (!bchk)
                     {
-                        this.bulbs.RemoveAt(i);
+                        bwalk.RemoveAt(i);
                     }
                 }
             }

@@ -8,11 +8,10 @@ using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WizLib.Profiles;
 using System.Threading;
 using Newtonsoft.Json;
 
-namespace WizLib
+namespace WizLib.Observable
 {
     /// <summary>
     /// Class or property decorator to specify the key property.
@@ -212,13 +211,13 @@ namespace WizLib
             }
             else
             {
-                if (!(typeof(IComparable<TKey>).IsAssignableFrom(typeof(TKey))))
+                if (!typeof(IComparable<TKey>).IsAssignableFrom(typeof(TKey)))
                 {
                     foreach (var c in Comparers)
                     {
                         if (typeof(IComparer<TKey>).IsAssignableFrom(c))
                         {
-                            var tc = (IComparer<TKey>)System.Reflection.Assembly.GetExecutingAssembly().CreateInstance(c.FullName);
+                            var tc = (IComparer<TKey>)Assembly.GetExecutingAssembly().CreateInstance(c.FullName);
 
                             keycomp = new Comparison<TKey>(tc.Compare);
                             break;
@@ -267,12 +266,19 @@ namespace WizLib
 
             if (keyProp == null)
             {
-                throw new ArgumentException(nameof(propertyName), $"Property '{propertyName}' property does not exist in '{typeof(TValue).Name}'.");
+                if (propertyName == null)
+                {
+                    throw new ArgumentException(nameof(propertyName), $"No key property specified or found in '{typeof(TValue).FullName}'.");
+                }
+                else
+                {
+                    throw new ArgumentException(nameof(propertyName), $"Property '{propertyName}' does not exist in '{typeof(TValue).FullName}'.");
+                }
             }
 
             if (keyProp.PropertyType != typeof(TKey))
             {
-                throw new ArgumentException(nameof(propertyName), $"Property '{propertyName}' property is not of type '{typeof(TKey).Name}'.");
+                throw new ArgumentException(nameof(propertyName), $"Property '{propertyName}' is not of type '{typeof(TKey).FullName}'.");
             }
 
 
@@ -387,7 +393,7 @@ namespace WizLib
         [JsonIgnore]
         public PropertyInfo KeyProperty
         {
-            get => keyProp;        
+            get => keyProp;
         }
 
         /// <summary>
@@ -586,7 +592,7 @@ namespace WizLib
         public bool ContainsKey(TKey key, out TValue item)
         {
             int i;
-           
+
             i = Search(key);
 
             if (i != -1)
@@ -839,7 +845,7 @@ namespace WizLib
             int x = _size;
 
             var ns = x + c;
-            var zp = ns + (_autoBuffer - (ns % _autoBuffer));
+            var zp = ns + (_autoBuffer - ns % _autoBuffer);
 
             EnsureCapacity(zp);
 
@@ -913,7 +919,7 @@ namespace WizLib
             idxToKey[index] = idx;
 
             _size++;
-            
+
             if (!suppressEvent && CollectionChanged != null)
             {
                 var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index);
@@ -944,7 +950,7 @@ namespace WizLib
                     idxToKey[g]--;
                 }
             }
-            
+
             if (!suppressEvent && CollectionChanged != null)
             {
                 var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index);
@@ -991,12 +997,12 @@ namespace WizLib
         /// Inserting is up to the caller.
         /// </remarks>
         private void ArrOp<U>(
-            ArrayOperation mode, 
-            ref U[] arr, 
-            int oldIndex = -1, 
+            ArrayOperation mode,
+            ref U[] arr,
+            int oldIndex = -1,
             int newIndex = -1,
             bool expanded = false,
-            int virtSize = -1) 
+            int virtSize = -1)
         {
             U[] a2;
 
@@ -1012,12 +1018,11 @@ namespace WizLib
                 c = d = arr?.Length ?? 0;
             }
 
-            if (mode != ArrayOperation.Insert && (oldIndex < 0 || oldIndex >= arr.Length)) 
+            if (mode != ArrayOperation.Insert && (oldIndex < 0 || oldIndex >= arr.Length))
                 throw new ArgumentOutOfRangeException(nameof(oldIndex));
 
             if (mode == ArrayOperation.Remove) // remove
             {
-
                 --d;
 
                 a2 = new U[d]; // dest array
@@ -1027,7 +1032,7 @@ namespace WizLib
                     Array.Copy(arr, 0, a2, 0, oldIndex);
                 }
 
-                if (oldIndex < (c - 1))
+                if (oldIndex < c - 1)
                 {
                     Array.Copy(arr, oldIndex + 1, a2, oldIndex, d - oldIndex);
                 }
@@ -1036,9 +1041,9 @@ namespace WizLib
                 return;
             }
 
-            if (newIndex < 0 || newIndex > (arr?.Length ?? 0)) 
+            if (newIndex < 0 || newIndex > (arr?.Length ?? 0))
                 throw new ArgumentOutOfRangeException(nameof(newIndex));
-            
+
             if (mode == ArrayOperation.Insert) // insert 
             {
                 ++c;
@@ -1056,15 +1061,15 @@ namespace WizLib
                     a2 = arr;
                 }
 
-                if (newIndex < (c - 1))
+                if (newIndex < c - 1)
                 {
                     Array.Copy(arr, newIndex, a2, newIndex + 1, d - newIndex);
                 }
                 arr = a2;
-            }            
+            }
             else if (mode == ArrayOperation.Move) // move
             {
-                U elem = arr[oldIndex]; 
+                U elem = arr[oldIndex];
 
                 if (oldIndex < newIndex)
                 {
@@ -1247,7 +1252,7 @@ namespace WizLib
             return Search(value, out _, false);
         }
 
-        private int Search(TKey value, out int keyIdx, bool insert) //, bool expanded = false, int virtSize = -1)
+        private int Search(TKey value, out int keyIdx, bool insert) 
         {
             int max = _size - 1;
             int lo = 0, hi = max;
@@ -1256,7 +1261,8 @@ namespace WizLib
 
             if (def == null)
             {
-                def = new Comparison<TKey>((a, b) => {
+                def = new Comparison<TKey>((a, b) =>
+                {
 
                     if (a == null && b == null) return 0;
 
@@ -1267,7 +1273,7 @@ namespace WizLib
                     return ((IComparable<TKey>)a).CompareTo(b);
 
 
-                    });
+                });
 
                 KeyComparison = def;
             }
@@ -1284,15 +1290,15 @@ namespace WizLib
                         {
                             EnsureCapacity(_size + _autoBuffer);
                         }
-                        
+
                         bool expanded = _capacity > _size;
 
                         p = GetInsertIndex(lo, hi, value, def, max);
-                        
-                        ArrOp(ArrayOperation.Insert, 
-                            ref _Keys, 
-                            newIndex: p, 
-                            expanded: expanded, 
+
+                        ArrOp(ArrayOperation.Insert,
+                            ref _Keys,
+                            newIndex: p,
+                            expanded: expanded,
                             virtSize: max + 1);
 
                         ArrOp(ArrayOperation.Insert,
@@ -1318,7 +1324,7 @@ namespace WizLib
                     break;
                 }
 
-                p = ((hi + lo) / 2);
+                p = (hi + lo) / 2;
 
 
                 TKey elem = _Keys[p];
@@ -1354,7 +1360,7 @@ namespace WizLib
             if (!Equals(kchk, key))
                 throw new InvalidOperationException($"Key must match value of '{keyPropName}' property.");
 
-            this.Add(value);
+            Add(value);
         }
 
         public void Add(KeyValuePair<TKey, TValue> item) => Add(item.Key, item.Value);
@@ -1392,7 +1398,7 @@ namespace WizLib
         {
             TKey kchk = (TKey)keyProp.GetValue(item.Value);
             if (!Equals(kchk, item.Key))
-                throw new InvalidOperationException("Key must match key property of object.");
+                throw new InvalidOperationException($"Key must match value of '{keyPropName}' property.");
 
             return Remove(item.Value);
         }

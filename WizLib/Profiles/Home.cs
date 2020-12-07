@@ -10,6 +10,7 @@ using System.Reflection;
 
 using Newtonsoft.Json;
 using System.Collections;
+using WizLib.Observable;
 
 namespace WizLib.Profiles
 {
@@ -22,6 +23,9 @@ namespace WizLib.Profiles
 
         private ObservableDictionary<int, Room> rooms = new ObservableDictionary<int, Room>(nameof(Room.RoomId));
 
+        public static ObservableDictionary<int, Home> HomeCache { get; private set; } = new ObservableDictionary<int, Home>();
+
+
         [JsonProperty("rooms")]
         public ObservableDictionary<int, Room> Rooms
         {
@@ -32,13 +36,25 @@ namespace WizLib.Profiles
             }
         }
 
+        [KeyProperty]
         [JsonProperty("homeId")]
         public int HomeId
         {
             get => homeId;
             set
             {
-                SetProperty(ref homeId, value);
+
+                if (SetProperty(ref homeId, value))
+                {
+                    if (HomeCache.ContainsKey(homeId))
+                    {
+                        HomeCache[homeId] = this;
+                    }
+                    else
+                    {
+                        HomeCache.Add(this);
+                    }
+                }
             }
         }
 
@@ -75,7 +91,7 @@ namespace WizLib.Profiles
                         {
                             var smac = b.MACAddress;
 
-                            if (smac != null && nr.Bulbs.ContainsKey(smac))
+                            if (smac != MACAddress.None && nr.Bulbs.ContainsKey(smac))
                             {
                                 nr.Bulbs[smac] = nb;
                             }

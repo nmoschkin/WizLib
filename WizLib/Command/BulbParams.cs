@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.NetworkInformation;
-using WizLib.Profiles;
+using WizLib.Observable;
 
 namespace WizLib
 {

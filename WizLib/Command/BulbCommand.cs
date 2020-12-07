@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
+using WizLib.Observable;
 using WizLib.Profiles;
 
 namespace WizLib

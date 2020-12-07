@@ -18,6 +18,7 @@ using WizBulb.Localization.Resources;
 using WizLib;
 using WizLib.Profiles;
 using System.Net.NetworkInformation;
+using WizLib.Observable;
 
 namespace WizBulb
 {
@@ -422,35 +423,47 @@ namespace WizBulb
 
                 if (!File.Exists(fileName)) return false;
 
-                var j = new JsonProfileSerializer(fileName);
-
-                SelectedRoom = null;
-                SelectedHome = null;
-
-                Profile = (Profile)j.Deserialize();
-                Homes = new ObservableDictionary<int, Home>(nameof(Home.HomeId), Profile.Homes);
-
-                allBulbs = Bulbs = new ObservableDictionary<MACAddress, Bulb>(
-                                nameof(Bulb.MACAddress),
-                                await BulbItem.CreateBulbsFromInterfaceList(Profile.Bulbs)
-                                );
-
-                allBulbs.Sort((a, b) =>
+                try
                 {
-                    int x = (a.Settings.RoomId ?? 0) - (b.Settings.RoomId ?? 0);
-                    if (x == 0)
+                    var j = new JsonProfileSerializer(fileName);
+
+                    SelectedRoom = null;
+                    SelectedHome = null;
+
+                    var prof = (Profile)j.Deserialize();
+
+                    if (prof == null) return false;
+
+                    Profile = prof;
+                    
+                    Homes = new ObservableDictionary<int, Home>(nameof(Home.HomeId), Profile.Homes);
+
+                    allBulbs = Bulbs = new ObservableDictionary<MACAddress, Bulb>(
+                                    nameof(Bulb.MACAddress),
+                                    await BulbItem.CreateBulbsFromInterfaceList(Profile.Bulbs)
+                                    );
+
+                    allBulbs.Sort((a, b) =>
                     {
-                        x = string.Compare(a.Name, b.Name);
-                    }
-                    return x;
-                });
+                        int x = (a.Settings.RoomId ?? 0) - (b.Settings.RoomId ?? 0);
+                        if (x == 0)
+                        {
+                            x = string.Compare(a.Name, b.Name);
+                        }
+                        return x;
+                    });
 
-                Settings.AddRecentFile(fileName, Profile.ProjectId);
-                ProjectFile = fileName;
+                    Settings.AddRecentFile(fileName, Profile.ProjectId);
+                    ProjectFile = fileName;
 
-                OnPropertyChanged(nameof(WindowTitle));
+                    OnPropertyChanged(nameof(WindowTitle));
 
-                return true;
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
 
             }
             catch
@@ -468,7 +481,7 @@ namespace WizBulb
             var j = new JsonProfileSerializer(fileName);
 
             Profile.AddUpdateBulbs(allBulbs, true);
-            Profile.Homes = new List<Home>(Homes);
+            Profile.Homes = new ObservableDictionary<int, Home>(Homes);
 
             j.Serialize(Profile);
 
@@ -496,7 +509,7 @@ namespace WizBulb
             var j = new JsonProfileSerializer(fileName);
 
             Profile.AddUpdateBulbs(allBulbs, true);
-            Profile.Homes = new List<Home>(Homes);
+            Profile.Homes = new ObservableDictionary<int, Home>(Homes);
 
             j.Serialize(Profile);
 

@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
+using WizLib.Observable;
+
 namespace WizLib
 {
     public class ODJsonConverter<TKey, TValue> : JsonConverter<ObservableDictionary<TKey, TValue>> where TValue : class
@@ -21,21 +23,15 @@ namespace WizLib
         {
             ObservableDictionary<TKey, TValue> des = new ObservableDictionary<TKey, TValue>(PropertyName);
 
-            //var d = reader.Depth;
+            try
+            {
+                serializer.Populate(reader, des);
+            }
+            catch
+            {
 
-            //reader.Read();
-            //int c = 0;
+            }
 
-            //do
-            //{
-            //    var s = reader.Path;
-            //    reader.Read();
-            //} while (reader.Depth > d);
-
-
-
-
-            serializer.Populate(reader, des);
             return des;
         }
 

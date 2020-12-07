@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
+using WizLib.Observable;
+
 namespace WizLib.Profiles
 {
     public class Scene : ObservableBase
