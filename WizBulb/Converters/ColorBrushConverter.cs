@@ -12,19 +12,46 @@ namespace WizBulb.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is System.Drawing.Color c)
+            
+            if (targetType.IsAssignableTo(typeof(System.Windows.Media.Brush)))
             {
-                DataTools.Desktop.Unified.UniColor unc = c;
-                var mcc = (System.Windows.Media.Color)unc;
-                return new System.Windows.Media.SolidColorBrush(mcc);
+
+                if (value is System.Drawing.Color c)
+                {
+                    DataTools.Desktop.Unified.UniColor unc = c;
+                    var mcc = (System.Windows.Media.Color)unc;
+                    return new System.Windows.Media.SolidColorBrush(mcc);
+                }
+                else if (value is System.Windows.Media.Color mc)
+                {
+                    return new System.Windows.Media.SolidColorBrush(mc);
+                }
+                else
+                {
+                    return null;
+                }
+
             }
-            else if (value is System.Windows.Media.Color mc)
+            else if (targetType == typeof(string))
             {
-                return new System.Windows.Media.SolidColorBrush(mc);
+                if (value is System.Drawing.Color c)
+                {
+                    DataTools.Desktop.Unified.UniColor unc = c;
+                    return unc.ToString();
+                }
+                else if (value is System.Windows.Media.Color mc)
+                {
+                    DataTools.Desktop.Unified.UniColor unc = mc;
+                    return unc.ToString();
+                }
+                else
+                {
+                    return value?.ToString();
+                } 
             }
             else
             {
-                return null;
+                return value;
             }
         }
 

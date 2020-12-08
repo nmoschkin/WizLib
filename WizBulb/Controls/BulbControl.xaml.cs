@@ -39,7 +39,7 @@ namespace WizBulb.Controls
             if (o is BulbControl ctrl) 
             {
 
-                if (!e.OldValue.Equals(e.NewValue))
+                if (e.OldValue == null || !e.OldValue.Equals(e.NewValue))
                 {
                     if (e.OldValue is Bulb oldBulb)
                     {
@@ -67,8 +67,7 @@ namespace WizBulb.Controls
 
         private void RefreshBulb()
         {
-            
-
+            this.DataContext = ItemSource;
         }
 
 

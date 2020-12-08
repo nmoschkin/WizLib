@@ -437,7 +437,7 @@ namespace WizLib
             set
             {
                 SetProperty(ref sceneId, value);
-                OnPropertyChanged("LightModeInfo");
+                OnPropertyChanged(nameof(LightModeInfo));
             }
         }
 

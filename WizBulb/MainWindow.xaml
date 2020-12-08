@@ -109,7 +109,7 @@
             <ColumnDefinition />
             <ColumnDefinition />
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition />
+            <ColumnDefinition Width="220" />
         </Grid.ColumnDefinitions>
 
 
@@ -209,6 +209,88 @@
                 </TabItem.Header>
 
                 <ListView
+                    x:Name="BulbList"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2"
+                    Margin="0"
+                    BorderThickness="0"
+                    GridViewColumnHeader.Click="BulbList_Click"
+                    ItemsSource="{Binding Bulbs}"
+                    KeyDown="BulbList_KeyDown"
+                    MouseDoubleClick="BulbList_MouseDoubleClick"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    SelectedItem="{Binding SelectedBulb, Mode=TwoWay}"
+                    SelectionChanged="BulbList_SelectionChanged">
+
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem
+                                x:Name="mnuPing"
+                                Click="mnuPing_Click"
+                                Header="{i18n:Translate ResourceKey=PingBulb}" />
+
+                            <MenuItem
+                                x:Name="mnuRename"
+                                Click="mnuRename_Click"
+                                Header="{i18n:Translate ResourceKey=Rename}" />
+
+                            <Separator />
+
+                            <MenuItem x:Name="mnuModes" Header="{i18n:Translate ResourceKey=LightModes}" />
+
+
+                            <Separator />
+
+                            <MenuItem
+                                x:Name="mnuPower"
+                                Header="{i18n:Translate ResourceKey=IsPoweredOn}"
+                                IsCheckable="True"
+                                IsChecked="{Binding SelectedBulb.IsPoweredOn, Mode=TwoWay}" />
+
+                            <Separator />
+
+                            <MenuItem
+                                x:Name="mnuRefresh"
+                                Click="mnuRefresh_Click"
+                                Header="{i18n:Translate ResourceKey=Refresh}" />
+
+                            <MenuItem
+                                x:Name="mnuRefreshAll"
+                                Click="mnuRefreshAll_Click"
+                                Header="{i18n:Translate ResourceKey=RefreshAll}" />
+
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <controls:BulbControl
+                                Width="400"
+                                Height="128"
+                                ItemSource="{Binding}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="Height" Value="128" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                IsItemsHost="True"
+                                Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+
+                    </ListView.ItemsPanel>
+                </ListView>
+
+
+
+            </TabItem>
+
+            <!--<ListView
                     x:Name="BulbList"
                     Grid.Row="1"
                     Grid.ColumnSpan="2"
@@ -318,7 +400,7 @@
 
 
 
-            </TabItem>
+            </TabItem>-->
             <TabItem>
                 <TabItem.Header>
                     <Grid>

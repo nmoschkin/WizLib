@@ -316,6 +316,28 @@ namespace WizLib
         }
 
         /// <summary>
+        /// Returns the light mode matching the name, or null.
+        /// </summary>
+        /// <param name="type">Type of light modes to return.</param>
+        /// <returns>A <see cref="List{LightMode}"/> collection.</returns>
+        public static LightMode GetLightModeByName(string name)
+        {
+            LightMode ret = null;
+            if (name == null) return null;
+
+            foreach (var l in modes)
+            {
+
+                if (l.Value.Name.ToLower() == name.ToLower())
+                {
+                    return l.Value;
+                }
+            }
+
+            return ret;
+        }
+
+        /// <summary>
         /// Returns all light modes in the global catalog of the specified type.
         /// </summary>
         /// <param name="type">Type of light modes to return.</param>
@@ -394,6 +416,48 @@ namespace WizLib
                 default:
                     return type.ToString();
             }
+        }
+
+        /// <summary>
+        /// Gets a LightModeType based on its description.
+        /// </summary>
+        /// <param name="desc"></param>
+        /// <returns></returns>
+        public static LightModeType GetLightModeTypeByDescription(string desc)
+        {
+            if (desc == AppResources.Simple)
+            {
+                return LightModeType.Simple;
+            }
+            else if (desc == AppResources.Dynamic)
+            {
+                return LightModeType.Dynamic;
+            }
+            else if (desc == AppResources.Static)
+            {
+                return LightModeType.Static;
+            }
+            else if (desc == AppResources.Celebrations)
+            {
+                return LightModeType.Celebrations;
+            }
+            else if (desc == AppResources.CustomColor)
+            {
+                return LightModeType.CustomColor;
+            }
+            else if (desc == AppResources.WhiteLight)
+            {
+                return LightModeType.WhiteLight;
+            }
+            else if (desc == AppResources.Progressive)
+            {
+                return LightModeType.Progressive;
+            }
+            else
+            {
+                return LightModeType.CustomColor;
+            }
+
         }
 
         /// <summary>

@@ -157,7 +157,7 @@ namespace WizLib
 
             GetPilot().ContinueWith((a) =>
             {
-                if (MACAddress == null) return;
+                if (MACAddress == MACAddress.None) return;
 
                 Monitor.Enter(bulbCache);
 
@@ -781,12 +781,12 @@ namespace WizLib
 
                     await Task.Delay(10);
 
-                    //tdelc++;
-                    //if (tdelc >= 50)
-                    //{
-                    //    udpClient.Send(buffer, buffer.Length, "255.255.255.255", port);
-                    //    tdelc = 0;
-                    //}
+                    tdelc++;
+                    if (tdelc >= 50)
+                    {
+                        udpClient.Send(buffer, buffer.Length, "255.255.255.255", port);
+                        tdelc = 0;
+                    }
                 }
             });
 
@@ -1275,6 +1275,14 @@ namespace WizLib
             else if (e.PropertyName == nameof(BulbParams.MACAddress))
             {
                 OnPropertyChanged(nameof(MACAddress));
+            }
+            else if (e.PropertyName == nameof(BulbParams.Color))
+            {
+                OnPropertyChanged(nameof(Color));
+            }
+            else if (e.PropertyName == nameof(BulbParams.LightModeInfo))
+            {
+                OnPropertyChanged(nameof(LightMode));
             }
         }
 

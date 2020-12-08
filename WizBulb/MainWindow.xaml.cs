@@ -216,7 +216,6 @@ namespace WizBulb
         {
             var loc = Settings.LastWindowLocation;
             var size = Settings.LastWindowSize;
-            WizLib.Helpers.ConsoleHelper.AllocConsole();
 
             Left = loc.X;
             Top = loc.Y;
@@ -668,12 +667,12 @@ namespace WizBulb
         {
             if (e.PropertyName == nameof(MainViewModel.Bulbs))
             {
-                GridView view = (GridView)BulbList.View;
-                RoutedEventArgs v;
-                var header = GetHeader(AppResources.RoomId);
+                //GridView view = (GridView)BulbList.View;
+                //RoutedEventArgs v;
+                //var header = GetHeader(AppResources.RoomId);
 
-                v = new RoutedEventArgs(GridViewColumnHeader.ClickEvent, header);
-                this.BulbList_Click(BulbList, v);
+                //v = new RoutedEventArgs(GridViewColumnHeader.ClickEvent, header);
+                //this.BulbList_Click(BulbList, v);
             }
 
             if (e.PropertyName == nameof(MainViewModel.SelectedBulb) && vm.SelectedBulb != null && vm.SelectedBulb.Brightness != null)
@@ -745,6 +744,13 @@ namespace WizBulb
 
         #endregion Private Methods
 
+        private void BulbList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (BulbList.SelectedItem is Bulb b)
+            {
+                b.Pulse();
+            }
+        }
     }
 
 }
