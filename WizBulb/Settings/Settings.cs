@@ -4,8 +4,8 @@ using System.Windows;
 using System.IO;
 using System.Linq;
 using Microsoft.Win32;
-using WizLib;
-using WizLib.Profiles;
+using WiZ;
+using WiZ.Profiles;
 
 namespace WizBulb
 {

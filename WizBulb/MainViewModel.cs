@@ -15,10 +15,10 @@ using DataTools.Hardware.Network;
 
 using WizBulb.Localization.Resources;
 
-using WizLib;
-using WizLib.Profiles;
+using WiZ;
+using WiZ.Profiles;
 using System.Net.NetworkInformation;
-using WizLib.Observable;
+using WiZ.Observable;
 
 namespace WizBulb
 {

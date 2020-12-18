@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Runtime.InteropServices;
-using WizLib;
+using WiZ;
 using System.Net.Sockets;
 using System.Net;
 using DataTools.Desktop.Unified;
@@ -26,7 +26,7 @@ using System.ComponentModel;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using DataTools.Win32Api;
-using WizLib.Observable;
+using WiZ.Observable;
 
 namespace WizBulb
 {
@@ -89,64 +89,64 @@ namespace WizBulb
 
         public MainWindow()
         {
-            //WizLib.Helpers.ConsoleHelper.AllocConsole();
+            //WiZ.Helpers.ConsoleHelper.AllocConsole();
 
             InitializeComponent();
 
-            var lonc = new List<NamedColor>(NamedColor.Catalog);
+            //var lonc = new List<NamedColor>(NamedColor.Catalog);
 
-            lonc.Sort((a, b) =>
-            {
-                return (a.Color.IntValue - b.Color.IntValue);
-            });
+            //lonc.Sort((a, b) =>
+            //{
+            //    return (a.Color.IntValue - b.Color.IntValue);
+            //});
 
-            int c = lonc.Count - 1;
-            int i;
+            //int c = lonc.Count - 1;
+            //int i;
 
-            for (i = c; i >= 0; i--)
-            {
-                if (i > 0)
-                {
-                    if (lonc[i].Color.IntValue == lonc[i - 1].Color.IntValue)
-                    {
-                        lonc.RemoveAt(i);
-                    }
-                }
-            }
+            //for (i = c; i >= 0; i--)
+            //{
+            //    if (i > 0)
+            //    {
+            //        if (lonc[i].Color.IntValue == lonc[i - 1].Color.IntValue)
+            //        {
+            //            lonc.RemoveAt(i);
+            //        }
+            //    }
+            //}
 
-            var testing = new ObservableDictionary<UniColor, NamedColor>(nameof(NamedColor.Color), new Comparison<UniColor>((a, b) => {
-                    return (a.IntValue - b.IntValue);
-                    }));
-            foreach (var ck in lonc)
-            {
-                testing.Add(ck);
-            }
+            //var testing = new ObservableDictionary<UniColor, NamedColor>(nameof(NamedColor.Color), new Comparison<UniColor>((a, b) => {
+            //        return (a.IntValue - b.IntValue);
+            //        }));
+            //foreach (var ck in lonc)
+            //{
+            //    testing.Add(ck);
+            //}
 
-            int ecount = 0;
-            foreach (var k in testing.Keys)
-            {
+            //int ecount = 0;
+            //foreach (var k in testing.Keys)
+            //{
 
-                if (k.Value == 0xff000000)
-                {
-                    ecount++;
+            //    if (k.Value == 0xff000000)
+            //    {
+            //        ecount++;
                     
-                    var erl = "Break";
+            //        var erl = "Break";
 
-                }
-            }
+            //    }
+            //}
 
-            var nc1 = lonc[343];
+            //var nc1 = lonc[343];
 
-            HSVDATA h;
-            HSVDATA h2;
+            //HSVDATA h;
+            //HSVDATA h2;
 
-            h = DataTools.Desktop.ColorMath.ColorToHSV(nc1);
-            UniColor clr = DataTools.Desktop.ColorMath.HSVToColorRaw(h);
+            //h = DataTools.Desktop.ColorMath.ColorToHSV(nc1);
+            //UniColor clr = DataTools.Desktop.ColorMath.HSVToColorRaw(h);
 
-            h2 = DataTools.Desktop.ColorMath.ColorToHSV(clr);
-            NamedColor nc2 = NamedColor.FindColor(clr);
+            //h2 = DataTools.Desktop.ColorMath.ColorToHSV(clr);
+            //NamedColor nc2 = NamedColor.FindColor(clr);
 
-            nc1 = testing[clr];
+            //nc1 = testing[clr];
 
 
             //ObservableDictionary<string, TestClass> testing = new ObservableDictionary<string, TestClass>();
@@ -749,6 +749,33 @@ namespace WizBulb
             if (BulbList.SelectedItem is Bulb b)
             {
                 b.Pulse();
+            }
+        }
+
+        private void mnuTestCycle_Click(object sender, RoutedEventArgs e)
+        {
+            if (BulbList.SelectedItem is Bulb b)
+            {
+                _ = Task.Run(async () =>
+                {
+
+                    DateTime t = DateTime.Now;
+
+                    DateTime end = DateTime.Now.AddSeconds(30);
+
+                    System.Drawing.Color[] cycles = new System.Drawing.Color[] { System.Drawing.Color.Red, System.Drawing.Color.Orange, System.Drawing.Color.Yellow, System.Drawing.Color.Green, System.Drawing.Color.Cyan, System.Drawing.Color.Blue, System.Drawing.Color.Purple };
+
+
+                    int d = 30000 / cycles.Length;
+
+                    for (int i = 0; i < cycles.Length; i++)
+                    {
+                        b.Color = cycles[i];
+                        await Task.Delay(d);
+                    }
+
+                });
+
             }
         }
     }

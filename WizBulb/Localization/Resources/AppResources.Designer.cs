@@ -1267,6 +1267,15 @@ namespace WizBulb.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Test Cycles.
+        /// </summary>
+        internal static string TestCycles {
+            get {
+                return ResourceManager.GetString("TestCycles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Timeout.
         /// </summary>
         internal static string Timeout {

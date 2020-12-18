@@ -28,7 +28,7 @@
     <ProjectReference Include="..\..\DataTools5\DataTools.Hardware\DataTools.Hardware.csproj" />
     <ProjectReference Include="..\..\DataTools5\DataTools.Win32Api\DataTools.Win32Api.csproj" />
     <ProjectReference Include="..\..\DataTools5\DataTools\DataTools.csproj" />
-    <ProjectReference Include="..\WizLib\WizLib.csproj" />
+    <ProjectReference Include="..\WiZ\WiZ.csproj" />
   </ItemGroup>
 
   <ItemGroup>

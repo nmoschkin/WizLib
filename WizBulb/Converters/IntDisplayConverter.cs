@@ -8,7 +8,7 @@ using System.Windows.Data;
 
 using WizBulb.Localization.Resources;
 
-using WizLib.Observable;
+using WiZ.Observable;
 
 namespace WizBulb.Converters
 {

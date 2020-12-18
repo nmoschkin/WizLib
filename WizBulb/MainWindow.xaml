@@ -208,7 +208,7 @@
 
                 </TabItem.Header>
 
-                <ListView
+                <!--<ListView
                     x:Name="BulbList"
                     Grid.Row="1"
                     Grid.ColumnSpan="2"
@@ -264,7 +264,7 @@
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <controls:BulbControl
-                                Width="400"
+                                Width="300"
                                 Height="128"
                                 ItemSource="{Binding}" />
                         </DataTemplate>
@@ -288,9 +288,9 @@
 
 
 
-            </TabItem>
+            </TabItem>-->
 
-            <!--<ListView
+                <ListView
                     x:Name="BulbList"
                     Grid.Row="1"
                     Grid.ColumnSpan="2"
@@ -338,6 +338,13 @@
                                 x:Name="mnuRefreshAll"
                                 Click="mnuRefreshAll_Click"
                                 Header="{i18n:Translate ResourceKey=RefreshAll}" />
+
+                            <Separator />
+
+                            <MenuItem
+                                x:Name="mnuTestCycle"
+                                Click="mnuTestCycle_Click"
+                                Header="{i18n:Translate ResourceKey=TestCycles}" />
 
                         </ContextMenu>
                     </ListView.ContextMenu>
@@ -400,7 +407,7 @@
 
 
 
-            </TabItem>-->
+            </TabItem>
             <TabItem>
                 <TabItem.Header>
                     <Grid>
