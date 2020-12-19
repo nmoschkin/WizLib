@@ -25,7 +25,7 @@ using WizBulb.Localization.Resources;
 using System.ComponentModel;
 using System.Collections;
 using System.Runtime.CompilerServices;
-using DataTools.Win32Api;
+using DataTools.Win32;
 using WiZ.Observable;
 
 namespace WizBulb
