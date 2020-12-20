@@ -25,8 +25,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\DataTools5\DataTools.ColorControls\DataTools.ColorControls.csproj" />
+    <ProjectReference Include="..\..\DataTools5\DataTools.Graphics\DataTools.Graphics.csproj" />
     <ProjectReference Include="..\..\DataTools5\DataTools.Hardware\DataTools.Hardware.csproj" />
+    <ProjectReference Include="..\..\DataTools5\DataTools.Win32.Memory\DataTools.Win32.Memory.csproj" />
     <ProjectReference Include="..\..\DataTools5\DataTools.Win32Api\DataTools.Win32Api.csproj" />
+    <ProjectReference Include="..\..\DataTools5\DataTools.Win32\DataTools.Win32.csproj" />
     <ProjectReference Include="..\..\DataTools5\DataTools\DataTools.csproj" />
     <ProjectReference Include="..\WiZ\WiZ.csproj" />
   </ItemGroup>

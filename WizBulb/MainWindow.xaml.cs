@@ -17,7 +17,6 @@ using System.Runtime.InteropServices;
 using WiZ;
 using System.Net.Sockets;
 using System.Net;
-using DataTools.Desktop.Unified;
 using DataTools.Text;
 using DataTools.ColorControls;
 using DataTools.Hardware.Network;
@@ -27,6 +26,7 @@ using System.Collections;
 using System.Runtime.CompilerServices;
 using DataTools.Win32;
 using WiZ.Observable;
+using DataTools.Graphics;
 
 namespace WizBulb
 {
@@ -472,12 +472,12 @@ namespace WizBulb
 
                 foreach (Bulb bulb in BulbList.SelectedItems)
                 {
-                    await bulb.SetLightMode((UniColor)e.Color, 100);
+                    await bulb.SetLightMode(e.Color, 100);
                 }
             }
             else if (vm.SelectedBulb != null)
             {
-                await vm.SelectedBulb.SetLightMode((UniColor)e.Color, 100);
+                await vm.SelectedBulb.SetLightMode(e.Color, 100);
             }
         }
 
@@ -612,7 +612,7 @@ namespace WizBulb
                 ColorText.Text = "";
             }
 
-            ColorSwatch.Background = new SolidColorBrush((Color)uc);
+            ColorSwatch.Background = new SolidColorBrush(uc.GetWPFColor());
         }
 
         private void RoomList_Click(object sender, RoutedEventArgs e)
