@@ -449,13 +449,25 @@ namespace WiZ
         {
             get
             {
-                if (LightMode.LightModes.ContainsKey(sceneId ?? 0))
+
+                if (sceneId == null) return null;
+
+                int sc = (int)sceneId;
+
+                if (sc == 0)
                 {
-                    return LightMode.LightModes[sceneId ?? 0];
+                    if (temp != null)
+                    {
+                        return LightMode.LightModes[-1];
+                    }
+                    else
+                    {
+                        return LightMode.LightModes[0];
+                    }
                 }
                 else
                 {
-                    return null;
+                    return LightMode.LightModes[sc];
                 }
             }
         }

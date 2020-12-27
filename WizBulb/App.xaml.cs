@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Runtime.InteropServices;
 
 namespace WizBulb
 {
@@ -15,8 +16,6 @@ namespace WizBulb
     public partial class App : Application
     {
 
-       
-
         public new static App Current
         {
             get => (App)Application.Current;
@@ -24,7 +23,7 @@ namespace WizBulb
 
         public App() : base()
         {
-           
+            WiZ.Helpers.ConsoleHelper.AllocConsole();
         }
 
     }

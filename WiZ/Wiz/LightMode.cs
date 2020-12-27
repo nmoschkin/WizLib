@@ -626,6 +626,13 @@ namespace WiZ
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Coolwhite { get; } = RegisterLightMode(13, "Cool White", true, LightModeType.WhiteLight);
+
+        /// <summary>
+        /// Built-In Lighting Mode
+        /// </summary>
+        public static LightMode CustomWhite { get; } = RegisterLightMode(-1, "Custom White", true, LightModeType.WhiteLight);
+
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>

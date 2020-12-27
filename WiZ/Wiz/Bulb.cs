@@ -287,7 +287,29 @@ namespace WiZ
             }
         }
 
+        public virtual int? Temperature
+        {
+            get => Settings?.Temperature;
+            set
+            {
+                if (Settings == null)
+                {
+                    Settings = new BulbParams();
+                }
 
+                if (Settings.Temperature == value) return;
+
+                Settings.Temperature = value;
+                if (value == null) return;
+
+                var stg = new BulbCommand(BulbMethod.SetPilot);
+
+                stg.Params.Temperature = value;
+                stg.Params.Scene = 0;
+
+                _ = SendCommand(stg);
+            }
+        }
 
         public virtual int? HomeId
         {
@@ -505,6 +527,12 @@ namespace WiZ
                         {
                             return $"{AppResources.CustomColor}: RGB ({c.R}, {c.G}, {c.B})";
                         }
+                    }
+                    else if (settings.Temperature != null)
+                    {
+                        var t = (int)settings.Temperature;
+                        
+                        return $"{AppResources.WhiteLight}: {t} K";
                     }
                     else
                     {
@@ -995,6 +1023,7 @@ namespace WiZ
 
             // set scene
             cmd.Params.State = true;
+            cmd.Params.Scene = 0;
             cmd.Params.Red = c.R;
             cmd.Params.Green = c.G;
             cmd.Params.Blue = c.B;
@@ -1016,8 +1045,7 @@ namespace WiZ
 
             cmd.Params.State = true;
             cmd.Params.Brightness = brightness;
-            cmd.Params.WarmWhite = 0;
-            cmd.Params.ColdWhite = 0;
+            cmd.Params.Scene = 0;
             cmd.Params.Red = c.R;
             cmd.Params.Green = c.G;
             cmd.Params.Blue = c.B;
@@ -1139,7 +1167,8 @@ namespace WiZ
                 Settings = cmd.Result;
             }
 
-            OnPropertyChanged("Scene");
+            OnPropertyChanged(nameof(Scene));
+            OnPropertyChanged(nameof(LightMode));
             return true;
         }
 

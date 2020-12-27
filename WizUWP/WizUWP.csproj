@@ -155,6 +155,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\DataTools5\DataTools.XamarinForms.ColorControls\DataTools.XamarinForms.ColorControls.csproj">
+      <Project>{815c0c04-0033-4bcb-9721-e750c26181e4}</Project>
+      <Name>DataTools.XamarinForms.ColorControls</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WiZ\WiZ.csproj">
       <Project>{bf3d0026-ab4d-4d9a-abfa-338e0212481c}</Project>
       <Name>WiZ</Name>

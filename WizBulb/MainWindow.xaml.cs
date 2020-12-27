@@ -467,18 +467,22 @@ namespace WizBulb
 
         private async void ColorPicker_ColorHit(object sender, ColorHitEventArgs e)
         {
-            if ((BulbList.SelectedItems?.Count ?? 0) > 0)
+            try
             {
-
-                foreach (Bulb bulb in BulbList.SelectedItems)
+                if ((BulbList.SelectedItems?.Count ?? 0) > 0)
                 {
-                    await bulb.SetLightMode(e.Color, 100);
+
+                    foreach (Bulb bulb in BulbList.SelectedItems)
+                    {
+                        await bulb.SetLightMode(e.Color);
+                    }
+                }
+                else if (vm.SelectedBulb != null)
+                {
+                    await vm.SelectedBulb.SetLightMode(e.Color, 100);
                 }
             }
-            else if (vm.SelectedBulb != null)
-            {
-                await vm.SelectedBulb.SetLightMode(e.Color, 100);
-            }
+            catch { }
         }
 
         private void HomeList_Click(object sender, RoutedEventArgs e)
