@@ -637,6 +637,15 @@ namespace WizBulb.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Multiple Devices.
+        /// </summary>
+        internal static string MultipleDevices {
+            get {
+                return ResourceManager.GetString("MultipleDevices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Name.
         /// </summary>
         internal static string Name {

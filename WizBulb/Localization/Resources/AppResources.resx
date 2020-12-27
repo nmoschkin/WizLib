@@ -309,6 +309,9 @@
   <data name="ModuleName" xml:space="preserve">
     <value>Module Name</value>
   </data>
+  <data name="MultipleDevices" xml:space="preserve">
+    <value>Multiple Devices</value>
+  </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
   </data>

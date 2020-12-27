@@ -96,5 +96,10 @@ namespace WiZ.Profiles
         {
         }
 
+        public override string ToString()
+        {
+            return name ?? roomId.ToString();
+        }
+
     }
 }

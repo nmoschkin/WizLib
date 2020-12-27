@@ -19,6 +19,8 @@ using WiZ;
 using WiZ.Profiles;
 using System.Net.NetworkInformation;
 using WiZ.Observable;
+using System.Windows.Data;
+using WizBulb.Converters;
 
 namespace WizBulb
 {
@@ -69,6 +71,8 @@ namespace WizBulb
         private ObservableDictionary<int, Home> homes = new ObservableDictionary<int, Home>(nameof(Home.HomeId));
 
         private int interval = 2500;
+
+        private ReadOnlyCollection<LightMode> lightModeList = new ReadOnlyCollection<LightMode>(new List<LightMode>(LightMode.LightModes.Values));
 
         private string networkStatus;
 
@@ -241,6 +245,77 @@ namespace WizBulb
             }
         }
 
+        public IReadOnlyCollection<LightMode> LightModes => lightModeList;
+
+        public string SelectedText
+        {
+            get
+            {
+                if (selBulbs == null || selBulbs.Count == 0)
+                {
+                    if (selBulb != null)
+                    {
+                        return selBulb.Name;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else if (selBulbs.Count == 1)
+                {
+                    return selBulbs[0].Name;
+                }
+                else
+                {
+
+                    Room r = profile.MatchBulbsToRoom(selBulbs);
+
+                    if (r == null)
+                    {
+                        return AppResources.MultipleDevices;
+                    }
+                    else
+                    {
+                        return r.ToString();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the room associated with the current bulb selection.
+        /// </summary>
+        /// <remarks>
+        /// If multiple items from different rooms are selected, this value is null.
+        /// </remarks>
+        public Room BulbSelectionRoom
+        {
+            get
+            {
+                if (selBulbs == null || selBulbs.Count == 0)
+                {
+                    if (selBulb != null)
+                    {
+                        return profile?.FindRoomById(selBulb.RoomId ?? 0);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else if (selBulbs.Count == 1)
+                {
+                    return profile?.FindRoomById(selBulbs[0].RoomId ?? 0);
+                }
+                else
+                {
+
+                    return profile.MatchBulbsToRoom(selBulbs);
+                }
+            }
+        }
+
         public NetworkAdapter SelectedAdapter
         {
             get => selAdapter;
@@ -255,7 +330,11 @@ namespace WizBulb
             get => selBulb;
             set
             {
-                SetProperty(ref selBulb, value);
+                if (SetProperty(ref selBulb, value))
+                {
+                    OnPropertyChanged(nameof(SelectedText));
+                    OnPropertyChanged(nameof(BulbSelectionRoom));
+                }
             }
         }
 
@@ -264,7 +343,11 @@ namespace WizBulb
             get => selBulbs;
             set
             {
-                SetProperty(ref selBulbs, value);
+                if (SetProperty(ref selBulbs, value))
+                {
+                    OnPropertyChanged(nameof(SelectedText));
+                    OnPropertyChanged(nameof(BulbSelectionRoom));
+                }
             }
         }
 
@@ -543,6 +626,9 @@ namespace WizBulb
                 miln.Add(mis);
             }
 
+
+            CheckedToSceneEqualConverter chkConv = new CheckedToSceneEqualConverter();
+
             foreach (var lm in lms)
             {
                 foreach (var sm in miln)
@@ -556,10 +642,16 @@ namespace WizBulb
                         };
 
                         mis.Click += LightModeItemClicked;
+                        System.Windows.Data.Binding b = new System.Windows.Data.Binding("SelectedBulbs");
+                        
+                        b.Converter = chkConv;
+                        b.ConverterParameter = lm.Code;
+
 
                         if (sm.ItemsSource is ObservableCollection<MenuItem> lsm)
                         {
                             lsm.Add(mis);
+                            mis.SetBinding(MenuItem.IsCheckedProperty, b);
                         }
 
                         break;
@@ -751,6 +843,12 @@ namespace WizBulb
                 });
 
                 allBulbs = bulbs;
+
+                foreach (var bulb in allBulbs)
+                {
+                    await bulb.GetPilot();
+                }
+
                 Homes = Home.GenerateHomes(Bulbs);
 
                 StatusMessage = AppResources.ScanComplete;
@@ -758,6 +856,7 @@ namespace WizBulb
                 ScanComplete?.Invoke(this, new EventArgs());
 
                 ButtonsEnabled = true;
+
                 if (aw) WatchBulbs();
 
                 App.Current.Dispatcher.Invoke(() =>

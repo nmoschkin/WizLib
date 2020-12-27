@@ -224,10 +224,7 @@ namespace WizBulb
             Height = size.Height;
             mnuLoadLast.IsChecked = Settings.OpenLastOnStartup;
 
-            //vm.RefreshNetworks();
-            //_ = vm.LoadLastProject();
-
-            _ = vm.RefreshAll().ContinueWith(async (t) =>
+            vm.RefreshAll().ContinueWith(async (t) =>
             {
                 await App.Current.Dispatcher.Invoke(async () =>
                 {
@@ -238,7 +235,6 @@ namespace WizBulb
                     }
                 });
             });
-
         }
 
         #endregion Public Constructors

@@ -78,6 +78,83 @@ namespace WiZ.Profiles
             }
         }
 
+        public Room FindRoomById(int roomId)
+        {
+            foreach (Home h in Homes)
+            {
+                foreach (Room r in h.Rooms)
+                {
+                    if (r.RoomId == roomId)
+                    {
+                        return r;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public Home FindHomeById(int homeId)
+        {
+            foreach (Home h in Homes)
+            {
+                if (h.HomeId == homeId)
+                {
+                    return h;
+                }
+            }
+
+            return null;
+        }
+
+        public Room MatchBulbsToRoom(IEnumerable<IBulb> bulbs)
+        {
+            List<IBulb> blook1 = new List<IBulb>(bulbs);
+            List<IBulb> blook2;
+
+            blook1.Sort((a, b) =>
+            {
+                return a.MACAddress.CompareTo(b.MACAddress);
+            });
+
+            foreach (Home h in Homes)
+            {
+                foreach (Room r in h.Rooms)
+                {
+                    
+                    blook2 = new List<IBulb>(r.Bulbs.Values);
+                    if (blook2.Count != blook1.Count) continue;
+
+                    blook2.Sort((a, b) =>
+                    {
+                        return a.MACAddress.CompareTo(b.MACAddress);
+                    });
+
+                    bool bmatch = true;
+                    int i, c = blook1.Count;
+
+                    for (i = 0; i < c; i++)
+                    {
+
+                        if (!blook1[i].MACAddress.Equals(blook2[i].MACAddress))
+                        {
+                            bmatch = false;
+                            break;
+                        }
+                    }
+
+                    if (bmatch)
+                    {
+                        return r;
+                    }
+
+                }
+            }
+
+            return null;
+        }
+
+
         [JsonProperty("lightModes")]
         public ObservableDictionary<int, LightMode> CustomLightModes
         {

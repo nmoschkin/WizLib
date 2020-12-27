@@ -124,5 +124,11 @@ namespace WiZ.Profiles
             return kh;
         }
 
+        public override string ToString()
+        {
+            return name ?? homeId.ToString();
+        }
+
+
     }
 }
