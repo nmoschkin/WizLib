@@ -406,41 +406,6 @@ namespace WizBulb
 
         private async void BulbList_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.F5)
-            {
-                if ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-                {
-                    await vm.RefreshAll();
-                }
-                else
-                {
-                    await vm.RefreshSelected();
-                }
-            }
-            else if ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-            {
-                if (e.Key == Key.S)
-                {
-                    if ((e.KeyboardDevice.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
-                    {
-                        vm.SaveProjectAs();
-                    }
-                    else
-                    {
-                        vm.SaveProject();
-                    }
-                }
-                else if (e.Key == Key.O)
-                {
-                    await vm.OpenProject();
-                }
-                else if (e.Key == Key.Q)
-                {
-                    Close();
-                }
-
-            }
-
         }
 
         private void BulbList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -777,6 +742,46 @@ namespace WizBulb
                 });
 
             }
+        }
+
+        private async void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F5)
+            {
+                if ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+                {
+                    await vm.RefreshAll();
+                }
+                else
+                {
+                    await vm.RefreshSelected();
+                }
+            }
+            else if ((e.KeyboardDevice.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                if (e.Key == Key.S)
+                {
+                    if ((e.KeyboardDevice.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
+                    {
+                        vm.SaveProjectAs();
+                    }
+                    else
+                    {
+                        vm.SaveProject();
+                    }
+                }
+                else if (e.Key == Key.O)
+                {
+                    await vm.OpenProject();
+                }
+                else if (e.Key == Key.Q)
+                {
+                    Close();
+                }
+
+            }
+
+
         }
     }
 

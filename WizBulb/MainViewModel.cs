@@ -110,10 +110,27 @@ namespace WizBulb
 
         public MainViewModel(bool populate)
         {
-
+            PropertyChanged += SelfWatch;
             if (populate)
             {
-                _ = RefreshNetworks().ContinueWith(async (t) => await RefreshAll());
+                _ = RefreshAll();
+            }
+        }
+
+        ~MainViewModel()
+        {
+            PropertyChanged -= SelfWatch;
+        }
+
+        private void SelfWatch(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Profile))
+            {
+                foreach (var b in Bulbs)
+                {
+                    b.Settings.OnPropertyChanged(nameof(BulbParams.RoomId));
+                    b.Settings.OnPropertyChanged(nameof(BulbParams.HomeId));
+                }
             }
         }
 
@@ -316,6 +333,41 @@ namespace WizBulb
             }
         }
 
+
+        /// <summary>
+        /// Gets the home associated with the current bulb selection.
+        /// </summary>
+        /// <remarks>
+        /// If multiple items are selected, this value is null.
+        /// </remarks>
+        public Home BulbSelectionHome
+        {
+            get
+            {
+                if (selBulbs == null || selBulbs.Count == 0)
+                {
+                    if (selBulb != null)
+                    {
+                        return profile?.FindHomeById(selBulb.HomeId ?? 0);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else if (selBulbs.Count == 1)
+                {
+                    return profile?.FindHomeById(selBulbs[0].HomeId ?? 0);
+                }
+                else
+                {
+
+                    return profile.MatchBulbsToHome(selBulbs);
+                }
+            }
+        }
+
+
         public NetworkAdapter SelectedAdapter
         {
             get => selAdapter;
@@ -334,6 +386,7 @@ namespace WizBulb
                 {
                     OnPropertyChanged(nameof(SelectedText));
                     OnPropertyChanged(nameof(BulbSelectionRoom));
+                    OnPropertyChanged(nameof(BulbSelectionHome));
                 }
             }
         }
@@ -347,6 +400,7 @@ namespace WizBulb
                 {
                     OnPropertyChanged(nameof(SelectedText));
                     OnPropertyChanged(nameof(BulbSelectionRoom));
+                    OnPropertyChanged(nameof(BulbSelectionHome));
                 }
             }
         }
@@ -518,8 +572,8 @@ namespace WizBulb
                     if (prof == null) return false;
 
                     Profile = prof;
-                    
-                    Homes = new ObservableDictionary<int, Home>(nameof(Home.HomeId), Profile.Homes);
+
+                    Homes = Profile.Homes;
 
                     allBulbs = Bulbs = new ObservableDictionary<MACAddress, Bulb>(
                                     nameof(Bulb.MACAddress),
@@ -563,8 +617,7 @@ namespace WizBulb
 
             var j = new JsonProfileSerializer(fileName);
 
-            Profile.AddUpdateBulbs(allBulbs, true);
-            Profile.Homes = new ObservableDictionary<int, Home>(Homes);
+            Profile.BuildUpdateProfile(allBulbs, true);
 
             j.Serialize(Profile);
 
@@ -591,7 +644,7 @@ namespace WizBulb
             var fileName = dlg.FileName;
             var j = new JsonProfileSerializer(fileName);
 
-            Profile.AddUpdateBulbs(allBulbs, true);
+            Profile.BuildUpdateProfile(allBulbs, true);
             Profile.Homes = new ObservableDictionary<int, Home>(Homes);
 
             j.Serialize(Profile);
@@ -642,7 +695,7 @@ namespace WizBulb
                         };
 
                         mis.Click += LightModeItemClicked;
-                        System.Windows.Data.Binding b = new System.Windows.Data.Binding("SelectedBulbs");
+                        System.Windows.Data.Binding b = new System.Windows.Data.Binding(nameof(SelectedBulbs));
                         
                         b.Converter = chkConv;
                         b.ConverterParameter = lm.Code;
@@ -849,7 +902,17 @@ namespace WizBulb
                     await bulb.GetPilot();
                 }
 
-                Homes = Home.GenerateHomes(Bulbs);
+                var oldHomes = Homes;
+
+                if (Profile == null)
+                {
+                    Profile = new Profile();
+                    Profile.Homes = Home.GenerateHomes(Bulbs);
+                }
+                else
+                {
+                    Profile.BuildUpdateProfile(Bulbs, true);
+                }
 
                 StatusMessage = AppResources.ScanComplete;
 

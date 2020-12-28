@@ -21,7 +21,7 @@ namespace WiZ.Profiles
 
         ObservableDictionary<MACAddress, BulbItem> Bulbs { get; set; }
 
-        void AddUpdateBulbs(IEnumerable<IBulb> bulbs, bool removeMissing);
+        void BuildUpdateProfile(IEnumerable<IBulb> bulbs, bool removeMissing);
 
     }
 

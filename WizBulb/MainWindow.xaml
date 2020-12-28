@@ -14,12 +14,19 @@
     xmlns:wiz="clr-namespace:WiZ;assembly=WiZ"
     Title="{Binding WindowTitle}"
     Width="630"
-    Height="365"
+    Height="600"
     Icon="pack://application:,,,/WizBulb;component/Resources/wiz.ico"
+    Keyboard.PreviewKeyDown="Window_PreviewKeyDown"
     mc:Ignorable="d">
 
     <Window.Resources>
         <ResourceDictionary>
+
+            <conv:ProfilePartsConverter x:Key="roomConv" Part="Room" />
+
+            <conv:ProfilePartsConverter x:Key="homeConv" Part="Home" />
+
+
             <conv:SelectionConverter
                 x:Key="visConv"
                 MultiSelectVisibility="Visible"
@@ -112,15 +119,13 @@
                         BorderBrush="Gray"
                         BorderThickness="1" />
 
-                    <TextBox
+                    <Label
                         Grid.Column="1"
                         Margin="4"
                         Background="Transparent"
                         BorderThickness="0"
-                        GotFocus="TextBox_GotFocus"
-                        IsEnabled="{Binding Renaming, Mode=TwoWay}"
-                        LostFocus="TextBox_LostFocus"
-                        Text="{Binding Name, Mode=TwoWay}" />
+                        Content="{Binding Name}"
+                        IsEnabled="{Binding Renaming, Mode=TwoWay}" />
 
                 </Grid>
             </DataTemplate>
@@ -324,12 +329,12 @@
                                 Header="{i18n:Translate ResourceKey=LightMode}" />
                             <GridViewColumn
                                 Width="120"
-                                DisplayMemberBinding="{Binding Settings.HomeId}"
-                                Header="{i18n:Translate ResourceKey=HomeId}" />
+                                DisplayMemberBinding="{Binding Settings.HomeId, Converter={StaticResource homeConv}}"
+                                Header="{i18n:Translate ResourceKey=Home}" />
                             <GridViewColumn
                                 Width="120"
-                                DisplayMemberBinding="{Binding Settings.RoomId}"
-                                Header="{i18n:Translate ResourceKey=RoomId}" />
+                                DisplayMemberBinding="{Binding Settings.RoomId, Converter={StaticResource roomConv}}"
+                                Header="{i18n:Translate ResourceKey=Room}" />
                             <GridViewColumn
                                 Width="120"
                                 DisplayMemberBinding="{Binding Settings.ModuleName}"
@@ -696,10 +701,7 @@
 
                 </Grid>
 
-                <Grid
-                    MinHeight="128"
-                    Margin="0,8,0,0"
-                    Visibility="{Binding SelectedBulbs, Converter={StaticResource visConv}}">
+                <Grid Margin="0,8,0,0" Visibility="{Binding SelectedBulbs, Converter={StaticResource visConv}}">
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
@@ -727,7 +729,9 @@
                         Visibility="{Binding SelectedBulbs, Converter={StaticResource nameEdConv}}">
 
                         <i:Interaction.Behaviors>
-                            <behaviors:TextBoxEnterKeyUpdateBehavior />
+                            <behaviors:TextBoxEnterKeyUpdateBehavior CancelFocusReceiver="{x:Reference Name=BulbList}" ReturnFocusReceiver="{x:Reference Name=BulbList}" />
+
+
                         </i:Interaction.Behaviors>
                     </TextBox>
 
@@ -748,7 +752,20 @@
                         Margin="0,2,0,8"
                         Padding="4"
                         ItemsSource="{Binding LightModes}"
-                        SelectedItem="{Binding SelectedBulb.LightMode}" />
+                        SelectedItem="{Binding SelectedBulb.LightMode}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+
+                                    <Label
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        Content="{Binding Name}" />
+                                </StackPanel>
+
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
                     <Label
                         Grid.Row="2"
@@ -761,6 +778,7 @@
                         x:Name="Slide"
                         Grid.Row="3"
                         Grid.Column="0"
+                        Height="96"
                         Margin="8,0,8,0"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Stretch"
@@ -803,10 +821,76 @@
 
                 </Grid>
 
+                <Grid Margin="0,8,0,0" Visibility="{Binding DeviceSelectionRoom, Converter={StaticResource visConv}}">
+
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Content="{i18n:Translate ResourceKey=Home,
+                                                 AddColon=True}" />
+
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Content="{i18n:Translate ResourceKey=Room,
+                                                 AddColon=True}" />
+
+                    <TextBox
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Margin="4"
+                        Padding="2"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Left"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Text="{Binding BulbSelectionHome.Name, Mode=TwoWay}"
+                        Visibility="{Binding BulbSelectionHome, Converter={StaticResource nameEdConv}}">
+
+                        <i:Interaction.Behaviors>
+                            <behaviors:TextBoxEnterKeyUpdateBehavior
+                                CancelFocusReceiver="{x:Reference Name=BulbList}"
+                                ObservableUpdateProperty="Profile"
+                                ReturnFocusReceiver="{x:Reference Name=BulbList}" />
+                        </i:Interaction.Behaviors>
+                    </TextBox>
+
+
+                    <TextBox
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Margin="4"
+                        Padding="2"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Left"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Text="{Binding BulbSelectionRoom.Name, Mode=TwoWay}"
+                        Visibility="{Binding BulbSelectionRoom, Converter={StaticResource nameEdConv}}">
+
+                        <i:Interaction.Behaviors>
+                            <behaviors:TextBoxEnterKeyUpdateBehavior
+                                CancelFocusReceiver="{x:Reference Name=BulbList}"
+                                ObservableUpdateProperty="Profile"
+                                ReturnFocusReceiver="{x:Reference Name=BulbList}" />
+                        </i:Interaction.Behaviors>
+                    </TextBox>
+
+
+                </Grid>
 
             </StackPanel>
-
-
 
         </ScrollViewer>
         <StatusBar

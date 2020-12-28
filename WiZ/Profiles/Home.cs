@@ -61,13 +61,25 @@ namespace WiZ.Profiles
         [JsonProperty("name")]
         public string Name
         {
-            get => name;
+            get => name ?? homeId.ToString();
             set
             {
                 SetProperty(ref name, value);
             }
         }
 
+        public IList<IBulb> GetAllBulbsInHome()
+        {
+            var l = new List<IBulb>();
+
+            foreach (var r in rooms)
+            {
+                l.AddRange(r.Bulbs.Values);
+            }
+
+            return l;
+
+        }
         public static ObservableDictionary<int, Home> GenerateHomes(IEnumerable<Bulb> bulbs)
         {
             Room nr;

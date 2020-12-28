@@ -60,7 +60,7 @@ namespace WiZ.Profiles
         [JsonProperty("name")]
         public string Name
         {
-            get => name;
+            get => name ?? roomId.ToString();
             set
             {
                 SetProperty(ref name, value);

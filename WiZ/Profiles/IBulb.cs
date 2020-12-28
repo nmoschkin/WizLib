@@ -31,7 +31,7 @@ namespace WiZ.Profiles
         /// The room Id of the bulb.
         /// </summary>
         int? RoomId { get; }
-
+        
         /// <summary>
         /// The default network port 
         /// </summary>

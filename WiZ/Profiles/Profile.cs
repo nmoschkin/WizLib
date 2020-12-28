@@ -155,6 +155,51 @@ namespace WiZ.Profiles
         }
 
 
+        public Home MatchBulbsToHome(IEnumerable<IBulb> bulbs)
+        {
+            List<IBulb> blook1 = new List<IBulb>(bulbs);
+            List<IBulb> blook2;
+
+            blook1.Sort((a, b) =>
+            {
+                return a.MACAddress.CompareTo(b.MACAddress);
+            });
+
+            foreach (Home h in Homes)
+            {
+
+                blook2 = new List<IBulb>(h.GetAllBulbsInHome());
+                if (blook2.Count != blook1.Count) continue;
+
+                blook2.Sort((a, b) =>
+                {
+                    return a.MACAddress.CompareTo(b.MACAddress);
+                });
+
+                bool bmatch = true;
+                int i, c = blook1.Count;
+
+                for (i = 0; i < c; i++)
+                {
+
+                    if (!blook1[i].MACAddress.Equals(blook2[i].MACAddress))
+                    {
+                        bmatch = false;
+                        break;
+                    }
+                }
+
+                if (bmatch)
+                {
+                    return h;
+                }
+
+            }
+
+            return null;
+        }
+
+
         [JsonProperty("lightModes")]
         public ObservableDictionary<int, LightMode> CustomLightModes
         {
@@ -175,10 +220,14 @@ namespace WiZ.Profiles
             }
         }
 
-        public void AddUpdateBulbs(IEnumerable<IBulb> bulbs, bool removeMissing)
+        public void BuildUpdateProfile(IEnumerable<IBulb> bulbs, bool removeMissing)
         {
 
             bool bchk;
+
+            List<int> fhomes = new List<int>();
+            List<int> frooms = new List<int>();
+
             foreach (var b in bulbs)
             {
                 bchk = false;
@@ -204,6 +253,32 @@ namespace WiZ.Profiles
                 if (!bchk)
                 {
                     this.bulbs.Add(BulbItem.CreateItemFromBulb(b));
+                }
+
+                if (b.HomeId is int hh)
+                {
+                    if (!fhomes.Contains(hh)) fhomes.Add(hh);
+
+                    var h = FindHomeById(hh);
+
+                    if (h == null) 
+                    {
+                        h = new Home() { HomeId = hh };
+                        Homes.Add(h);
+                    }
+
+                    if (b.RoomId is int rr)
+                    {
+                        if (!frooms.Contains(rr)) frooms.Add(rr);
+
+                        var r = FindRoomById(rr);
+
+                        if (r == null)
+                        {
+                            r = new Room() { RoomId = rr };
+                            h.Rooms.Add(r);
+                        }
+                    }
                 }
             }
 
@@ -232,8 +307,33 @@ namespace WiZ.Profiles
                         bwalk.RemoveAt(i);
                     }
                 }
-            }
 
+                c = Homes.Count - 1;
+                var hv = Homes as IList<Home>;
+
+                for (i = c; i >= 0; i--)
+                {
+                    if (!fhomes.Contains(hv[i].HomeId))
+                    {
+                        hv.RemoveAt(i);
+                        continue;
+                    }
+                    else
+                    {
+                        var hr = hv[i].Rooms as IList<Room>;
+                        int j, d = hr.Count - 1;
+
+                        for (j = d; j >= 0; j--)
+                        {
+                            if (!frooms.Contains(hr[j].RoomId))
+                            {
+                                hr.RemoveAt(j);
+                                continue;
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

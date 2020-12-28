@@ -324,6 +324,8 @@ namespace WiZ
                 if (Settings.HomeId == value) return;
 
                 Settings.HomeId = value;
+                OnPropertyChanged(nameof(HomeId));
+
                 //if (value == null) return;
 
                 //var stg = new BulbCommand(BulbMethod.SetSystemConfig);
