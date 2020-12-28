@@ -22,7 +22,7 @@ using WiZ.Observable;
 using System.Windows.Data;
 using WizBulb.Converters;
 
-namespace WizBulb
+namespace WizBulb.ViewModels
 {
     public delegate void LightModeClickEvent(object sender, LightModeClickEventArgs e);
 
@@ -72,7 +72,7 @@ namespace WizBulb
 
         private int interval = 2500;
 
-        private ReadOnlyCollection<LightMode> lightModeList = new ReadOnlyCollection<LightMode>(new List<LightMode>(LightMode.LightModes.Values));
+        private LightModeList lightModeList;
 
         private string networkStatus;
 
@@ -130,6 +130,17 @@ namespace WizBulb
                 {
                     b.Settings.OnPropertyChanged(nameof(BulbParams.RoomId));
                     b.Settings.OnPropertyChanged(nameof(BulbParams.HomeId));
+                }
+
+                LightModeList = new LightModeList(profile);
+
+                if (selBulbs != null && selBulbs.Count > 1)
+                {
+                    LightModeList.BulbSelection = selBulbs;
+                }
+                else if (selBulb != null)
+                {
+                    LightModeList.BulbSelection = new Bulb[] { selBulb };
                 }
             }
         }
@@ -262,7 +273,14 @@ namespace WizBulb
             }
         }
 
-        public IReadOnlyCollection<LightMode> LightModes => lightModeList;
+        public LightModeList LightModeList
+        {
+            get => lightModeList;
+            private set
+            {
+                SetProperty(ref lightModeList, value);
+            }
+        }
 
         public string SelectedText
         {
@@ -384,6 +402,8 @@ namespace WizBulb
             {
                 if (SetProperty(ref selBulb, value))
                 {
+                    lightModeList.BulbSelection = new Bulb[] { selBulb };
+
                     OnPropertyChanged(nameof(SelectedText));
                     OnPropertyChanged(nameof(BulbSelectionRoom));
                     OnPropertyChanged(nameof(BulbSelectionHome));
@@ -398,6 +418,8 @@ namespace WizBulb
             {
                 if (SetProperty(ref selBulbs, value))
                 {
+                    lightModeList.BulbSelection = selBulbs;
+                    
                     OnPropertyChanged(nameof(SelectedText));
                     OnPropertyChanged(nameof(BulbSelectionRoom));
                     OnPropertyChanged(nameof(BulbSelectionHome));
@@ -696,7 +718,7 @@ namespace WizBulb
 
                         mis.Click += LightModeItemClicked;
                         System.Windows.Data.Binding b = new System.Windows.Data.Binding(nameof(SelectedBulbs));
-                        
+
                         b.Converter = chkConv;
                         b.ConverterParameter = lm.Code;
 
@@ -763,7 +785,7 @@ namespace WizBulb
                     return;
                 }
             }
-            
+
         }
 
         public virtual async Task RefreshOnce()
@@ -951,7 +973,7 @@ namespace WizBulb
 
         public void WatchAbort()
         {
-            if (cts != null) 
+            if (cts != null)
             {
                 cts.Cancel();
                 watchTask?.Wait();
@@ -984,7 +1006,7 @@ namespace WizBulb
                             if (cts?.IsCancellationRequested ?? true) break;
                             await Task.Delay(100);
                         }
-                        
+
                     }
                 }
                 catch
@@ -1004,7 +1026,7 @@ namespace WizBulb
 
         #region Protected Methods
 
-        protected virtual async void LightModeItemClicked(object sender, System.Windows.RoutedEventArgs e)
+        protected virtual async void LightModeItemClicked(object sender, RoutedEventArgs e)
         {
             if (e.Source is MenuItem mi && mi.Tag is LightMode lm)
             {
@@ -1024,13 +1046,15 @@ namespace WizBulb
                             await bulb.GetPilot();
                         }
                     }
+
+                    LightModeList.OnPropertyChanged(nameof(LightModeList.SelectedMode));
                 }
 
                 LightModeClick?.Invoke(this, new LightModeClickEventArgs(lm, mi));
             }
         }
 
-        protected virtual async void RecentItemClicked(object sender, System.Windows.RoutedEventArgs e)
+        protected virtual async void RecentItemClicked(object sender, RoutedEventArgs e)
         {
             if (e.Source is MenuItem mi && mi.Tag is RecentFile r)
             {

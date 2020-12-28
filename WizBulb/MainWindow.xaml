@@ -730,8 +730,6 @@
 
                         <i:Interaction.Behaviors>
                             <behaviors:TextBoxEnterKeyUpdateBehavior CancelFocusReceiver="{x:Reference Name=BulbList}" ReturnFocusReceiver="{x:Reference Name=BulbList}" />
-
-
                         </i:Interaction.Behaviors>
                     </TextBox>
 
@@ -751,8 +749,8 @@
                         Grid.ColumnSpan="2"
                         Margin="0,2,0,8"
                         Padding="4"
-                        ItemsSource="{Binding LightModes}"
-                        SelectedItem="{Binding SelectedBulb.LightMode}">
+                        ItemsSource="{Binding LightModeList.ModeList}"
+                        SelectedItem="{Binding LightModeList.SelectedMode, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">

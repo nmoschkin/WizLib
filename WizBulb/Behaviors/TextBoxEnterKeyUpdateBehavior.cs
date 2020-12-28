@@ -154,6 +154,8 @@ namespace WizBulb.Behaviors
 
         private void TriggerUpdateTarget(TextBox sender)
         {
+            if (sender.Text == stxt) return;
+
             var o = GetTarget(sender.DataContext, ObservableUpdatePath);
 
             if (o is WiZ.Observable.ObservableBase ob)

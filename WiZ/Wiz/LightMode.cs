@@ -68,6 +68,8 @@ namespace WiZ
 
         protected static ReadOnlyDictionary<LightModeType, string> almts;
 
+        public static readonly LightMode Empty = new LightMode(true);
+
         private int code;
         private LightModeType type;
 
@@ -134,6 +136,15 @@ namespace WiZ
         internal LightMode()
         {
             jsonInit = true;
+        }
+
+        private LightMode(bool empty)
+        {
+            if (empty)
+            {
+                Code = 0;
+                Name = " ";
+            }
         }
 
         /// <summary>

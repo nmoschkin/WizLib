@@ -27,6 +27,8 @@ using System.Runtime.CompilerServices;
 using DataTools.Win32;
 using WiZ.Observable;
 using DataTools.Graphics;
+using WizBulb.ViewModels;
+using WizBulb.Converters;
 
 namespace WizBulb
 {
@@ -199,7 +201,7 @@ namespace WizBulb
             this.LocationChanged += MainWindow_LocationChanged;
             this.SizeChanged += MainWindow_SizeChanged;
 
-            var iconv = (WizBulb.Converters.IntDisplayConverter)this.Resources["intConv"];
+            var iconv = (IntDisplayConverter)this.Resources["intConv"];
 
             iconv.ConverterError += Iconv_ConverterError;
 
