@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 using System.Windows.Forms;
 using System.IO;
@@ -21,6 +22,7 @@ using System.Net.NetworkInformation;
 using WiZ.Observable;
 using System.Windows.Data;
 using WizBulb.Converters;
+using DataTools.Graphics;
 
 namespace WizBulb.ViewModels
 {
@@ -72,7 +74,7 @@ namespace WizBulb.ViewModels
 
         private int interval = 2500;
 
-        private LightModeList lightModeList;
+        private LightModeListViewModel lightModeList;
 
         private string networkStatus;
 
@@ -86,7 +88,7 @@ namespace WizBulb.ViewModels
 
         private Bulb selBulb;
 
-        private IList<Bulb> selBulbs;
+        private ObservableCollection<Bulb> selBulbs;
 
         private Home selHome;
 
@@ -110,7 +112,12 @@ namespace WizBulb.ViewModels
 
         public MainViewModel(bool populate)
         {
-            PropertyChanged += SelfWatch;
+            PropertyChanged += PropChangeWatcher;
+            SelectedBulbs = new ObservableCollection<Bulb>();
+
+          
+
+
             if (populate)
             {
                 _ = RefreshAll();
@@ -119,10 +126,10 @@ namespace WizBulb.ViewModels
 
         ~MainViewModel()
         {
-            PropertyChanged -= SelfWatch;
+            PropertyChanged -= PropChangeWatcher;
         }
 
-        private void SelfWatch(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void PropChangeWatcher(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(Profile))
             {
@@ -132,16 +139,8 @@ namespace WizBulb.ViewModels
                     b.Settings.OnPropertyChanged(nameof(BulbParams.HomeId));
                 }
 
-                LightModeList = new LightModeList(profile);
-
-                if (selBulbs != null && selBulbs.Count > 1)
-                {
-                    LightModeList.BulbSelection = selBulbs;
-                }
-                else if (selBulb != null)
-                {
-                    LightModeList.BulbSelection = new Bulb[] { selBulb };
-                }
+                LightModeList = new LightModeListViewModel(profile);
+                LightModeList.BulbSelection = selBulbs;
             }
         }
 
@@ -273,7 +272,7 @@ namespace WizBulb.ViewModels
             }
         }
 
-        public LightModeList LightModeList
+        public LightModeListViewModel LightModeList
         {
             get => lightModeList;
             private set
@@ -395,36 +394,134 @@ namespace WizBulb.ViewModels
             }
         }
 
+        public double? SelectedBrightness
+        {
+            get
+            {
+                if (selBulbs == null || selBulbs.Count == 0) return null;
+                double? d = null;
+
+                foreach (var item in selBulbs)
+                {
+                    if (item.Brightness == null) continue;
+                    
+                    d = (d ?? 0) + (double)item.Brightness;
+                }
+
+                return (d / selBulbs.Count);
+            }
+            set
+            {
+                if (value != null && (value < 0 || value > 255)) throw new ArgumentOutOfRangeException();
+
+                foreach (var item in selBulbs)
+                {
+                    item.Brightness = (byte?)(value);
+                }
+            }
+        }
+
+        public double? SelectedSpeed
+        {
+            get
+            {
+                if (selBulbs == null || selBulbs.Count == 0) return null;
+                double? d = null;
+
+                foreach (var item in selBulbs)
+                {
+                    if (item.Speed == null) continue;
+
+                    d = (d ?? 0) + (double)item.Speed;
+                }
+
+                return (d / selBulbs.Count);
+            }
+            set
+            {
+                if (value != null && (value < 0 || value > 255)) throw new ArgumentOutOfRangeException();
+
+                foreach (var item in selBulbs)
+                {
+                    item.Speed = (byte?)(value);
+                }
+            }
+        }
+
+        public Color? SelectedColor
+        {
+            get
+            {
+                Color? tc = null;
+
+                foreach (var item in selBulbs)
+                {
+
+                    if (item.Color == null) continue;
+
+                    var clr = new UniColor(item.Color.Value.ToArgb()).GetWPFColor();
+
+                    if (tc == null)
+                    {
+                        tc = clr;
+                    }
+                    else if (tc != clr)
+                    {
+                        return null;
+                    }
+                }
+
+                return tc;
+            }
+            set
+            {
+                System.Drawing.Color? sc = null;
+
+                if (value != null)
+                {
+                    sc = ((Color)value).GetUniColor();
+                }
+
+                foreach (var item in selBulbs)
+                {
+                    item.Color = sc;
+                }
+            }
+        }
+
+
         public Bulb SelectedBulb
         {
             get => selBulb;
             set
             {
-                if (SetProperty(ref selBulb, value))
-                {
-                    lightModeList.BulbSelection = new Bulb[] { selBulb };
-
-                    OnPropertyChanged(nameof(SelectedText));
-                    OnPropertyChanged(nameof(BulbSelectionRoom));
-                    OnPropertyChanged(nameof(BulbSelectionHome));
-                }
+                SetProperty(ref selBulb, value);
             }
         }
 
-        public IList<Bulb> SelectedBulbs
+        public ObservableCollection<Bulb> SelectedBulbs
         {
             get => selBulbs;
             set
             {
                 if (SetProperty(ref selBulbs, value))
                 {
-                    lightModeList.BulbSelection = selBulbs;
-                    
-                    OnPropertyChanged(nameof(SelectedText));
-                    OnPropertyChanged(nameof(BulbSelectionRoom));
-                    OnPropertyChanged(nameof(BulbSelectionHome));
+                    if (lightModeList != null) lightModeList.BulbSelection = selBulbs;
+                    SelectionPropertiesChanged();
                 }
             }
+        }
+
+        private void SelectionPropertiesChanged()
+        {
+            OnPropertyChanged(nameof(SelectedBulbs));
+            OnPropertyChanged(nameof(SelectedText));
+            OnPropertyChanged(nameof(SelectedBrightness));
+            OnPropertyChanged(nameof(SelectedSpeed));
+            OnPropertyChanged(nameof(SelectedColor));
+            OnPropertyChanged(nameof(BulbSelectionRoom));
+            OnPropertyChanged(nameof(BulbSelectionHome));
+
         }
 
         public Home SelectedHome
@@ -528,6 +625,27 @@ namespace WizBulb.ViewModels
         #endregion Public Properties
 
         #region Public Methods
+
+        public void SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+            if (e.RemovedItems != null && e.RemovedItems.Count > 0)
+            {
+                foreach (Bulb item in e.RemovedItems)
+                {
+                    selBulbs.Remove(item);
+                }
+            }
+            if (e.AddedItems != null && e.AddedItems.Count > 0)
+            {
+                foreach (Bulb item in e.AddedItems)
+                {
+                    selBulbs.Add(item);
+                }
+            }
+
+            SelectionPropertiesChanged();
+        }
 
         public virtual bool CheckTimeout()
         {

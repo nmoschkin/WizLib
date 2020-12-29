@@ -91,10 +91,9 @@ namespace WizBulb
 
         public MainWindow()
         {
-            //WiZ.Helpers.ConsoleHelper.AllocConsole();
-
             InitializeComponent();
 
+            #region Test Stuff
             //var lonc = new List<NamedColor>(NamedColor.Catalog);
 
             //lonc.Sort((a, b) =>
@@ -131,7 +130,7 @@ namespace WizBulb
             //    if (k.Value == 0xff000000)
             //    {
             //        ecount++;
-                    
+
             //        var erl = "Break";
 
             //    }
@@ -185,7 +184,7 @@ namespace WizBulb
             //f4.Key = "CF2";
 
             //f4 = testing["CF2"];
-
+            #endregion
 
             var loc = Settings.LastWindowLocation;
             var size = Settings.LastWindowSize;
@@ -204,9 +203,9 @@ namespace WizBulb
             var iconv = (IntDisplayConverter)this.Resources["intConv"];
 
             iconv.ConverterError += Iconv_ConverterError;
-
+            
             vm = new MainViewModel(false);
-            vm.PropertyChanged += Vm_PropertyChanged;
+            BulbList.SelectionChanged += vm.SelectionChanged;
 
             vm.PopulateLightModesMenu(mnuModes);
             vm.PopulateRecentFiles(mnuRecents);
@@ -406,28 +405,6 @@ namespace WizBulb
             dataView.Refresh();
         }
 
-        private async void BulbList_KeyDown(object sender, KeyEventArgs e)
-        {
-        }
-
-        private void BulbList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (e.RemovedItems != null && e.RemovedItems.Count > 0)
-            {
-                var b = e.RemovedItems[0] as Bulb;
-                b.Renaming = false;
-            }
-
-            List<Bulb> lb = new List<Bulb>();
-
-            foreach (Bulb sel in BulbList.SelectedItems)
-            {
-                lb.Add(sel);
-            }
-
-            vm.SelectedBulbs = lb;
-        }
-
         private async void ColorPicker_ColorHit(object sender, ColorHitEventArgs e)
         {
             try
@@ -536,14 +513,6 @@ namespace WizBulb
             await vm.RefreshAll();
         }
 
-        private void mnuRename_Click(object sender, RoutedEventArgs e)
-        {
-            if (BulbList.SelectedValue is Bulb b)
-            {
-                b.Renaming = true;
-            }
-        }
-
         private void mnuRoomRefresh_Click(object sender, RoutedEventArgs e)
         {
 
@@ -627,27 +596,6 @@ namespace WizBulb
             if (sender is TextBox tb)
             {
                 tb.IsEnabled = false;
-            }
-        }
-
-        private void Vm_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(MainViewModel.Bulbs))
-            {
-                //GridView view = (GridView)BulbList.View;
-                //RoutedEventArgs v;
-                //var header = GetHeader(AppResources.RoomId);
-
-                //v = new RoutedEventArgs(GridViewColumnHeader.ClickEvent, header);
-                //this.BulbList_Click(BulbList, v);
-            }
-
-            if (e.PropertyName == nameof(MainViewModel.SelectedBulb) && vm.SelectedBulb != null && vm.SelectedBulb.Brightness != null)
-            {
-                notch = true;
-                Slide.Value = vm.SelectedBulb?.Brightness ?? 10;
-                Speed.Value = vm.SelectedBulb?.Speed ?? 10;
-                notch = false;
             }
         }
 

@@ -124,8 +124,7 @@
                         Margin="4"
                         Background="Transparent"
                         BorderThickness="0"
-                        Content="{Binding Name}"
-                        IsEnabled="{Binding Renaming, Mode=TwoWay}" />
+                        Content="{Binding Name}" />
 
                 </Grid>
             </DataTemplate>
@@ -256,11 +255,10 @@
                     Grid.ColumnSpan="2"
                     Margin="0"
                     BorderThickness="0"
+                    Foreground="Black"
                     GridViewColumnHeader.Click="BulbList_Click"
                     ItemsSource="{Binding Bulbs}"
-                    KeyDown="BulbList_KeyDown"
-                    SelectedItem="{Binding SelectedBulb, Mode=TwoWay}"
-                    SelectionChanged="BulbList_SelectionChanged">
+                    SelectedItem="{Binding SelectedBulb, Mode=TwoWay}">
 
                     <ListView.ContextMenu>
                         <ContextMenu>
@@ -268,11 +266,6 @@
                                 x:Name="mnuPing"
                                 Click="mnuPing_Click"
                                 Header="{i18n:Translate ResourceKey=PingBulb}" />
-
-                            <MenuItem
-                                x:Name="mnuRename"
-                                Click="mnuRename_Click"
-                                Header="{i18n:Translate ResourceKey=Rename}" />
 
                             <Separator />
 
@@ -404,7 +397,6 @@
                     BorderThickness="0"
                     GridViewColumnHeader.Click="HomeList_Click"
                     ItemsSource="{Binding Homes}"
-                    KeyDown="BulbList_KeyDown"
                     SelectedItem="{Binding SelectedHome, Mode=TwoWay}"
                     SelectionChanged="HomeList_SelectionChanged">
 
@@ -464,7 +456,6 @@
                     BorderThickness="0"
                     GridViewColumnHeader.Click="RoomList_Click"
                     ItemsSource="{Binding Rooms}"
-                    KeyDown="BulbList_KeyDown"
                     SelectedItem="{Binding SelectedRoom, Mode=TwoWay}"
                     SelectionChanged="RoomList_SelectionChanged">
 
@@ -542,7 +533,8 @@
                     Grid.Column="0"
                     ColorHit="ColorPicker_ColorHit"
                     InvertSaturation="True"
-                    Mode="LinearHorizontal" />
+                    Mode="LinearHorizontal"
+                    SelectedColor="{Binding SelectedColor}" />
             </Grid>
 
         </Border>
@@ -788,7 +780,7 @@
                         SmallChange="1"
                         TickFrequency="1"
                         TickPlacement="BottomRight"
-                        ValueChanged="Slider_ValueChanged" />
+                        Value="{Binding SelectedBrightness}" />
 
                     <Label
                         Grid.Row="2"
@@ -812,7 +804,7 @@
                         SmallChange="1"
                         TickFrequency="1"
                         TickPlacement="TopLeft"
-                        ValueChanged="Speed_ValueChanged" />
+                        Value="{Binding SelectedSpeed}" />
 
 
 

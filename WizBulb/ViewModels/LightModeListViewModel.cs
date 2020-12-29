@@ -12,15 +12,15 @@ using WiZ.Helpers;
 
 namespace WizBulb.ViewModels
 {
-    public class LightModeList : ObservableBase
+    public class LightModeListViewModel : ObservableBase
     {
 
         private ObservableCollection<LightMode> modeList;
-        private IEnumerable<Bulb> selection;
+        private ObservableCollection<Bulb> selection;
 
         public ObservableCollection<LightMode> ModeList => modeList;
 
-        public LightModeList(Profile profile)
+        public LightModeListViewModel(Profile profile)
         {
 
             List<LightMode> init = new List<LightMode>();
@@ -37,17 +37,25 @@ namespace WizBulb.ViewModels
 
         }
 
+        ~LightModeListViewModel()
+        {
+            if (selection != null)
+            {
+                selection.CollectionChanged -= SelectionChanged;
+            }
+        }
+
         public LightMode SelectedMode
         {
             get
             {
-                if (selection == null) return LightMode.Empty;
+                if (selection == null || selection.Count == 0) return LightMode.Empty;
 
                 LightMode lm = LightMode.Empty; 
                 
                 foreach (var bulb in selection)
                 {
-                    if (lm == LightMode.Empty)
+                    if (lm == LightMode.Empty && bulb.LightMode != null)
                     {
                         lm = bulb.LightMode;
                     }
@@ -67,22 +75,31 @@ namespace WizBulb.ViewModels
                 foreach (var bulb in selection)
                 {
                     bulb.LightMode = value;
+                    _ = bulb.GetPilot();
                 }
             }
         }
 
-        public IEnumerable<Bulb> BulbSelection
+        public ObservableCollection<Bulb> BulbSelection
         {
             get => BulbSelection;
             set
             {
+                var oldval = selection;
+
                 if (SetProperty(ref selection, value))
                 {
+                    if (oldval != null) oldval.CollectionChanged -= SelectionChanged;
+                    value.CollectionChanged += SelectionChanged;
+                    
                     OnPropertyChanged(nameof(SelectedMode));
                 }
             }
         }
 
-
+        private void SelectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(SelectedMode));
+        }
     }
 }

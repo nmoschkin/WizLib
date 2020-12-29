@@ -89,7 +89,6 @@ namespace WiZ
         protected string icon;
         protected string name;
         protected int port = DefaultPort;
-        protected bool renaming;
         protected BulbParams settings;
         protected int timeout = 2000;
 
@@ -461,15 +460,6 @@ namespace WiZ
             set
             {
                 SetProperty(ref port, value);
-            }
-        }
-
-        public virtual bool Renaming
-        {
-            get => renaming;
-            set
-            {
-                SetProperty(ref renaming, value);
             }
         }
 
