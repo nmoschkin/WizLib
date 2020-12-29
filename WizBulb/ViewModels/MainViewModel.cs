@@ -452,26 +452,16 @@ namespace WizBulb.ViewModels
         {
             get
             {
-                Color? tc = null;
+                if (selBulbs.Count == 0) return null;
+                System.Drawing.Color? tc = selBulbs[0].Color;
 
+                
                 foreach (var item in selBulbs)
                 {
-
-                    if (item.Color == null) continue;
-
-                    var clr = new UniColor(item.Color.Value.ToArgb()).GetWPFColor();
-
-                    if (tc == null)
-                    {
-                        tc = clr;
-                    }
-                    else if (tc != clr)
-                    {
-                        return null;
-                    }
+                    if (item.Color != tc) return null;
                 }
 
-                return tc;
+                return tc != null ? ((UniColor)tc.Value).GetWPFColor() : null;
             }
             set
             {
