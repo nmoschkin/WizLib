@@ -353,6 +353,11 @@
                                 DisplayMemberBinding="{Binding Settings.FirmwareVersion}"
                                 Header="{i18n:Translate ResourceKey=FirmwareVersion}" />
 
+                            <GridViewColumn
+                                Width="120"
+                                DisplayMemberBinding="{Binding Settings.DriverConfig}"
+                                Header="{i18n:Translate ResourceKey=DriverConfig}" />
+
 
                         </GridView>
                     </ListView.View>
