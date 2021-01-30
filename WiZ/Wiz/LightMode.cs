@@ -40,12 +40,12 @@ namespace WiZ
         WhiteLight = 3,
 
         /// <summary>
-        /// Simple light modes that do not support additional paramters.
+        /// Simple light modes that do not support additional parameters.
         /// </summary>
         Simple = 4,
 
         /// <summary>
-        /// Progressive light modes that evolve over 30 minutes and do not support additional paramters.
+        /// Progressive light modes that evolve over 30 minutes and do not support additional parameters.
         /// </summary>
         Progressive = 5,
 
@@ -339,7 +339,7 @@ namespace WiZ
             foreach (var l in modes)
             {
 
-                if (l.Value.Name.ToLower() == name.ToLower())
+                if (l.Value.Name == name)
                 {
                     return l.Value;
                 }

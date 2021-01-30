@@ -432,7 +432,7 @@ namespace WiZ
         }
 
         /// <summary>
-        /// Gets or sets the name of this buld.
+        /// Gets or sets the name of this bulb.
         /// </summary>
         public virtual string Name
         {

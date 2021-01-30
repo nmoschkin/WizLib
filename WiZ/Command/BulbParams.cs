@@ -26,8 +26,8 @@ namespace WiZ
         public static readonly ReadOnlyDictionary<(int, int), string> BulbTypeCatalog
             = new ReadOnlyDictionary<(int, int), string>(new Dictionary<(int, int), string>()
             {
-                { (37, 1), "Phillips Color & Tunable-White BR30" },
-                { (50, 1), "Phillips Color & Tunable-White BR30" },
+                { (37, 1), "Philips Color & Tunable-White BR30" },
+                { (50, 1), "Philips Color & Tunable-White BR30" },
                 { (33, 1), "Philips Color & Tunable-White A19" },
                 { (60, 1), "Philips Color & Tunable-White A19" },
                 { (20, 2), "Philips Color & Tunable-White A21" },
