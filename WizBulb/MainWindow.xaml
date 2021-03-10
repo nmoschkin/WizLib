@@ -45,6 +45,8 @@
                 NonVisibility="Collapsed"
                 Visibility="Visible" />
 
+            <conv:EmptyToVisibilityConverter x:Key="emptyVis" />
+
             <conv:DistanceConverter x:Key="distConv" AsFeet="True" />
             <conv:MacAddrConverter x:Key="macConv" />
             <conv:EnumConverter x:Key="enumConv" />
@@ -748,6 +750,42 @@
                         Padding="4"
                         ItemsSource="{Binding LightModeList.ModeList}"
                         SelectedItem="{Binding LightModeList.SelectedMode, Mode=TwoWay}">
+
+                        <ComboBox.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.HeaderTemplate>
+                                    <DataTemplate>
+                                        <Border
+                                            Margin="0,2,0,2"
+                                            Background="LightSlateGray"
+                                            BorderBrush="DarkSlateGray"
+                                            BorderThickness="0.75"
+                                            Visibility="{Binding Name, Converter={StaticResource emptyVis}}">
+
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock
+                                                    Grid.Row="0"
+                                                    Padding="4"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Background="Transparent"
+                                                    FontFamily="Calibri"
+                                                    FontSize="12"
+                                                    FontWeight="Bold"
+                                                    Foreground="White"
+                                                    Text="{Binding Name}" />
+
+                                            </Grid>
+
+                                        </Border>
+                                    </DataTemplate>
+                                </GroupStyle.HeaderTemplate>
+                            </GroupStyle>
+                        </ComboBox.GroupStyle>
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">

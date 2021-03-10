@@ -180,11 +180,20 @@ namespace WiZ
         }
 
         /// <summary>
+        /// Gets a value indicating this is an empty entry.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsEmpty
+        {
+            get => Name == " " && Code == 0;
+        }
+
+        /// <summary>
         /// Gets the descriptive name for the type in the local language.
         /// </summary>
         public string TypeDescription
         {
-            get => GetLightModeTypeDescription(type);
+            get => Name == " " && Code == 0 ? " " : GetLightModeTypeDescription(type);
         }
 
         /// <summary>

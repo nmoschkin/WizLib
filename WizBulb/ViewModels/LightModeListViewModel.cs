@@ -9,16 +9,26 @@ using WiZ;
 using WiZ.Observable;
 using WiZ.Profiles;
 using WiZ.Helpers;
+using System.Windows.Data;
+using System.ComponentModel;
 
 namespace WizBulb.ViewModels
 {
     public class LightModeListViewModel : ObservableBase
     {
 
-        private ObservableCollection<LightMode> modeList;
+        private ListCollectionView modeList;
         private ObservableCollection<Bulb> selection;
 
-        public ObservableCollection<LightMode> ModeList => modeList;
+        public ListCollectionView ModeList
+        {
+            get => modeList;
+            set
+            {
+                SetProperty(ref modeList, value);
+            }
+        }
+
 
         public LightModeListViewModel(Profile profile)
         {
@@ -33,8 +43,33 @@ namespace WizBulb.ViewModels
                 init.Add(h);
             }
 
-            modeList = new ObservableCollection<LightMode>(init);
+            init.Sort((a, b) =>
+            {
+                
+                if (a.Type == LightModeType.CustomColor && b.Type == LightModeType.CustomColor)
+                {
+                    if (a.IsEmpty && b.IsEmpty) return 0;
+                    else if (a.IsEmpty) return -1;
+                    else if (b.IsEmpty) return 1;
 
+                }
+                else if (a.Type == LightModeType.CustomColor)
+                {
+                    return -1;
+                }
+                else if (b.Type == LightModeType.CustomColor)
+                {
+                    return 1;
+                }
+
+                int t = string.Compare(a.TypeDescription, b.TypeDescription);
+                return t == 0 ? string.Compare(a.Name, b.Name) : t;
+            });
+
+            var ml = new ListCollectionView(init);
+            ml.GroupDescriptions.Add(new PropertyGroupDescription("TypeDescription"));
+
+            ModeList = ml;
         }
 
         ~LightModeListViewModel()
