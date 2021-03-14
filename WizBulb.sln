@@ -9,21 +9,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataTools", "DataTools", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Wiz", "Wiz", "{8504AAF8-EB4C-4EE7-9DB0-AF727E9420CA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools", "..\DataTools5\DataTools\DataTools.csproj", "{36DE43F7-134F-4A18-BE76-0650AC8EBC1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools", "DataTools5\DataTools\DataTools.csproj", "{36DE43F7-134F-4A18-BE76-0650AC8EBC1C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Hardware", "..\DataTools5\DataTools.Hardware\DataTools.Hardware.csproj", "{3826F90D-1094-4BFC-8874-ED44B403D3D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Hardware", "DataTools5\DataTools.Hardware\DataTools.Hardware.csproj", "{3826F90D-1094-4BFC-8874-ED44B403D3D4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.ColorControls", "..\DataTools5\DataTools.ColorControls\DataTools.ColorControls.csproj", "{2A39E5B1-BA5B-4AEC-8077-27CBBBDC3014}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.ColorControls", "DataTools5\DataTools.ColorControls\DataTools.ColorControls.csproj", "{2A39E5B1-BA5B-4AEC-8077-27CBBBDC3014}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WizUWP", "WizUWP\WizUWP.csproj", "{B1A66E6B-EAD8-44EE-9839-F910E6F62BA4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WiZ", "WiZ\WiZ.csproj", "{BF3D0026-AB4D-4D9A-ABFA-338E0212481C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Win32", "..\DataTools5\DataTools.Win32\DataTools.Win32.csproj", "{ACE4D521-BFB2-471A-B0DF-9C45BC7C5704}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Win32", "DataTools5\DataTools.Win32\DataTools.Win32.csproj", "{ACE4D521-BFB2-471A-B0DF-9C45BC7C5704}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Win32.Memory", "..\DataTools5\DataTools.Win32.Memory\DataTools.Win32.Memory.csproj", "{9DA87286-DDD4-4AE0-954E-0F89669F0A92}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Win32.Memory", "DataTools5\DataTools.Win32.Memory\DataTools.Win32.Memory.csproj", "{9DA87286-DDD4-4AE0-954E-0F89669F0A92}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Graphics", "..\DataTools5\DataTools.Graphics\DataTools.Graphics.csproj", "{4111BD37-1783-41DB-97B6-37162CB941F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Graphics", "DataTools5\DataTools.Graphics\DataTools.Graphics.csproj", "{4111BD37-1783-41DB-97B6-37162CB941F1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageBoxEx", "..\MessageBoxEx\MessageBoxEx\MessageBoxEx.csproj", "{37A2537D-70C6-4A26-B6C6-CBC6A2D6CA75}"
 EndProject
