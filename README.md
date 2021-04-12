@@ -15,5 +15,9 @@ The example program **WizBulb** is built for Windows Desktop in .NET 5.0, and re
 
 When you clone the project, be sure to run __git submodule init__ and __git submodule update__ from the root project directory.
 
+Quick notes: When you select a bulb in the application, you can change the name by clicking into the text on the right-hand panel.  If you select all the bulbs in the room you can change the name of the room, and the name of the house.  
+
+You can save these settings to a JSON file, and they will automatically load the next time the application is run.
+
 
 
