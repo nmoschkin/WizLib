@@ -99,6 +99,46 @@ namespace WiZ
 
         #endregion
 
+        #region UserConfig 
+
+        private int? fadeIn;
+
+        private int? fadeOut;
+
+        private int? dftDim;
+
+        private bool? opMode;
+
+        private int? minDimming;
+
+        #endregion
+
+        #region ModelConfig
+
+        private int? ps;
+
+        private int? pwmFreq;
+
+        private int[] pwmRange;
+
+        private int? wcr;
+
+        private int? nowc;
+
+        private int[] cctRange;
+
+        private int[] renderFactor;
+
+        private int? hasAdjMinDim;
+
+        private int? hasTapSensor;
+
+        private int? pm;
+
+        private int? fanSpeed;
+
+        #endregion
+
         #endregion
 
         #region Settings Rules Enforcement, Copying, Clearing, Configuring, Cloning
@@ -876,12 +916,200 @@ namespace WiZ
                 {
                     return BulbTypeCatalog[drvConf.Value];
                 }
+                else if (wcr != null && nowc != null && BulbTypeCatalog.ContainsKey(((int)wcr, (int)nowc)))
+                {
+                    return BulbTypeCatalog[((int)wcr, (int)nowc)];
+                }
                 else
                 {
                     return null;
                 }
             }
         }
+
+        #region Returned from getModelConfig
+
+
+        [JsonProperty("ps")]
+        public int? Ps
+        {
+            get => ps;
+            set
+            {
+                SetProperty(ref ps, value);
+            }
+        }
+
+
+        [JsonProperty("pwmFreq")]
+        public int? PwmFrequency
+        {
+            get => pwmFreq;
+            set
+            {
+                SetProperty(ref pwmFreq, value);
+            }
+        }
+
+
+        [JsonProperty("pwmRange")]
+        public int[] PwmRange
+        {
+            get => pwmRange;
+            set
+            {
+                SetProperty(ref pwmRange, value);
+            }
+        }
+
+
+        [JsonProperty("wcr")]
+        public int? WcR
+        {
+            get => wcr;
+            set
+            {
+                SetProperty(ref wcr, value);
+            }
+        }
+
+
+        [JsonProperty("nowc")]
+        public int? NoWc
+        {
+            get => nowc;
+            set
+            {
+                SetProperty(ref nowc, value);
+            }
+        }
+
+
+        [JsonProperty("cctRange")]
+        public int[] CCTRange
+        {
+            get => cctRange;
+            set
+            {
+                SetProperty(ref cctRange, value);
+            }
+        }
+
+
+        [JsonProperty("renderFactor")]
+        public int[] RenderFactor
+        {
+            get => renderFactor;
+            set
+            {
+                SetProperty(ref renderFactor, value);
+            }
+        }
+
+
+        [JsonProperty("hasAdjMinDim")]
+        public int? HasAdjustableMinDim
+        {
+            get => hasAdjMinDim;
+            set
+            {
+                SetProperty(ref hasAdjMinDim, value);
+            }
+        }
+
+
+        [JsonProperty("hasTapSensor")]
+        public int? HasTapSensor
+        {
+            get => hasTapSensor;
+            set
+            {
+                SetProperty(ref hasTapSensor, value);
+            }
+        }
+
+
+        [JsonProperty("pm")]
+        public int? Pm
+        {
+            get => pm;
+            set
+            {
+                SetProperty(ref pm, value);
+            }
+        }
+
+
+        [JsonProperty("fanSpeed")]
+        public int? FanSpeed
+        {
+            get => fanSpeed;
+            set
+            {
+                SetProperty(ref fanSpeed, value);
+            }
+        }
+
+        #endregion
+
+        #region Results from getUserConfig
+
+        [JsonProperty("fadeIn")]
+        public int? FadeIn
+        {
+            get => fadeIn;
+            set
+            {
+                SetProperty(ref fadeIn, value);
+            }
+        }
+
+
+        [JsonProperty("fadeOut")]
+        public int? FadeOut
+        {
+            get => fadeOut;
+            set
+            {
+                SetProperty(ref fadeOut, value);
+            }
+        }
+
+
+        [JsonProperty("dftDim")]
+        public int? DefaultBrightness
+        {
+            get => dftDim;
+            set
+            {
+                SetProperty(ref dftDim, value);
+            }
+        }
+
+
+        [JsonProperty("opMode")]
+        public bool? OpMode
+        {
+            get => opMode;
+            set
+            {
+                SetProperty(ref opMode, value);
+            }
+        }
+
+
+        [JsonProperty("minDimming")]
+        public int? MinBrightness
+        {
+            get => minDimming;
+            set
+            {
+                SetProperty(ref minDimming, value);
+            }
+        }
+
+
+        #endregion
 
         #endregion
 

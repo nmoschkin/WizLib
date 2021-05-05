@@ -485,7 +485,11 @@ namespace WizBulb.ViewModels
             get => selBulb;
             set
             {
-                SetProperty(ref selBulb, value);
+                if (SetProperty(ref selBulb, value))
+                {
+                    _ = selBulb.GetUserConfig();
+                    _ = selBulb.GetModelConfig();
+                }
             }
         }
 

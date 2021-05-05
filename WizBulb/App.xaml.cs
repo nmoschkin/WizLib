@@ -23,7 +23,7 @@ namespace WizBulb
 
         public App() : base()
         {
-            //WiZ.Helpers.ConsoleHelper.AllocConsole();
+            // WiZ.Helpers.ConsoleHelper.AllocConsole();
         }
 
     }

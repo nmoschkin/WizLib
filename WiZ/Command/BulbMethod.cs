@@ -31,9 +31,19 @@ namespace WiZ
         public static readonly BulbMethod GetPilot = new BulbMethod("getPilot", false);
 
         /// <summary>
+        /// GetModelConfig Method
+        /// </summary>
+        public static readonly BulbMethod GetModelConfig = new BulbMethod("getModelConfig", false);
+
+        /// <summary>
         /// GetSystemConfig Method
         /// </summary>
         public static readonly BulbMethod GetSystemConfig = new BulbMethod("getSystemConfig", false);
+        
+        /// <summary>
+        /// GetUserConfig Method
+        /// </summary>
+        public static readonly BulbMethod GetUserConfig = new BulbMethod("getUserConfig", false);
 
         /// <summary>
         /// Pulse Method

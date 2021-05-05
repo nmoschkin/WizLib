@@ -59,10 +59,10 @@ namespace WizBulb.Controls
 
         private static void NewBulb_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            switch(e.PropertyName)
-            {
+            //switch(e.PropertyName)
+            //{
                 
-            }
+            //}
         }
 
         private void RefreshBulb()

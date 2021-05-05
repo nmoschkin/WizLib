@@ -844,6 +844,11 @@ namespace WiZ
 
             allUdpActive = false;
 
+            foreach (var newBulb in bulbs)
+            {
+                _ = newBulb.GetModelConfig();
+            }
+
             return bulbs;
         }
 
@@ -930,7 +935,7 @@ namespace WiZ
         /// <returns>True if successful.</returns>
         public virtual async Task<bool> GetPilot()
         {
-            return await GetMethod(BulbMethod.GetPilot);
+            return await GetMethod(BulbMethod.GetPilot) && await GetUserConfig();
         }
 
         /// <summary>
@@ -939,7 +944,17 @@ namespace WiZ
         /// <returns>True if successful.</returns>
         public virtual async Task<bool> GetSystemConfig()
         {
-            return await GetMethod(BulbMethod.GetSystemConfig);
+            return await GetMethod(BulbMethod.GetSystemConfig, false) && await GetModelConfig();
+        }
+
+        public virtual async Task<bool> GetModelConfig()
+        {
+            return await GetMethod(BulbMethod.GetModelConfig, false);
+        }
+
+        public virtual async Task<bool> GetUserConfig()
+        {
+            return await GetMethod(BulbMethod.GetUserConfig, false);
         }
 
         /// <summary>
@@ -1125,7 +1140,7 @@ namespace WiZ
         /// </summary>
         /// <param name="m">The method to run (must be a 'get' method)</param>
         /// <returns>True if successful.</returns>
-        internal async Task<bool> GetMethod(BulbMethod m)
+        internal async Task<bool> GetMethod(BulbMethod m, bool clearPilot = true)
         {
             if (m.IsSetMethod || m.IsInboundOnly) return false;
 
@@ -1149,7 +1164,7 @@ namespace WiZ
             if (Settings != null)
             {
                 cmd.Result = Settings;
-                cmd.Result.ClearPilot();
+                if (clearPilot) cmd.Result.ClearPilot();
 
                 JsonConvert.PopulateObject(json, cmd, BulbCommand.DefaultJsonSettings);
             }
