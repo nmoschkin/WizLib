@@ -16,6 +16,7 @@ namespace WiZ.Observable
     /// <summary>
     /// Class or property decorator to specify the key property.
     /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property)]
     public class KeyPropertyAttribute : Attribute
     {
         #region Public Constructors

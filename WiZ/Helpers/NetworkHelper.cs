@@ -40,10 +40,7 @@ namespace WiZ
 
                 return defAddr;
             }
-            set
-            {
-
-            }
+          
         }
 
         /// <summary>
