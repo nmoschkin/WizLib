@@ -31,7 +31,9 @@ namespace WiZ
                 { (33, 1), "Philips Color & Tunable-White A19" },
                 { (60, 1), "Philips Color & Tunable-White A19" },
                 { (20, 2), "Philips Color & Tunable-White A21" },
-                { (40, 1), "Philips Color & Tunable-White E14 Candelabra" }
+                { (40, 1), "Philips Color & Tunable-White E14 Candelabra" },
+                { (80, 2), "Philips Color & Tunable-White Lighting Strip" },
+
             });
         #endregion
 
