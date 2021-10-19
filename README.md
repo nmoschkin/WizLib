@@ -7,8 +7,6 @@ The library, itself, is pretty well documented, so far (the Bulb class is, anywa
 
 Internal WiZ API workings gleaned from Python and Java source (https://github.com/sbidy/pywizlight) and also (https://github.com/SRGDamia1/openhab2-addons).
 
-There is nothing happening with the UWP project, right now, it's just an empty shell.  In the future I will come back around to it or just remove it, entirely.
-
 The **WiZ** class library is implmented in .NET Standard and requires only the NewtonSoft.Json Nuget package.
 
 The example program **WizBulb** is built for Windows Desktop in .NET 5.0, and requires the DataTools library. 
