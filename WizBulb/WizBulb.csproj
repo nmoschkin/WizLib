@@ -25,7 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\MessageBoxEx\MessageBoxEx\MessageBoxEx.csproj" />
     <ProjectReference Include="..\DataTools5\DataTools.ColorControls\DataTools.ColorControls.csproj" />
     <ProjectReference Include="..\DataTools5\DataTools.Graphics\DataTools.Graphics.csproj" />
     <ProjectReference Include="..\DataTools5\DataTools.Hardware\DataTools.Hardware.csproj" />
