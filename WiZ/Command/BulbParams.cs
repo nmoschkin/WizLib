@@ -33,6 +33,7 @@ namespace WiZ
                 { (20, 2), "Philips Color & Tunable-White A21" },
                 { (40, 1), "Philips Color & Tunable-White E14 Candelabra" },
                 { (80, 2), "Philips Color & Tunable-White Lighting Strip" },
+                { (30, 1), "Philips Color & Tunable-White PAR38 Indoor/Outdoor Floodlight" }
 
             });
         #endregion
