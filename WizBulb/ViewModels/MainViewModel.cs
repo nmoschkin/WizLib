@@ -1,28 +1,25 @@
-﻿using System;
+﻿using DataTools.Graphics;
+using DataTools.Win32.Network;
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
+using System.IO;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Threading;
-using System.Windows.Forms;
-using System.IO;
-
-using DataTools.Hardware.Network;
-
-using WizBulb.Localization.Resources;
 
 using WiZ;
-using WiZ.Profiles;
-using System.Net.NetworkInformation;
 using WiZ.Observable;
-using System.Windows.Data;
+using WiZ.Profiles;
+
 using WizBulb.Converters;
-using DataTools.Graphics;
+using WizBulb.Localization.Resources;
 
 namespace WizBulb.ViewModels
 {
@@ -49,9 +46,9 @@ namespace WizBulb.ViewModels
 
         #endregion Public Properties
     }
+
     public class MainViewModel : ObservableBase
     {
-
         #region Private Fields
 
         private AdaptersCollection adapters;
@@ -115,9 +112,6 @@ namespace WizBulb.ViewModels
             PropertyChanged += PropChangeWatcher;
             SelectedBulbs = new ObservableCollection<Bulb>();
 
-          
-
-
             if (populate)
             {
                 _ = RefreshAll();
@@ -156,9 +150,9 @@ namespace WizBulb.ViewModels
 
         #region Public Properties
 
-        public ObservableCollection<NetworkAdapter> Adapters
+        public AdaptersCollection Adapters
         {
-            get => adapters?.Adapters;
+            get => adapters;
         }
 
         public bool AutoChangeBulb
@@ -176,7 +170,6 @@ namespace WizBulb.ViewModels
             set
             {
                 if (autoWatch == value) return;
-
 
                 if (value)
                 {
@@ -225,7 +218,6 @@ namespace WizBulb.ViewModels
             }
         }
 
-
         public int Interval
         {
             get => interval;
@@ -233,7 +225,6 @@ namespace WizBulb.ViewModels
             {
                 SetProperty(ref interval, value);
             }
-
         }
 
         public string NetworkStatus
@@ -302,7 +293,6 @@ namespace WizBulb.ViewModels
                 }
                 else
                 {
-
                     Room r = profile.MatchBulbsToRoom(selBulbs);
 
                     if (r == null)
@@ -344,12 +334,10 @@ namespace WizBulb.ViewModels
                 }
                 else
                 {
-
                     return profile.MatchBulbsToRoom(selBulbs);
                 }
             }
         }
-
 
         /// <summary>
         /// Gets the home associated with the current bulb selection.
@@ -378,12 +366,10 @@ namespace WizBulb.ViewModels
                 }
                 else
                 {
-
                     return profile.MatchBulbsToHome(selBulbs);
                 }
             }
         }
-
 
         public NetworkAdapter SelectedAdapter
         {
@@ -404,7 +390,7 @@ namespace WizBulb.ViewModels
                 foreach (var item in selBulbs)
                 {
                     if (item.Brightness == null) continue;
-                    
+
                     d = (d ?? 0) + (double)item.Brightness;
                 }
 
@@ -455,7 +441,6 @@ namespace WizBulb.ViewModels
                 if (selBulbs.Count == 0) return null;
                 System.Drawing.Color? tc = selBulbs[0].Color;
 
-                
                 foreach (var item in selBulbs)
                 {
                     if (item.Color != tc) return null;
@@ -478,7 +463,6 @@ namespace WizBulb.ViewModels
                 }
             }
         }
-
 
         public Bulb SelectedBulb
         {
@@ -515,7 +499,6 @@ namespace WizBulb.ViewModels
             OnPropertyChanged(nameof(SelectedColor));
             OnPropertyChanged(nameof(BulbSelectionRoom));
             OnPropertyChanged(nameof(BulbSelectionHome));
-
         }
 
         public Home SelectedHome
@@ -550,7 +533,6 @@ namespace WizBulb.ViewModels
                                             await BulbItem.CreateBulbsFromInterfaceList(selRoom.Bulbs)
                                             );
                         }
-
                     });
                 }
             }
@@ -622,7 +604,6 @@ namespace WizBulb.ViewModels
 
         public void SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
             if (e.RemovedItems != null && e.RemovedItems.Count > 0)
             {
                 foreach (Bulb item in e.RemovedItems)
@@ -691,7 +672,6 @@ namespace WizBulb.ViewModels
         {
             try
             {
-
                 if (!File.Exists(fileName)) return false;
 
                 try
@@ -735,14 +715,12 @@ namespace WizBulb.ViewModels
                 {
                     return false;
                 }
-
             }
             catch
             {
                 return false;
             }
         }
-
 
         public virtual bool SaveProject()
         {
@@ -798,7 +776,6 @@ namespace WizBulb.ViewModels
             var lms = LightMode.LightModes.Values;
             var lmts = LightMode.AllLightModeTypes;
 
-
             ObservableCollection<MenuItem> submnu = new ObservableCollection<MenuItem>();
 
             foreach (var lmt in lmts)
@@ -812,7 +789,6 @@ namespace WizBulb.ViewModels
                 mis.ItemsSource = new ObservableCollection<MenuItem>();
                 miln.Add(mis);
             }
-
 
             CheckedToSceneEqualConverter chkConv = new CheckedToSceneEqualConverter();
 
@@ -833,7 +809,6 @@ namespace WizBulb.ViewModels
 
                         b.Converter = chkConv;
                         b.ConverterParameter = lm.Code;
-
 
                         if (sm.ItemsSource is ObservableCollection<MenuItem> lsm)
                         {
@@ -862,7 +837,6 @@ namespace WizBulb.ViewModels
                     ToolTip = r.FileName,
                     Tag = r
                 };
-
 
                 mis.Click += RecentItemClicked;
                 l.Add(mis);
@@ -897,7 +871,6 @@ namespace WizBulb.ViewModels
                     return;
                 }
             }
-
         }
 
         public virtual async Task RefreshOnce()
@@ -952,7 +925,6 @@ namespace WizBulb.ViewModels
         {
             if (SelectedBulb != null && (SelectedBulbs == null || SelectedBulbs.Count == 0))
             {
-
                 GC.Collect(0);
                 StatusMessage = string.Format(AppResources.GettingBulbInfoForX, SelectedBulb.ToString());
 
@@ -1070,14 +1042,11 @@ namespace WizBulb.ViewModels
 
                 _ = Task.Run(async () =>
                 {
-
                     await Task.Delay(5000);
 
                     if (ButtonsEnabled)
                         StatusMessage = prevStat ?? "";
-
                 });
-
             });
 
             return true;
@@ -1118,14 +1087,12 @@ namespace WizBulb.ViewModels
                             if (cts?.IsCancellationRequested ?? true) break;
                             await Task.Delay(100);
                         }
-
                     }
                 }
                 catch
                 {
                     return;
                 }
-
             }, cts.Token);
 
             autoWatch = true;
@@ -1142,7 +1109,6 @@ namespace WizBulb.ViewModels
         {
             if (e.Source is MenuItem mi && mi.Tag is LightMode lm)
             {
-
                 if (autoChangeBulb)
                 {
                     if (SelectedBulb != null && (SelectedBulbs == null || SelectedBulbs.Count == 0))

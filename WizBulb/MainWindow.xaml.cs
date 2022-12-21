@@ -1,5 +1,5 @@
 ﻿using DataTools.Graphics;
-using DataTools.Hardware.Network;
+using DataTools.Win32.Network;
 
 using System;
 using System.Collections.ObjectModel;

@@ -20,17 +20,19 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="System.Windows.Interactivity.WPF" Version="2.0.20525" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataTools5\DataTools.ColorControls\DataTools.ColorControls.csproj" />
-    <ProjectReference Include="..\DataTools5\DataTools.Graphics\DataTools.Graphics.csproj" />
-    <ProjectReference Include="..\DataTools5\DataTools.Hardware\DataTools.Hardware.csproj" />
-    <ProjectReference Include="..\DataTools5\DataTools.Win32.Memory\DataTools.Win32.Memory.csproj" />
-    <ProjectReference Include="..\DataTools5\DataTools.Win32\DataTools.Win32.csproj" />
-    <ProjectReference Include="..\DataTools5\DataTools\DataTools.csproj" />
+    <ProjectReference Include="..\datatools-common\DataTools.Graphics\DataTools.Graphics.csproj" />
+    <ProjectReference Include="..\datatools-common\DataTools\DataTools.csproj" />
+    <ProjectReference Include="..\datatools-win32\DataTools.Win32.Memory\DataTools.Win32.Memory.csproj" />
+    <ProjectReference Include="..\datatools-win32\DataTools.Win32.Network\DataTools.Win32.Network.csproj" />
+    <ProjectReference Include="..\datatools-win32\DataTools.Win32\DataTools.Win32.csproj" />
+    <ProjectReference Include="..\datatools-windows\WPF\DataTools.ColorControls\DataTools.ColorControls.csproj" />
+    <ProjectReference Include="..\datatools-windows\WPF\DataTools.Desktop.Network\DataTools.Desktop.Network.csproj" />
+    <ProjectReference Include="..\datatools-windows\WPF\DataTools.Desktop.WPF\DataTools.Desktop.WPF.csproj" />
     <ProjectReference Include="..\WiZ\WiZ.csproj" />
   </ItemGroup>
 

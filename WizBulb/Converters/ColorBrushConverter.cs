@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DataTools.Graphics;
+
+using System;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace WizBulb.Converters
@@ -12,14 +10,12 @@ namespace WizBulb.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            
             if (targetType.IsAssignableTo(typeof(System.Windows.Media.Brush)))
             {
-
                 if (value is System.Drawing.Color c)
                 {
-                    DataTools.Desktop.Unified.UniColor unc = c;
-                    var mcc = (System.Windows.Media.Color)unc;
+                    UniColor unc = c;
+                    var mcc = unc.GetWPFColor();
                     return new System.Windows.Media.SolidColorBrush(mcc);
                 }
                 else if (value is System.Windows.Media.Color mc)
@@ -30,24 +26,23 @@ namespace WizBulb.Converters
                 {
                     return null;
                 }
-
             }
             else if (targetType == typeof(string))
             {
                 if (value is System.Drawing.Color c)
                 {
-                    DataTools.Desktop.Unified.UniColor unc = c;
+                    UniColor unc = c;
                     return unc.ToString();
                 }
                 else if (value is System.Windows.Media.Color mc)
                 {
-                    DataTools.Desktop.Unified.UniColor unc = mc;
+                    UniColor unc = mc.GetUniColor();
                     return unc.ToString();
                 }
                 else
                 {
                     return value?.ToString();
-                } 
+                }
             }
             else
             {
