@@ -1,21 +1,14 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
-using System.ComponentModel;
-using System.Data.SqlTypes;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using System.Diagnostics.CodeAnalysis;
-using System.Net.NetworkInformation;
+
 using WiZ.Observable;
 
 namespace WiZ
 {
-
     /// <summary>
     /// Bulb configuration parameters.
     /// </summary>
@@ -34,13 +27,14 @@ namespace WiZ
                 { (40, 1), "Philips Color & Tunable-White E14 Candelabra" },
                 { (80, 2), "Philips Color & Tunable-White Lighting Strip" },
                 { (30, 1), "Philips Color & Tunable-White PAR38 Indoor/Outdoor Floodlight" }
-
             });
-        #endregion
+
+        #endregion Bulb Type Catalog
 
         #region Fields
 
         #region Pilot Fields
+
         private bool? state;
 
         private byte? r;
@@ -64,9 +58,11 @@ namespace WiZ
         private int? delta;
 
         private int? duration;
-        #endregion
+
+        #endregion Pilot Fields
 
         #region Registration Params
+
         private string phoneMac;
 
         private bool? register;
@@ -74,7 +70,8 @@ namespace WiZ
         private string phoneIp;
 
         private string id;
-        #endregion
+
+        #endregion Registration Params
 
         #region Results
 
@@ -100,9 +97,11 @@ namespace WiZ
 
         private string moduleName;
 
-        #endregion
+        private int? schdPsetId;
 
-        #region UserConfig 
+        #endregion Results
+
+        #region UserConfig
 
         private int? fadeIn;
 
@@ -114,7 +113,7 @@ namespace WiZ
 
         private int? minDimming;
 
-        #endregion
+        #endregion UserConfig
 
         #region ModelConfig
 
@@ -140,11 +139,12 @@ namespace WiZ
 
         private int? fanSpeed;
 
-        #endregion
+        #endregion ModelConfig
 
-        #endregion
+        #endregion Fields
 
         #region Settings Rules Enforcement, Copying, Clearing, Configuring, Cloning
+
         /// <summary>
         /// Set the configurate with the settings from the specified light mode and enforce rules.
         /// </summary>
@@ -282,7 +282,6 @@ namespace WiZ
         /// </summary>
         public void EnforceSimpleLightRules()
         {
-
             //State = null;
             Red = null;
             Green = null;
@@ -340,7 +339,6 @@ namespace WiZ
         /// </summary>
         public void EnforceStaticSceneRules()
         {
-
             //State = null;
             Red = null;
             Green = null;
@@ -360,7 +358,6 @@ namespace WiZ
         /// </summary>
         public void EnforceDynamicSceneRules()
         {
-
             //State = null;
             Red = null;
             Green = null;
@@ -394,7 +391,7 @@ namespace WiZ
             //Duration = null;
         }
 
-        #endregion
+        #endregion Settings Rules Enforcement, Copying, Clearing, Configuring, Cloning
 
         #region Pilot
 
@@ -493,7 +490,6 @@ namespace WiZ
         {
             get
             {
-
                 if (sceneId == null) return null;
 
                 int sc = (int)sceneId;
@@ -662,7 +658,7 @@ namespace WiZ
             }
         }
 
-        #endregion
+        #endregion Pilot
 
         #region Returned Information
 
@@ -752,7 +748,6 @@ namespace WiZ
             double exp = (27.55 - (20 * Math.Log10(freqInMHz)) + Math.Abs(signalLevelInDb)) / 20.0;
             return Math.Pow(10.0, exp);
         }
-
 
         /// <summary>
         /// Source (can be bluetooth, lan, or wan)
@@ -857,7 +852,7 @@ namespace WiZ
         /// <summary>
         /// Product module Ewf code.
         /// </summary>
-        [JsonProperty("ewf")] 
+        [JsonProperty("ewf")]
         public int[] Ewf
         {
             get => ewf;
@@ -896,7 +891,7 @@ namespace WiZ
         /// <summary>
         /// Product module name.
         /// </summary>
-        [JsonProperty("moduleName")] 
+        [JsonProperty("moduleName")]
         public string ModuleName
         {
             get => moduleName;
@@ -930,8 +925,20 @@ namespace WiZ
             }
         }
 
-        #region Returned from getModelConfig
+        /// <summary>
+        /// Rhythm Set Id
+        /// </summary>
+        [JsonProperty("schdPsetId")]
+        public int? SchdPsetId
+        {
+            get => schdPsetId;
+            set
+            {
+                SetProperty(ref schdPsetId, value);
+            }
+        }
 
+        #region Returned from getModelConfig
 
         [JsonProperty("ps")]
         public int? Ps
@@ -943,7 +950,6 @@ namespace WiZ
             }
         }
 
-
         [JsonProperty("pwmFreq")]
         public int? PwmFrequency
         {
@@ -953,7 +959,6 @@ namespace WiZ
                 SetProperty(ref pwmFreq, value);
             }
         }
-
 
         [JsonProperty("pwmRange")]
         public int[] PwmRange
@@ -965,7 +970,6 @@ namespace WiZ
             }
         }
 
-
         [JsonProperty("wcr")]
         public int? WcR
         {
@@ -975,7 +979,6 @@ namespace WiZ
                 SetProperty(ref wcr, value);
             }
         }
-
 
         [JsonProperty("nowc")]
         public int? NoWc
@@ -987,7 +990,6 @@ namespace WiZ
             }
         }
 
-
         [JsonProperty("cctRange")]
         public int[] CCTRange
         {
@@ -997,7 +999,6 @@ namespace WiZ
                 SetProperty(ref cctRange, value);
             }
         }
-
 
         [JsonProperty("renderFactor")]
         public int[] RenderFactor
@@ -1009,7 +1010,6 @@ namespace WiZ
             }
         }
 
-
         [JsonProperty("hasAdjMinDim")]
         public int? HasAdjustableMinDim
         {
@@ -1019,7 +1019,6 @@ namespace WiZ
                 SetProperty(ref hasAdjMinDim, value);
             }
         }
-
 
         [JsonProperty("hasTapSensor")]
         public int? HasTapSensor
@@ -1031,7 +1030,6 @@ namespace WiZ
             }
         }
 
-
         [JsonProperty("pm")]
         public int? Pm
         {
@@ -1041,7 +1039,6 @@ namespace WiZ
                 SetProperty(ref pm, value);
             }
         }
-
 
         [JsonProperty("fanSpeed")]
         public int? FanSpeed
@@ -1053,7 +1050,7 @@ namespace WiZ
             }
         }
 
-        #endregion
+        #endregion Returned from getModelConfig
 
         #region Results from getUserConfig
 
@@ -1067,7 +1064,6 @@ namespace WiZ
             }
         }
 
-
         [JsonProperty("fadeOut")]
         public int? FadeOut
         {
@@ -1077,7 +1073,6 @@ namespace WiZ
                 SetProperty(ref fadeOut, value);
             }
         }
-
 
         [JsonProperty("dftDim")]
         public int? DefaultBrightness
@@ -1089,7 +1084,6 @@ namespace WiZ
             }
         }
 
-
         [JsonProperty("opMode")]
         public bool? OpMode
         {
@@ -1099,7 +1093,6 @@ namespace WiZ
                 SetProperty(ref opMode, value);
             }
         }
-
 
         [JsonProperty("minDimming")]
         public int? MinBrightness
@@ -1111,12 +1104,12 @@ namespace WiZ
             }
         }
 
+        #endregion Results from getUserConfig
 
-        #endregion
-
-        #endregion
+        #endregion Returned Information
 
         #region Object Overrides
+
         public override string ToString()
         {
             var s = TypeDescription;
@@ -1126,7 +1119,6 @@ namespace WiZ
 
         public override bool Equals(object obj)
         {
-
             if (obj == null) return false;
 
             if (obj.GetType() != typeof(BulbParams)) return false;
@@ -1157,7 +1149,6 @@ namespace WiZ
 
                 bPass &= a.Equals(b);
                 if (!bPass) break;
-
             }
 
             return bPass;
@@ -1168,9 +1159,11 @@ namespace WiZ
             var s = JsonConvert.SerializeObject(this);
             return s.GetHashCode();
         }
-        #endregion
+
+        #endregion Object Overrides
 
         #region Operators
+
         public static bool operator ==(BulbParams v1, BulbParams v2)
         {
             if (!(v1 is object) && !(v2 is object))
@@ -1186,13 +1179,11 @@ namespace WiZ
                 return false;
             }
 
-
             return v1.Equals(v2);
         }
 
         public static bool operator !=(BulbParams v1, BulbParams v2)
         {
-
             if (!(v1 is object) && !(v2 is object))
             {
                 return false;
@@ -1208,8 +1199,7 @@ namespace WiZ
 
             return !v1.Equals(v2);
         }
-        #endregion
 
+        #endregion Operators
     }
-
 }

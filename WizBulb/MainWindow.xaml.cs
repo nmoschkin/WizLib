@@ -1,34 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DataTools.Graphics;
+using DataTools.Hardware.Network;
+
+using System;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Runtime.InteropServices;
+
 using WiZ;
-using System.Net.Sockets;
-using System.Net;
-using DataTools.Text;
-using DataTools.ColorControls;
-using DataTools.Hardware.Network;
-using WizBulb.Localization.Resources;
-using System.ComponentModel;
-using System.Collections;
-using System.Runtime.CompilerServices;
-using DataTools.Win32;
 using WiZ.Observable;
-using DataTools.Graphics;
-using WizBulb.ViewModels;
+
 using WizBulb.Converters;
+using WizBulb.Localization.Resources;
+using WizBulb.ViewModels;
 
 namespace WizBulb
 {
@@ -39,11 +27,11 @@ namespace WizBulb
     {
         #region Private Fields
 
-        ListSortDirection _lastDirection = ListSortDirection.Ascending;
+        private ListSortDirection _lastDirection = ListSortDirection.Ascending;
 
-        GridViewColumnHeader _lastHeaderClicked = null;
+        private GridViewColumnHeader _lastHeaderClicked = null;
 
-        bool notch = false;
+        private bool notch = false;
 
         private MainViewModel vm;
 
@@ -51,7 +39,7 @@ namespace WizBulb
 
         #region Public Constructors
 
-        class TestClass : ObservableBase
+        private class TestClass : ObservableBase
         {
             private string title;
 
@@ -81,19 +69,20 @@ namespace WizBulb
                 Title = value;
                 Key = key;
             }
-           
+
             public override string ToString()
             {
                 return $"{Key}: {Title}";
             }
-
         }
 
         public MainWindow()
         {
             InitializeComponent();
+            //ConsoleHelper.AllocConsole();
 
             #region Test Stuff
+
             //var lonc = new List<NamedColor>(NamedColor.Catalog);
 
             //lonc.Sort((a, b) =>
@@ -126,7 +115,6 @@ namespace WizBulb
             //int ecount = 0;
             //foreach (var k in testing.Keys)
             //{
-
             //    if (k.Value == 0xff000000)
             //    {
             //        ecount++;
@@ -148,7 +136,6 @@ namespace WizBulb
             //NamedColor nc2 = NamedColor.FindColor(clr);
 
             //nc1 = testing[clr];
-
 
             //ObservableDictionary<string, TestClass> testing = new ObservableDictionary<string, TestClass>();
 
@@ -184,7 +171,8 @@ namespace WizBulb
             //f4.Key = "CF2";
 
             //f4 = testing["CF2"];
-            #endregion
+
+            #endregion Test Stuff
 
             var loc = Settings.LastWindowLocation;
             var size = Settings.LastWindowSize;
@@ -203,7 +191,7 @@ namespace WizBulb
             var iconv = (IntDisplayConverter)this.Resources["intConv"];
 
             iconv.ConverterError += Iconv_ConverterError;
-            
+
             vm = new MainViewModel(false);
             BulbList.SelectionChanged += vm.SelectionChanged;
 
@@ -257,7 +245,6 @@ namespace WizBulb
 
         private void BtnScan_Click(object sender, RoutedEventArgs e)
         {
-
             vm.ScanForBulbs();
         }
 
@@ -331,7 +318,6 @@ namespace WizBulb
                         {
                             return -string.Compare(a.Name?.ToString(), b.Name?.ToString());
                         });
-
                     }
                 }
                 else
@@ -342,7 +328,6 @@ namespace WizBulb
                         {
                             return string.Compare(a.Name?.ToString(), b.Name?.ToString());
                         });
-
                     }
                 }
             }
@@ -356,7 +341,6 @@ namespace WizBulb
                         {
                             return -string.Compare(a.IPAddress?.ToString(), b.IPAddress?.ToString());
                         });
-
                     }
                 }
                 else
@@ -367,7 +351,6 @@ namespace WizBulb
                         {
                             return string.Compare(a.IPAddress?.ToString(), b.IPAddress?.ToString());
                         });
-
                     }
                 }
             }
@@ -381,7 +364,6 @@ namespace WizBulb
                         {
                             return -a.MACAddress.CompareTo(b.MACAddress);
                         });
-
                     }
                 }
                 else
@@ -392,7 +374,6 @@ namespace WizBulb
                         {
                             return a.MACAddress.CompareTo(b.MACAddress);
                         });
-
                     }
                 }
             }
@@ -411,7 +392,6 @@ namespace WizBulb
             {
                 if ((BulbList.SelectedItems?.Count ?? 0) > 0)
                 {
-
                     foreach (Bulb bulb in BulbList.SelectedItems)
                     {
                         await bulb.SetLightMode(e.Color);
@@ -427,12 +407,10 @@ namespace WizBulb
 
         private void HomeList_Click(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void HomeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
         }
 
         private void Iconv_ConverterError(object sender, Converters.ConverterErrorEventArgs e)
@@ -490,7 +468,6 @@ namespace WizBulb
                 }
                 else if (ret == MessageBoxResult.Yes)
                 {
-
                     // if (vm.SaveProfile()) Environment.Exit(0);
                     Environment.Exit(0);
                 }
@@ -515,12 +492,10 @@ namespace WizBulb
 
         private void mnuRoomRefresh_Click(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void mnuRoomRefreshAll_Click(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void mnuSaveAs_Click(object sender, RoutedEventArgs e)
@@ -553,12 +528,10 @@ namespace WizBulb
 
         private void RoomList_Click(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void RoomList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
         }
 
         private void Slider_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
@@ -572,7 +545,6 @@ namespace WizBulb
 
             byte i = (byte)e.NewValue;
             await Bulb.SetLights(vm.SelectedBulbs, speed: i);
-
         }
 
         private async void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -601,7 +573,6 @@ namespace WizBulb
 
         private GridViewColumnHeader GetHeader(string text)
         {
-
             GridViewHeaderRowPresenter presenter = GetDescendantByType(BulbList, typeof(GridViewHeaderRowPresenter)) as GridViewHeaderRowPresenter;
 
             GridView gridView = BulbList.View as GridView;
@@ -609,7 +580,6 @@ namespace WizBulb
             for (int i = 0; i < gridView.Columns.Count; i++)
 
             {
-
                 GridViewColumnHeader header = VisualTreeHelper.GetChild(presenter, i) as GridViewColumnHeader;
                 GridViewColumn colunmn = header.Column;
 
@@ -617,16 +587,13 @@ namespace WizBulb
                 {
                     return header;
                 }
-
             }
 
             return null;
-
         }
 
-        static Visual GetDescendantByType(Visual element, Type type)
+        private static Visual GetDescendantByType(Visual element, Type type)
         {
-
             if (element == null) return null;
 
             if (element.GetType() == type) return element;
@@ -640,7 +607,6 @@ namespace WizBulb
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
 
             {
-
                 Visual visual = VisualTreeHelper.GetChild(element, i) as Visual;
 
                 foundElement = GetDescendantByType(visual, type);
@@ -648,14 +614,10 @@ namespace WizBulb
                 if (foundElement != null)
 
                     break;
-
             }
 
             return foundElement;
-
         }
-
-
 
         #endregion Private Methods
 
@@ -673,13 +635,11 @@ namespace WizBulb
             {
                 _ = Task.Run(async () =>
                 {
-
                     DateTime t = DateTime.Now;
 
                     DateTime end = DateTime.Now.AddSeconds(30);
 
                     System.Drawing.Color[] cycles = new System.Drawing.Color[] { System.Drawing.Color.Red, System.Drawing.Color.Orange, System.Drawing.Color.Yellow, System.Drawing.Color.Green, System.Drawing.Color.Cyan, System.Drawing.Color.Blue, System.Drawing.Color.Purple };
-
 
                     int d = 30000 / cycles.Length;
 
@@ -688,9 +648,7 @@ namespace WizBulb
                         b.Color = cycles[i];
                         await Task.Delay(d);
                     }
-
                 });
-
             }
         }
 
@@ -728,12 +686,7 @@ namespace WizBulb
                 {
                     Close();
                 }
-
             }
-
-
         }
     }
-
 }
-
