@@ -24,7 +24,6 @@ namespace WiZ.Profiles
 
         private string name;
 
-
         public Profile(string name) : this(name, Guid.NewGuid())
         {
         }
@@ -36,7 +35,6 @@ namespace WiZ.Profiles
         public Profile() : this(null, Guid.NewGuid())
         {
         }
-
 
         public Profile(string name, Guid projectId)
         {
@@ -121,7 +119,6 @@ namespace WiZ.Profiles
             {
                 foreach (Room r in h.Rooms)
                 {
-                    
                     blook2 = new List<IBulb>(r.Bulbs.Values);
                     if (blook2.Count != blook1.Count) continue;
 
@@ -135,7 +132,6 @@ namespace WiZ.Profiles
 
                     for (i = 0; i < c; i++)
                     {
-
                         if (!blook1[i].MACAddress.Equals(blook2[i].MACAddress))
                         {
                             bmatch = false;
@@ -147,13 +143,11 @@ namespace WiZ.Profiles
                     {
                         return r;
                     }
-
                 }
             }
 
             return null;
         }
-
 
         public Home MatchBulbsToHome(IEnumerable<IBulb> bulbs)
         {
@@ -167,7 +161,6 @@ namespace WiZ.Profiles
 
             foreach (Home h in Homes)
             {
-
                 blook2 = new List<IBulb>(h.GetAllBulbsInHome());
                 if (blook2.Count != blook1.Count) continue;
 
@@ -181,7 +174,6 @@ namespace WiZ.Profiles
 
                 for (i = 0; i < c; i++)
                 {
-
                     if (!blook1[i].MACAddress.Equals(blook2[i].MACAddress))
                     {
                         bmatch = false;
@@ -193,12 +185,10 @@ namespace WiZ.Profiles
                 {
                     return h;
                 }
-
             }
 
             return null;
         }
-
 
         [JsonProperty("lightModes")]
         public ObservableDictionary<int, LightMode> CustomLightModes
@@ -222,7 +212,6 @@ namespace WiZ.Profiles
 
         public void BuildUpdateProfile(IEnumerable<IBulb> bulbs, bool removeMissing)
         {
-
             bool bchk;
 
             List<int> fhomes = new List<int>();
@@ -261,7 +250,7 @@ namespace WiZ.Profiles
 
                     var h = FindHomeById(hh);
 
-                    if (h == null) 
+                    if (h == null)
                     {
                         h = new Home() { HomeId = hh };
                         Homes.Add(h);
