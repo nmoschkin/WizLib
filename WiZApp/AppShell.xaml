@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="WiZApp.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:WiZApp"
+    Shell.FlyoutBehavior="Flyout">
+
+    <ShellContent
+        Title="Home"
+        ContentTemplate="{DataTemplate local:MainPage}"
+        Route="MainPage" />
+
+    <Shell.FlyoutContent>
+        <ContentView>
+            <ScrollView>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackLayout>
+
+                        <Button Text="All Bulbs" />
+                        <Button Text="Rooms" />
+                        <Button Text="Homes" />
+                        <Button Text="Scenes" />
+                    </StackLayout>
+
+                    <StackLayout Grid.Row="1">
+
+                        <Button Text="Bulb Types" />
+                        <Button Text="Settings" />
+                        <Button Text="Quit" />
+                    </StackLayout>
+                </Grid>
+            </ScrollView>
+        </ContentView>
+    </Shell.FlyoutContent>
+</Shell>
