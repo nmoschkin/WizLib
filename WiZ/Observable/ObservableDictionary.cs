@@ -238,7 +238,8 @@ namespace WiZ.Observable
             {
                 keyProp = valType.GetProperty(propertyName);
             }
-            else
+
+            if (keyProp == null)
             {
                 Attribute attr;
 
@@ -282,14 +283,11 @@ namespace WiZ.Observable
                 throw new ArgumentException(nameof(propertyName), $"Property '{propertyName}' is not of type '{typeof(TKey).FullName}'.");
             }
 
-
             if (typeof(INotifyPropertyChanged).IsAssignableFrom(valType) && keyProp.CanWrite)
             {
-
                 // we can observe a key that could change.
                 isObs = true;
             }
-
 
             keyPropName = keyProp.Name;
             EnsureCapacity(_autoBuffer);
@@ -357,6 +355,7 @@ namespace WiZ.Observable
 
         [JsonIgnore]
         public int Count => _size;
+
         int ICollection<KeyValuePair<TKey, TValue>>.Count => _size;
 
         /// <summary>
@@ -607,6 +606,7 @@ namespace WiZ.Observable
                 return false;
             }
         }
+
         public void CopyTo(TValue[] array, int arrayIndex)
         {
             _Values.CopyTo(array, arrayIndex);
@@ -702,7 +702,6 @@ namespace WiZ.Observable
             {
                 var comp = new Comparison<TValue>((a, b) =>
                 {
-
                     if (a is IComparable<TValue> ai)
                     {
                         return ai.CompareTo(b);
@@ -750,6 +749,7 @@ namespace WiZ.Observable
             Array.ConstrainedCopy(_Values, 0, x, 0, _size);
             return x;
         }
+
         public bool TryGetValue(TKey key, out TValue value)
         {
             int i = Search(key);
@@ -837,7 +837,6 @@ namespace WiZ.Observable
                 CollectionChanged.Invoke(this, e);
                 OnPropertyChanged(nameof(Count));
             }
-
         }
 
         private void AddRange(IEnumerable<TValue> items, bool suppressEvent)
@@ -901,7 +900,6 @@ namespace WiZ.Observable
             if (ContainsKey(key))
                 throw new ArgumentException($"Collection already contains key '{key}'.", nameof(item));
 
-
             for (int g = index; g < _size; g++)
             {
                 keyToIdx[idxToKey[g]]++;
@@ -928,6 +926,7 @@ namespace WiZ.Observable
                 OnPropertyChanged(nameof(Count));
             }
         }
+
         private void RemoveAt(int index, bool suppressEvent)
         {
             var item = _Values[index];
@@ -951,7 +950,7 @@ namespace WiZ.Observable
                     idxToKey[g]--;
                 }
             }
-            
+
             if (!suppressEvent && CollectionChanged != null)
             {
                 var e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index);
@@ -959,6 +958,7 @@ namespace WiZ.Observable
                 OnPropertyChanged(nameof(Count));
             }
         }
+
         private void Value_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == KeyPropertyName)
@@ -1045,7 +1045,7 @@ namespace WiZ.Observable
             if (newIndex < 0 || newIndex > (arr?.Length ?? 0))
                 throw new ArgumentOutOfRangeException(nameof(newIndex));
 
-            if (mode == ArrayOperation.Insert) // insert 
+            if (mode == ArrayOperation.Insert) // insert
             {
                 ++c;
                 if (!expanded)
@@ -1091,13 +1091,12 @@ namespace WiZ.Observable
 
                 arr[newIndex] = elem;
             }
-
         }
 
-
-        #endregion
+        #endregion ArrOp
 
         #region QuickSort
+
         private int Partition(Comparison<TValue> comparison, int lo, int hi)
         {
             var ppt = (hi + lo) / 2;
@@ -1203,9 +1202,10 @@ namespace WiZ.Observable
                 Sort(comparison, p + 1, hi, onKey);
             }
         }
-        #endregion
 
-        #region Binary Search 
+        #endregion QuickSort
+
+        #region Binary Search
 
         private int GetInsertIndex(int inLo, int inHi, TKey value, Comparison<TKey> comp, int max)
         {
@@ -1253,7 +1253,7 @@ namespace WiZ.Observable
             return Search(value, out _, false);
         }
 
-        private int Search(TKey value, out int keyIdx, bool insert) 
+        private int Search(TKey value, out int keyIdx, bool insert)
         {
             int max = _size - 1;
             int lo = 0, hi = max;
@@ -1264,7 +1264,6 @@ namespace WiZ.Observable
             {
                 def = new Comparison<TKey>((a, b) =>
                 {
-
                     if (a == null && b == null) return 0;
 
                     if (a == null && b != null) return -1;
@@ -1272,8 +1271,6 @@ namespace WiZ.Observable
                     if (a != null && b == null) return 1;
 
                     return ((IComparable<TKey>)a).CompareTo(b);
-
-
                 });
 
                 KeyComparison = def;
@@ -1327,7 +1324,6 @@ namespace WiZ.Observable
 
                 p = (hi + lo) / 2;
 
-
                 TKey elem = _Keys[p];
                 int c;
 
@@ -1351,7 +1347,8 @@ namespace WiZ.Observable
             keyIdx = -1;
             return -1;
         }
-        #endregion
+
+        #endregion Binary Search
 
         #region IEnumerable
 
@@ -1394,7 +1391,9 @@ namespace WiZ.Observable
         {
             return new KeyValueEnumerator(this);
         }
+
         bool IDictionary<TKey, TValue>.Remove(TKey key) => RemoveKey(key);
+
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
         {
             TKey kchk = (TKey)keyProp.GetValue(item.Value);
@@ -1498,8 +1497,6 @@ namespace WiZ.Observable
             #endregion Public Methods
         }
 
-        #endregion
-
+        #endregion IEnumerable
     }
-
 }

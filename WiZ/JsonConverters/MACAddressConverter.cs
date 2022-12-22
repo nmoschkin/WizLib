@@ -18,7 +18,7 @@ namespace WiZ
             {
                 MACAddress p;
 
-                if (MACAddress.TryParse(s, "", out p))
+                if (MACAddress.TryParse(s, out p))
                 {
                     return p;
                 }

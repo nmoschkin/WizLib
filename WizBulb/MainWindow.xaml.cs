@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 
 using WiZ;
+using WiZ.Helpers;
 using WiZ.Observable;
 
 using WizBulb.Converters;
@@ -79,7 +80,21 @@ namespace WizBulb
         public MainWindow()
         {
             InitializeComponent();
-            //ConsoleHelper.AllocConsole();
+            ConsoleHelper.AllocConsole();
+
+            Bulb.GetBulbByMacAddress(MACAddress.Parse("a8:bb:50:a8:e8:e1"), ScanCondition.Always).
+                ContinueWith(async (t) =>
+                {
+                    var bulb = (Bulb)t.Result;
+                    bulb.Timeout = 5000;
+                    await bulb.GetPilot();
+                    await bulb.GetSystemConfig();
+                    await bulb.GetModelConfig();
+                    await bulb.GetUserConfig();
+                    Console.WriteLine("Got Bulb");
+                });
+
+            return;
 
             #region Test Stuff
 

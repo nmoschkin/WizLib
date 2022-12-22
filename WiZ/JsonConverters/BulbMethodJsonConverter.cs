@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
+using WiZ.Command;
+
 namespace WiZ
 {
     /// <summary>

@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace WiZ.Observable
 {
-
     /// <summary>
     /// Abstract base class for observable classes.
     /// </summary>
@@ -38,7 +38,7 @@ namespace WiZ.Observable
         /// <returns>True if the property was changed and the <see cref="PropertyChanged"/> event was fired.</returns>
         protected virtual bool SetProperty<T>(ref T backingStore, T value, [CallerMemberName] string propertyName = null)
         {
-            if (!Equals(backingStore, value))
+            if (!EqualityComparer<T>.Default.Equals(backingStore, value))
             {
                 backingStore = value;
                 OnPropertyChanged(propertyName);
@@ -50,6 +50,5 @@ namespace WiZ.Observable
                 return false;
             }
         }
-
     }
 }

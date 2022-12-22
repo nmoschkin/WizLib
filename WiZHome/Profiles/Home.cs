@@ -11,20 +11,18 @@ using System.Reflection;
 using Newtonsoft.Json;
 using System.Collections;
 using WiZ.Observable;
+using WiZ.Contracts;
 
 namespace WiZ.Profiles
 {
-
     public class Home : ObservableBase
     {
-
         private int homeId;
         private string name;
 
         private ObservableDictionary<int, Room> rooms = new ObservableDictionary<int, Room>(nameof(Room.RoomId));
 
         public static ObservableDictionary<int, Home> HomeCache { get; private set; } = new ObservableDictionary<int, Home>();
-
 
         [JsonProperty("rooms")]
         public ObservableDictionary<int, Room> Rooms
@@ -43,7 +41,6 @@ namespace WiZ.Profiles
             get => homeId;
             set
             {
-
                 if (SetProperty(ref homeId, value))
                 {
                     if (HomeCache.ContainsKey(homeId))
@@ -78,8 +75,8 @@ namespace WiZ.Profiles
             }
 
             return l;
-
         }
+
         public static ObservableDictionary<int, Home> GenerateHomes(IEnumerable<Bulb> bulbs)
         {
             Room nr;
@@ -98,7 +95,6 @@ namespace WiZ.Profiles
 
                     if (kh.ContainsKey(hid, out nh))
                     {
-
                         if (nh.Rooms.ContainsKey(rid, out nr))
                         {
                             var smac = b.MACAddress;
@@ -140,7 +136,5 @@ namespace WiZ.Profiles
         {
             return name ?? homeId.ToString();
         }
-
-
     }
 }

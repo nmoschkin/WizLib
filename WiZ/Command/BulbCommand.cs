@@ -1,47 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
 
-using Newtonsoft.Json;
+using System.Collections.Generic;
 
 using WiZ.Observable;
-using WiZ.Profiles;
 
-namespace WiZ
+namespace WiZ.Command
 {
     /// <summary>
     /// Bulb command structure root object.
     /// </summary>
     public sealed class BulbCommand : ObservableBase
     {
-
-        #region Internal Fields
-
-        internal static List<JsonConverter> JsonConverters { get; } = new List<JsonConverter>(
-            new JsonConverter[] 
-            { 
-                new TupleConverter(), 
-                new MACAddressConverter(),
-                new ODJsonConverter<MACAddress, Bulb>(nameof(Bulb.MACAddress)),
-                new ODJsonConverter<int, Room>(nameof(Room.RoomId)),
-                new ODJsonConverter<int, Home>(nameof(Home.HomeId)),
-                new ODJsonConverter<Guid, Scene>(nameof(Scene.SceneId)),
-                new BulbMethodJsonConverter(), 
-                new IPAddressConverter() 
-            });
-
-        internal static readonly JsonSerializerSettings DefaultJsonSettings = new JsonSerializerSettings()
+        public static readonly JsonSerializerSettings DefaultJsonSettings = new JsonSerializerSettings()
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
             NullValueHandling = NullValueHandling.Ignore,
             Converters = JsonConverters
         };
 
-        internal static readonly JsonSerializerSettings DefaultProjectJsonSettings = new JsonSerializerSettings()
+        public static readonly JsonSerializerSettings DefaultProjectJsonSettings = new JsonSerializerSettings()
         {
             ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
             Formatting = Formatting.Indented,
@@ -49,19 +26,13 @@ namespace WiZ
             Converters = JsonConverters
         };
 
-        #endregion Internal Fields
-
-        #region Private Fields
-
         private string env;
+
         private BulbParams inparam;
+
         private BulbMethod method = BulbMethod.GetPilot;
 
         private BulbParams outparam;
-
-        #endregion Private Fields
-
-        #region Public Constructors
 
         /// <summary>
         /// Create a new, blank instance.
@@ -93,13 +64,19 @@ namespace WiZ
             }
             catch
             {
-
             }
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
+        public static List<JsonConverter> JsonConverters { get; set; }
+            = new List<JsonConverter>(
+                new JsonConverter[]
+                {
+                    new TupleConverter(),
+                    new MACAddressConverter(),
+                    new ODJsonConverter<MACAddress, Bulb>(nameof(Bulb.MACAddress)),
+                    new BulbMethodJsonConverter(),
+                    new IPAddressConverter()
+                });
 
         /// <summary>
         /// Environment.
@@ -153,10 +130,6 @@ namespace WiZ
             }
         }
 
-        #endregion Public Properties
-
-        #region Public Methods
-
         /// <summary>
         /// Assemble and return the JSON string for this command.
         /// </summary>
@@ -165,8 +138,5 @@ namespace WiZ
         {
             return JsonConvert.SerializeObject(this, DefaultJsonSettings);
         }
-
-        #endregion Public Methods
     }
-
 }

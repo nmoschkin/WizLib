@@ -7,15 +7,13 @@ using System.Reflection;
 
 using WiZ.Observable;
 
-namespace WiZ
+namespace WiZ.Command
 {
     /// <summary>
     /// Bulb configuration parameters.
     /// </summary>
     public class BulbParams : ObservableBase, ICloneable
     {
-        #region Bulb Type Catalog
-
         public static readonly ReadOnlyDictionary<(int, int), string> BulbTypeCatalog
             = new ReadOnlyDictionary<(int, int), string>(new Dictionary<(int, int), string>()
             {
@@ -28,12 +26,6 @@ namespace WiZ
                 { (80, 2), "Philips Color & Tunable-White Lighting Strip" },
                 { (30, 1), "Philips Color & Tunable-White PAR38 Indoor/Outdoor Floodlight" }
             });
-
-        #endregion Bulb Type Catalog
-
-        #region Fields
-
-        #region Pilot Fields
 
         private bool? state;
 
@@ -59,10 +51,6 @@ namespace WiZ
 
         private int? duration;
 
-        #endregion Pilot Fields
-
-        #region Registration Params
-
         private string phoneMac;
 
         private bool? register;
@@ -70,10 +58,6 @@ namespace WiZ
         private string phoneIp;
 
         private string id;
-
-        #endregion Registration Params
-
-        #region Results
 
         private int? rssi;
 
@@ -99,10 +83,6 @@ namespace WiZ
 
         private int? schdPsetId;
 
-        #endregion Results
-
-        #region UserConfig
-
         private int? fadeIn;
 
         private int? fadeOut;
@@ -112,10 +92,6 @@ namespace WiZ
         private bool? opMode;
 
         private int? minDimming;
-
-        #endregion UserConfig
-
-        #region ModelConfig
 
         private int? ps;
 
@@ -139,11 +115,21 @@ namespace WiZ
 
         private int? fanSpeed;
 
-        #endregion ModelConfig
+        /// <summary>
+        /// Create a new bulb parameters object.
+        /// </summary>
+        public BulbParams()
+        {
+        }
 
-        #endregion Fields
-
-        #region Settings Rules Enforcement, Copying, Clearing, Configuring, Cloning
+        /// <summary>
+        /// Create a new bulb parameters object with the specified mac address.
+        /// </summary>
+        /// <param name="macaddr"></param>
+        public BulbParams(MACAddress macaddr)
+        {
+            MACAddress = macaddr;
+        }
 
         /// <summary>
         /// Set the configurate with the settings from the specified light mode and enforce rules.
@@ -390,10 +376,6 @@ namespace WiZ
             //Delta = null;
             //Duration = null;
         }
-
-        #endregion Settings Rules Enforcement, Copying, Clearing, Configuring, Cloning
-
-        #region Pilot
 
         /// <summary>
         /// Gets or sets the brightness level.
@@ -658,10 +640,6 @@ namespace WiZ
             }
         }
 
-        #endregion Pilot
-
-        #region Returned Information
-
         /// <summary>
         /// The local Mac address.
         /// </summary>
@@ -745,7 +723,7 @@ namespace WiZ
 
         private double CalculateDistance(double signalLevelInDb, double freqInMHz)
         {
-            double exp = (27.55 - (20 * Math.Log10(freqInMHz)) + Math.Abs(signalLevelInDb)) / 20.0;
+            double exp = (27.55 - 20 * Math.Log10(freqInMHz) + Math.Abs(signalLevelInDb)) / 20.0;
             return Math.Pow(10.0, exp);
         }
 
@@ -938,8 +916,6 @@ namespace WiZ
             }
         }
 
-        #region Returned from getModelConfig
-
         [JsonProperty("ps")]
         public int? Ps
         {
@@ -1050,10 +1026,6 @@ namespace WiZ
             }
         }
 
-        #endregion Returned from getModelConfig
-
-        #region Results from getUserConfig
-
         [JsonProperty("fadeIn")]
         public int? FadeIn
         {
@@ -1103,12 +1075,6 @@ namespace WiZ
                 SetProperty(ref minDimming, value);
             }
         }
-
-        #endregion Results from getUserConfig
-
-        #endregion Returned Information
-
-        #region Object Overrides
 
         public override string ToString()
         {
@@ -1160,21 +1126,17 @@ namespace WiZ
             return s.GetHashCode();
         }
 
-        #endregion Object Overrides
-
-        #region Operators
-
         public static bool operator ==(BulbParams v1, BulbParams v2)
         {
             if (!(v1 is object) && !(v2 is object))
             {
                 return true;
             }
-            else if (!(v1 is object) && (v2 is object))
+            else if (!(v1 is object) && v2 is object)
             {
                 return false;
             }
-            else if ((v1 is object) && !(v2 is object))
+            else if (v1 is object && !(v2 is object))
             {
                 return false;
             }
@@ -1188,18 +1150,16 @@ namespace WiZ
             {
                 return false;
             }
-            else if (!(v1 is object) && (v2 is object))
+            else if (!(v1 is object) && v2 is object)
             {
                 return true;
             }
-            else if ((v1 is object) && !(v2 is object))
+            else if (v1 is object && !(v2 is object))
             {
                 return true;
             }
 
             return !v1.Equals(v2);
         }
-
-        #endregion Operators
     }
 }

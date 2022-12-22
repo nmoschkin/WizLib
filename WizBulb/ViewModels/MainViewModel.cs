@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 
 using WiZ;
+using WiZ.Command;
 using WiZ.Observable;
 using WiZ.Profiles;
 
@@ -29,28 +30,18 @@ namespace WizBulb.ViewModels
 
     public class LightModeClickEventArgs : EventArgs
     {
-        #region Public Constructors
-
         public LightModeClickEventArgs(LightMode lm, UIElement el)
         {
             LightMode = lm;
             Element = el;
         }
 
-        #endregion Public Constructors
-
-        #region Public Properties
-
         public UIElement Element { get; private set; }
         public LightMode LightMode { get; private set; }
-
-        #endregion Public Properties
     }
 
     public class MainViewModel : ObservableBase
     {
-        #region Private Fields
-
         private AdaptersCollection adapters;
 
         private ObservableDictionary<MACAddress, Bulb> allBulbs = new ObservableDictionary<MACAddress, Bulb>(nameof(Bulb.MACAddress));
@@ -103,10 +94,6 @@ namespace WizBulb.ViewModels
 
         private Task watchTask;
 
-        #endregion Private Fields
-
-        #region Public Constructors
-
         public MainViewModel(bool populate)
         {
             PropertyChanged += PropChangeWatcher;
@@ -138,17 +125,9 @@ namespace WizBulb.ViewModels
             }
         }
 
-        #endregion Public Constructors
-
-        #region Public Events
-
         public event LightModeClickEvent LightModeClick;
 
         public event ScanCompleteEvent ScanComplete;
-
-        #endregion Public Events
-
-        #region Public Properties
 
         public AdaptersCollection Adapters
         {
@@ -471,6 +450,8 @@ namespace WizBulb.ViewModels
             {
                 if (SetProperty(ref selBulb, value))
                 {
+                    if (selBulb == null) return;
+
                     _ = selBulb.GetUserConfig();
                     _ = selBulb.GetModelConfig();
                 }
@@ -530,7 +511,7 @@ namespace WizBulb.ViewModels
                         {
                             Bulbs = new ObservableDictionary<MACAddress, Bulb>(
                                             nameof(Bulb.MACAddress),
-                                            await BulbItem.CreateBulbsFromInterfaceList(selRoom.Bulbs)
+                                            await BulbItem.CreateBulbsFromInterfaceList<List<Bulb>, Bulb>(selRoom.Bulbs)
                                             );
                         }
                     });
@@ -597,10 +578,6 @@ namespace WizBulb.ViewModels
                 }
             }
         }
-
-        #endregion Public Properties
-
-        #region Public Methods
 
         public void SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -691,7 +668,7 @@ namespace WizBulb.ViewModels
 
                     allBulbs = Bulbs = new ObservableDictionary<MACAddress, Bulb>(
                                     nameof(Bulb.MACAddress),
-                                    await BulbItem.CreateBulbsFromInterfaceList(Profile.Bulbs)
+                                    await BulbItem.CreateBulbsFromInterfaceList<List<Bulb>, Bulb>(Profile.Bulbs)
                                     );
 
                     allBulbs.Sort((a, b) =>
@@ -1101,10 +1078,6 @@ namespace WizBulb.ViewModels
             return true;
         }
 
-        #endregion Public Methods
-
-        #region Protected Methods
-
         protected virtual async void LightModeItemClicked(object sender, RoutedEventArgs e)
         {
             if (e.Source is MenuItem mi && mi.Tag is LightMode lm)
@@ -1139,7 +1112,5 @@ namespace WizBulb.ViewModels
                 await OpenProject(r.FileName);
             }
         }
-
-        #endregion Protected Methods
     }
 }

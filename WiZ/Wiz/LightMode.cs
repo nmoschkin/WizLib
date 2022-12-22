@@ -10,10 +10,11 @@ using Newtonsoft.Json;
 using WiZ.Localization;
 using System.Collections.ObjectModel;
 using WiZ.Observable;
+using WiZ.Command;
+using WiZ.Contracts;
 
 namespace WiZ
 {
-
     /// <summary>
     /// Light mode families.
     /// </summary>
@@ -23,7 +24,7 @@ namespace WiZ
         /// Custom color mode that supports <see cref="BulbParams.Brightness"/>.
         /// </summary>
         CustomColor = 0,
-        
+
         /// <summary>
         /// Static light modes that support <see cref="BulbParams.Brightness"/>.
         /// </summary>
@@ -58,7 +59,7 @@ namespace WiZ
     /// <summary>
     /// WiZ bulb built-in and custom lighting mode (scene) class.
     /// </summary>
-    public class LightMode : IComparable<LightMode>, IComparable<int>
+    public class LightMode : ILightMode, IComparable<LightMode>
     {
         public const int UserStartIdx = 2000;
 
@@ -80,7 +81,6 @@ namespace WiZ
 
         static LightMode()
         {
-
             var cl = new Dictionary<uint, string>();
             var craw = AppResources.ColorList.Replace("\r\n", "\n").Split('\n');
 
@@ -90,9 +90,8 @@ namespace WiZ
                 var et = cen.Split('|');
                 uint cr = uint.Parse("ff" + et[0], System.Globalization.NumberStyles.HexNumber);
 
-                if (!cl.ContainsKey(cr)) 
+                if (!cl.ContainsKey(cr))
                     cl.Add(cr, et[1]);
-
             }
 
             namedColors = cl;
@@ -208,7 +207,6 @@ namespace WiZ
                 if (name == value) return;
                 name = value;
             }
-
         }
 
         /// <summary>
@@ -246,12 +244,11 @@ namespace WiZ
             {
                 i++;
             }
-            
-            var scnew = new LightMode(i, name,  LightModeType.CustomColor, settings);
+
+            var scnew = new LightMode(i, name, LightModeType.CustomColor, settings);
 
             modes.Add(i, scnew);
             return scnew;
-
         }
 
         /// <summary>
@@ -270,7 +267,7 @@ namespace WiZ
             // the alternatives are to throw an exception or return null
             // and I don't want to do that.
 
-            if (!builtin && code < UserStartIdx) 
+            if (!builtin && code < UserStartIdx)
                 throw new ArgumentOutOfRangeException(nameof(code), $"{nameof(code)} < {UserStartIdx}");
 
             if (modes.ContainsKey(code))
@@ -283,7 +280,6 @@ namespace WiZ
                     sc.settings = settings;
                 }
                 return sc;
-
             }
 
             var scnew = new LightMode(code, name, type, settings);
@@ -298,7 +294,7 @@ namespace WiZ
         /// </summary>
         /// <param name="lms"></param>
         public static void AddUserLightModes(IEnumerable<LightMode> lms)
-        {            
+        {
             foreach (var l in lms)
             {
                 if (l.Code >= UserStartIdx)
@@ -325,7 +321,6 @@ namespace WiZ
 
             foreach (var l in modes)
             {
-
                 if (l.Value.Code >= UserStartIdx)
                 {
                     ret.Add(l.Value);
@@ -347,7 +342,6 @@ namespace WiZ
 
             foreach (var l in modes)
             {
-
                 if (l.Value.Name == name)
                 {
                     return l.Value;
@@ -368,7 +362,6 @@ namespace WiZ
 
             foreach (var l in modes)
             {
-
                 if (l.Value.Type == type)
                 {
                     ret.Add(l.Value);
@@ -477,7 +470,6 @@ namespace WiZ
             {
                 return LightModeType.CustomColor;
             }
-
         }
 
         /// <summary>
@@ -524,27 +516,26 @@ namespace WiZ
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public int CompareTo(LightMode other)
+        public int CompareTo(ILightMode other)
         {
-            if (name == other.name)
+            if (name == other.Name)
             {
-                if (code == other.code)
+                if (code == other.Code)
                 {
-
-                    if (settings == null && other.settings != null)
+                    if (settings == null && other.Settings != null)
                     {
                         return -1;
                     }
-                    else if (settings != null && other.settings == null)
+                    else if (settings != null && other.Settings == null)
                     {
                         return 1;
                     }
-                    else if (settings != null && other.settings != null)
+                    else if (settings != null && other.Settings != null)
                     {
-                        if (settings.Color != null && other.settings.Color != null)
+                        if (settings.Color != null && other.Settings.Color != null)
                         {
                             var c1 = (System.Drawing.Color)settings.Color;
-                            var c2 = (System.Drawing.Color)other.settings.Color;
+                            var c2 = (System.Drawing.Color)other.Settings.Color;
 
                             return c1.ToArgb() - c2.ToArgb();
                         }
@@ -560,13 +551,23 @@ namespace WiZ
                 }
                 else
                 {
-                    return code - other.code;
+                    return code - other.Code;
                 }
             }
             else
             {
-                return string.Compare(name, other.name);
+                return string.Compare(name, other.Name);
             }
+        }
+
+        /// <summary>
+        /// Compare this lighting mode to another for sorting in lists.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public int CompareTo(LightMode other)
+        {
+            return CompareTo((ILightMode)other);
         }
 
         public static implicit operator int(LightMode val)
@@ -590,58 +591,72 @@ namespace WiZ
         }
 
         #region Built-In Lighting Modes
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Custom { get; } = RegisterLightMode(0, "Custom", true, LightModeType.CustomColor);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Ocean { get; } = RegisterLightMode(1, "Ocean", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Romance { get; } = RegisterLightMode(2, "Romance", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Sunset { get; } = RegisterLightMode(3, "Sunset", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Party { get; } = RegisterLightMode(4, "Party", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Fireplace { get; } = RegisterLightMode(5, "Fireplace", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Cozy { get; } = RegisterLightMode(6, "Cozy", true, LightModeType.Static);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Forest { get; } = RegisterLightMode(7, "Forest", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode PastelColors { get; } = RegisterLightMode(8, "Pastel Colors", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Wakeup { get; } = RegisterLightMode(9, "Wake up", true, LightModeType.Progressive);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Bedtime { get; } = RegisterLightMode(10, "Bedtime", true, LightModeType.Progressive);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode WarmWhite { get; } = RegisterLightMode(11, "Warm White", true, LightModeType.WhiteLight);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Daylight { get; } = RegisterLightMode(12, "Daylight", true, LightModeType.WhiteLight);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
@@ -652,91 +667,106 @@ namespace WiZ
         /// </summary>
         public static LightMode CustomWhite { get; } = RegisterLightMode(-1, "Custom White", true, LightModeType.WhiteLight);
 
-
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Nightlight { get; } = RegisterLightMode(14, "Night Light", true, LightModeType.Simple);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Focus { get; } = RegisterLightMode(15, "Focus", true, LightModeType.Static);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Relax { get; } = RegisterLightMode(16, "Relax", true, LightModeType.Static);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode TrueColors { get; } = RegisterLightMode(17, "True Colors", true, LightModeType.Static);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode TVTime { get; } = RegisterLightMode(18, "TV Time", true, LightModeType.Static);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode PlantGrowth { get; } = RegisterLightMode(19, "Plant Growth", true, LightModeType.Static);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Spring { get; } = RegisterLightMode(20, "Spring", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Summer { get; } = RegisterLightMode(21, "Summer", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Fall { get; } = RegisterLightMode(22, "Fall", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode DeepDive { get; } = RegisterLightMode(23, "Deep Dive", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Jungle { get; } = RegisterLightMode(24, "Jungle", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Mojito { get; } = RegisterLightMode(25, "Mojito", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Club { get; } = RegisterLightMode(26, "Club", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Christmas { get; } = RegisterLightMode(27, "Christmas", true, LightModeType.Celebrations);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Halloween { get; } = RegisterLightMode(28, "Halloween", true, LightModeType.Celebrations);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Candlelight { get; } = RegisterLightMode(29, "Candlelight", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode GoldenWhite { get; } = RegisterLightMode(30, "Golden White", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Pulse { get; } = RegisterLightMode(31, "Pulse", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Steampunk { get; } = RegisterLightMode(32, "Steam Punk", true, LightModeType.Dynamic);
+
         /// <summary>
         /// Built-In Lighting Mode
         /// </summary>
         public static LightMode Rhythm { get; } = RegisterLightMode(1000, "Rhythm", true, LightModeType.Dynamic);
 
-        #endregion
-
-
+        #endregion Built-In Lighting Modes
     }
-
 }

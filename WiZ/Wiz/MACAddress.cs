@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Net;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -12,16 +12,13 @@ namespace WiZ
     /// Represents a network adapter MAC address.
     /// </summary>
     /// <remarks></remarks>
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Size = MAX_ADAPTER_ADDRESS_LENGTH)]
     [TypeConverter(typeof(ExpandableObjectConverter))]
-    public struct MACAddress : IComparable<MACAddress>, IComparable<PhysicalAddress>, IComparable<byte[]>
+    public struct MACAddress : IComparable<MACAddress>, IComparable<PhysicalAddress>, IComparable<byte[]>, IEquatable<MACAddress>
     {
         public const int MAX_ADAPTER_ADDRESS_LENGTH = 8;
 
-        public static readonly MACAddress None = new MACAddress(new byte[0]);
-
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.U1, SizeConst = MAX_ADAPTER_ADDRESS_LENGTH)]
-        private byte[] address;
+        public static readonly MACAddress None = new MACAddress();
 
         public static bool operator ==(MACAddress val1, MACAddress val2)
         {
@@ -33,147 +30,165 @@ namespace WiZ
             return !val1.Equals(val2);
         }
 
-        public static MACAddress Parse(string s) => Parse(s, "");
-
-        public static MACAddress Parse(string s, string partition)
+        public static MACAddress Parse(string s)
         {
-            s = s.Replace(":", "").Replace("-", "").Replace(" ", "").Trim();
+            var strs = new string(s.Where(u => "abcdefABCDEF0123456789".Contains(u)).ToArray());
 
-            List<string> sv = new List<string>();
+            var lng = BitConverter.GetBytes(long.Parse(strs, System.Globalization.NumberStyles.HexNumber)).Reverse().ToArray();
 
-            for (int z = 0; z < s.Length; z += 2)
+            unsafe
             {
-                sv.Add(s.Substring(z, 2));
+                MACAddress mac = new MACAddress();
+                MACAddress* ptr = &mac;
+                fixed (byte* ptr2 = lng)
+                {
+                    *ptr = *(MACAddress*)ptr2;
+                }
+                var z = mac.ToString();
+                return mac;
             }
-
-            byte[] b = new byte[MAX_ADAPTER_ADDRESS_LENGTH];
-
-            int i, c = sv.Count - 1;
-            int j = b.Length - 1;
-
-            for (i = c; i >= 0; i--)
-            {
-                b[j] = byte.Parse(sv[i], System.Globalization.NumberStyles.HexNumber);
-                j--;
-            }
-
-            return new MACAddress(b);
         }
 
-        public static bool TryParse(string s, out MACAddress value) => TryParse(s, "", out value);
-
-        public static bool TryParse(string s, string partition, out MACAddress value)
+        public static bool TryParse(string s, out MACAddress value)
         {
             try
             {
-                value = Parse(s, partition);
+                value = Parse(s);
                 return true;
             }
             catch
             {
-                value = new MACAddress();
+                value = 0;
                 return false;
             }
         }
 
         public MACAddress(byte[] address)
         {
-            int i, c = address?.Length - 1 ?? throw new ArgumentNullException(nameof(address));
-
-            this.address = new byte[MAX_ADAPTER_ADDRESS_LENGTH];
-            int j = this.address.Length - 1;
-
-            for (i = c; i >= 0; i--)
+            unsafe
             {
-                this.address[j] = address[i];
-                j--;
+                fixed (MACAddress* ptr = &this)
+                {
+                    fixed (byte* ptrx = address)
+                    {
+                        if (ptrx == null) return;
+                        this = *(MACAddress*)ptrx;
+                    }
+                }
             }
+        }
+
+        public static implicit operator MACAddress(long val)
+        {
+            unsafe
+            {
+                MACAddress m = new MACAddress();
+                MACAddress* ptr = &m;
+
+                *(long*)ptr = val;
+                return m;
+            }
+        }
+
+        public static implicit operator long(MACAddress val)
+        {
+            unsafe
+            {
+                MACAddress* ptr = &val;
+                return *(long*)ptr;
+            }
+        }
+
+        private static MACAddress CreateFromBytes(byte[] bytes)
+        {
+            MACAddress nmx = new MACAddress();
+
+            unsafe
+            {
+                fixed (byte* ptr = bytes)
+                {
+                    nmx = *(MACAddress*)ptr;
+                }
+            }
+
+            return nmx;
         }
 
         public static explicit operator byte[](MACAddress obj) => obj.GetAddressBytes();
 
         public byte[] GetAddressBytes()
         {
-            var addr = address ?? new byte[0];
-            int x = 0, c = addr.Length;
+            byte[] result = new byte[8];
 
-            for (int i = 0; i < c; i++)
+            unsafe
             {
-                if (addr[i] != 0) break;
-                x++;
+                fixed (MACAddress* ptr = &this)
+                {
+                    fixed (byte* ptr2 = result)
+                    {
+                        *(long*)ptr2 = *(long*)ptr;
+                    }
+                }
             }
 
-            var outaddr = new byte[c - x];
-
-            Array.Copy(addr, x, outaddr, 0, c - x);
-
-            return outaddr;
+            return result;
         }
 
         public int CompareTo(PhysicalAddress other) => CompareTo(other?.GetAddressBytes());
 
-        public int CompareTo(MACAddress other) => CompareTo(other.GetAddressBytes());
+        public int CompareTo(MACAddress other)
+        {
+            unsafe
+            {
+                fixed (MACAddress* ptr = &this)
+                {
+                    MACAddress* ptr2 = &other;
+                    return (*(long*)ptr).CompareTo(*(long*)ptr2);
+                }
+            }
+        }
 
         public int CompareTo(byte[] other)
         {
-            byte[] b1 = GetAddressBytes();
-            byte[] b2 = other ?? new byte[0];
-
-            if (b1.Length != b2.Length) return b1.Length - b2.Length;
-
-            int c = b1.Length, i;
-
-            for (i = 0; i < c; i++)
+            unsafe
             {
-                if (b1[i] < b2[i]) return -1;
-                if (b1[i] > b2[i]) return 1;
+                fixed (MACAddress* ptr = &this)
+                {
+                    fixed (byte* ptr2 = other)
+                    {
+                        return (*(long*)ptr).CompareTo(*(long*)ptr2);
+                    }
+                }
             }
-
-            return 0;
         }
 
         public override bool Equals(object obj)
         {
-            byte[] b1 = address ?? new byte[0];
-            byte[] b2;
+            if (obj is MACAddress ma) return Equals(ma);
+            return false;
+        }
 
-            if (obj is MACAddress ma)
+        public bool Equals(MACAddress other)
+        {
+            unsafe
             {
-                b2 = ma.address ?? new byte[0];
+                fixed (MACAddress* ptr1 = &this)
+                {
+                    MACAddress* ptr2 = &other;
+                    return *(long*)ptr1 == *(long*)ptr2;
+                }
             }
-            else if (obj is byte[])
-            {
-                b2 = (byte[])obj;
-            }
-            else if (obj is string s)
-            {
-                MACAddress other;
-
-                bool b = TryParse(s, out other);
-                if (!b) return false;
-
-                b2 = other.address ?? new byte[0];
-            }
-            else
-            {
-                return false;
-            }
-
-            if (b1.Length != b2.Length) return false;
-            int c = b1.Length;
-          
-
-            for (int i = 0; i < c; i++)
-            {
-                if (b1[i] != b2[i]) return false;
-            }
-
-            return true;
         }
 
         public override int GetHashCode()
         {
-            return (ToString().GetHashCode());
+            unsafe
+            {
+                fixed (MACAddress* ptr = &this)
+                {
+                    return (*(long*)ptr).GetHashCode();
+                }
+            }
         }
 
         public override string ToString()
@@ -181,7 +196,6 @@ namespace WiZ
             //return ToString(true, false);
             return ToString(true, true, ":");
         }
-
 
         public static explicit operator string(MACAddress b)
         {
@@ -193,18 +207,20 @@ namespace WiZ
             return Parse(s);
         }
 
-        public static explicit operator System.Net.NetworkInformation.PhysicalAddress(MACAddress src)
+        public static explicit operator PhysicalAddress(MACAddress src)
         {
-            return new System.Net.NetworkInformation.PhysicalAddress(src.GetAddressBytes());
+            return new PhysicalAddress(src.GetAddressBytes());
         }
 
-        public static explicit operator MACAddress(System.Net.NetworkInformation.PhysicalAddress src)
+        public static explicit operator MACAddress(PhysicalAddress src)
         {
             return new MACAddress(src?.GetAddressBytes() ?? new byte[0]);
         }
 
         public string ToString(bool delineate, bool upperCase = false, string sep = ":")
         {
+            var address = GetAddressBytes();
+
             int i, c = address?.Length ?? 0;
             if (c == 0) return "None";
 
@@ -236,11 +252,9 @@ namespace WiZ
                 }
 
                 sb.Append(address[i].ToString(fmt));
-
             }
 
             return sb.ToString();
-
         }
     }
 }

@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
+using WiZ.Contracts;
+using WiZ.Helpers;
 using WiZ.Observable;
 
 namespace WiZ.Profiles
@@ -49,30 +52,48 @@ namespace WiZ.Profiles
             };
         }
 
-        public static async Task<IList<Bulb>> CreateBulbsFromInterfaceList(IEnumerable<IBulb> source)
+        public static Task<TList> CreateBulbsFromInterfaceList<TList, TBulb>(IEnumerable<IBulb> source)
+            where TList : IList<TBulb>, new()
+            where TBulb : IBulbController
         {
-            var l = new List<Bulb>();
-
-            foreach (var b in source)
+            return Task.Run(() =>
             {
-                l.Add(await b.GetBulb());
-            }
+                var l = new TList();
 
-            return l;
+                Parallel.ForEach(source, async (b) =>
+                {
+                    var res = await b.GetBulbController<TBulb>();
+
+                    lock (l)
+                    {
+                        l.Add(res);
+                    }
+                });
+
+                return l;
+            });
         }
 
-        public async Task<Bulb> GetBulb()
+        public async Task<IBulbController> GetBulbController()
         {
-            return await GetBulb(ScanCondition.Never);
+            var b = new Bulb(MACAddress.None);
+            await GetBulb(b, ScanCondition.Never);
+            return b;
         }
 
-        public async Task<Bulb> GetBulb(ScanCondition sc)
+        public async Task<T> GetBulbController<T>() where T : IBulbController
         {
-            Bulb b;
+            var b = BulbFactory.Instance.CreateBulb<T>(MACAddress);
+            await GetBulb(b, ScanCondition.Never);
+            return b;
+        }
 
+        public bool CanGetBulbController => true;
+
+        protected async Task GetBulb(IBulbController b, ScanCondition sc)
+        {
             if (Bulb.BulbCache.ContainsKey(MACAddress))
             {
-
                 b = Bulb.BulbCache[MACAddress];
 
                 b.Name = Name;
@@ -80,7 +101,7 @@ namespace WiZ.Profiles
                 b.HomeId = HomeId;
                 b.RoomId = RoomId;
 
-                return b;
+                return;
             }
 
             b = await Bulb.GetBulbByMacAddress(MACAddress, sc);
@@ -94,15 +115,11 @@ namespace WiZ.Profiles
             b.Icon = Icon;
             b.HomeId = HomeId;
             b.RoomId = RoomId;
-
-            return b;
         }
-
 
         public override string ToString()
         {
             return Name ?? MACAddress.ToString();
         }
     }
-
 }

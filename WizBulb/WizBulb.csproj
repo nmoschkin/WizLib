@@ -33,6 +33,7 @@
     <ProjectReference Include="..\datatools-windows\WPF\DataTools.ColorControls\DataTools.ColorControls.csproj" />
     <ProjectReference Include="..\datatools-windows\WPF\DataTools.Desktop.Network\DataTools.Desktop.Network.csproj" />
     <ProjectReference Include="..\datatools-windows\WPF\DataTools.Desktop.WPF\DataTools.Desktop.WPF.csproj" />
+    <ProjectReference Include="..\WiZHome\WiZHome.csproj" />
     <ProjectReference Include="..\WiZ\WiZ.csproj" />
   </ItemGroup>
 

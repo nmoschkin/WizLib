@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
+using WiZ.Command;
+using WiZ.Contracts;
+using WiZ.Helpers;
 using WiZ.Observable;
 
 namespace WiZ.Profiles
@@ -23,6 +25,15 @@ namespace WiZ.Profiles
         private ObservableDictionary<int, LightMode> lightModes;
 
         private string name;
+
+        static Profile()
+        {
+            BulbCommand.JsonConverters.AddRange(new JsonConverter[] {
+                new ODJsonConverter<int, Room>(nameof(Room.RoomId)),
+                new ODJsonConverter<int, Home>(nameof(Home.HomeId)),
+                new ODJsonConverter<Guid, Scene>(nameof(Scene.SceneId)),
+            });
+        }
 
         public Profile(string name) : this(name, Guid.NewGuid())
         {

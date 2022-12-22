@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
+using WiZ.Command;
 using WiZ.Observable;
 
 namespace WiZ.Profiles
@@ -15,7 +16,7 @@ namespace WiZ.Profiles
     {
 
         private ObservableDictionary<PhysicalAddress, BulbParams> bp
-            = new ObservableDictionary<PhysicalAddress, BulbParams>(nameof(WiZ.BulbParams.MACAddress));
+            = new ObservableDictionary<PhysicalAddress, BulbParams>(nameof(Command.BulbParams.MACAddress));
 
         private Guid sceneId;
 

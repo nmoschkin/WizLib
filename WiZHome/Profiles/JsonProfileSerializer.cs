@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
+using WiZ.Command;
 
 namespace WiZ.Profiles
 {
@@ -62,19 +63,19 @@ namespace WiZ.Profiles
                 return null;
             }
 
-            foreach (var bulb in p.Bulbs)
+            Parallel.ForEach<BulbItem>(p.Bulbs, async (bulb) =>
             {
-                bulb.GetBulb().Wait();
-            }
+                await bulb.GetBulbController();
+            });
 
             foreach (var home in p.Homes)
             {
                 foreach (var room in home.Rooms)
                 {
-                    foreach (var bulb in room.Bulbs)
+                    Parallel.ForEach<BulbItem>(room.Bulbs, async (bulb) =>
                     {
-                        bulb.GetBulb().Wait();
-                    }
+                        await bulb.GetBulbController();
+                    });
                 }
             }
 
@@ -88,10 +89,7 @@ namespace WiZ.Profiles
 
             JsonConvert.PopulateObject(json, obj, BulbCommand.DefaultJsonSettings);
 
-            foreach (var bulb in obj.Bulbs)
-            {
-                bulb.GetBulb().Wait();
-            }
+            Parallel.ForEach<BulbItem>(obj.Bulbs, async (bulb) => { await bulb.GetBulbController(); });
         }
 
         public void Serialize(IProfile profile)
@@ -105,6 +103,5 @@ namespace WiZ.Profiles
             }
             File.WriteAllText(Filename, json);
         }
-
     }
 }

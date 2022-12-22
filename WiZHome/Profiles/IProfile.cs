@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using WiZ.Observable;    
+using WiZ.Contracts;
+using WiZ.Observable;
 
 namespace WiZ.Profiles
 {
-
     public interface IProfile
     {
         Guid ProjectId { get; set; }
@@ -22,7 +22,5 @@ namespace WiZ.Profiles
         ObservableDictionary<MACAddress, BulbItem> Bulbs { get; set; }
 
         void BuildUpdateProfile(IEnumerable<IBulb> bulbs, bool removeMissing);
-
     }
-
 }
