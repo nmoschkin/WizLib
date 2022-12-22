@@ -77,7 +77,7 @@ namespace WiZ
         /// </summary>
         public const int DefaultPort = 38899;
 
-        public const int DefaultTimeout = 5000;
+        public const int DefaultTimeout = 2000;
 
         protected static Dictionary<MACAddress, Bulb> bulbCache = new Dictionary<MACAddress, Bulb>();
         protected static bool allUdpActive;
