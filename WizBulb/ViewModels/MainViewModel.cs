@@ -1,4 +1,5 @@
-﻿using DataTools.Graphics;
+﻿using DataTools.Desktop.Network;
+using DataTools.Graphics;
 using DataTools.Win32.Network;
 
 using System;
@@ -42,7 +43,7 @@ namespace WizBulb.ViewModels
 
     public class MainViewModel : ObservableBase
     {
-        private AdaptersCollection adapters;
+        private ObservableAdaptersCollection adapters;
 
         private ObservableDictionary<MACAddress, Bulb> allBulbs = new ObservableDictionary<MACAddress, Bulb>(nameof(Bulb.MACAddress));
 
@@ -129,7 +130,7 @@ namespace WizBulb.ViewModels
 
         public event ScanCompleteEvent ScanComplete;
 
-        public AdaptersCollection Adapters
+        public ObservableAdaptersCollection Adapters
         {
             get => adapters;
         }
@@ -834,7 +835,7 @@ namespace WizBulb.ViewModels
 
             await disp.BeginInvoke(() =>
             {
-                adapters = new AdaptersCollection();
+                adapters = new ObservableAdaptersCollection();
                 OnPropertyChanged("Adapters");
 
                 SelectedAdapter = null;

@@ -1198,8 +1198,6 @@ namespace WiZ
 
             buffer = Encoding.UTF8.GetBytes(data);
 
-            udpClient.Send(buffer, buffer.Length, "255.255.255.255", port);
-
             await t;
 
             udpClient?.Close();
