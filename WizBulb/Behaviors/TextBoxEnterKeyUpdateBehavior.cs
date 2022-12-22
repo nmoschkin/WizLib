@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Interactivity;
+
+using Microsoft.Xaml.Behaviors;
 
 namespace WizBulb.Behaviors
 {
     public class TextBoxEnterKeyUpdateBehavior : Behavior<TextBox>
     {
-        string stxt;
-
+        private string stxt;
 
         private static bool ValidateUpdateTarget(object value)
         {
@@ -37,7 +37,6 @@ namespace WizBulb.Behaviors
             }
         }
 
-
         public static readonly DependencyProperty ObservableUpdatePropertyProperty
             = DependencyProperty.Register(nameof(ObservableUpdateProperty), typeof(string), typeof(TextBoxEnterKeyUpdateBehavior), new PropertyMetadata(defaultValue: null), ValidateUpdateTarget);
 
@@ -52,8 +51,6 @@ namespace WizBulb.Behaviors
                 SetValue(ObservableUpdatePropertyProperty, value);
             }
         }
-
-
 
         private static bool ValidateTarget(object value)
         {
@@ -93,8 +90,6 @@ namespace WizBulb.Behaviors
             }
         }
 
-
-
         private object GetTarget(object item, string path)
         {
             if (string.IsNullOrEmpty(path))
@@ -114,7 +109,6 @@ namespace WizBulb.Behaviors
                 {
                     ini = p.GetValue(ini);
                 }
-
             }
 
             return ini;
@@ -187,8 +181,8 @@ namespace WizBulb.Behaviors
                 }
                 else if (e.Key == Key.Escape)
                 {
-                    e.Handled = true;                    
-                    
+                    e.Handled = true;
+
                     textBox.Text = stxt;
 
                     if (CancelFocusReceiver != null)

@@ -14,10 +14,10 @@ namespace WizBulb.Localization
     [ContentProperty("Text")]
     public class TranslateExtension : MarkupExtension
     {
-        CultureInfo ci = null;
-        const string ResourceId = "WizBulb.Localization.Resources.AppResources";
+        private CultureInfo ci = null;
+        private const string ResourceId = "WizBulb.Localization.Resources.AppResources";
 
-        static readonly Lazy<ResourceManager> ResMgr = new Lazy<ResourceManager>(
+        private static readonly Lazy<ResourceManager> ResMgr = new Lazy<ResourceManager>(
             () => new ResourceManager(ResourceId, IntrospectionExtensions.GetTypeInfo(typeof(AppResources)).Assembly));
 
         public string ResourceKey { get; set; }
@@ -54,7 +54,6 @@ namespace WizBulb.Localization
                 }
             }
 
-
             if (translation == null)
             {
                 ArgumentException ex = new ArgumentException(
@@ -66,11 +65,11 @@ namespace WizBulb.Localization
 #else
                 try
                 {
-                    translation = ResMgr.Value.GetString(Text, new CultureInfo("en")); // default to english
+                    translation = ResMgr.Value.GetString(ResourceKey, new CultureInfo("en")); // default to english
                 }
                 catch
                 {
-                    translation = Text; // HACK: returns the key, which GETS DISPLAYED TO THE USER
+                    translation = ResourceKey; // HACK: returns the key, which GETS DISPLAYED TO THE USER
                 }
 #endif
             }

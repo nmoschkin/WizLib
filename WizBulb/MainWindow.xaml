@@ -7,7 +7,7 @@
     xmlns:controls="clr-namespace:WizBulb.Controls"
     xmlns:conv="clr-namespace:WizBulb.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:i18n="clr-namespace:WizBulb.Localization"
     xmlns:local="clr-namespace:WizBulb"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"

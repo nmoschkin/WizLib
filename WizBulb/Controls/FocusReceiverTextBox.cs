@@ -8,14 +8,13 @@ using System.Windows.Controls;
 using System.Windows.Data;
 
 using System.Windows.Input;
-using System.Windows.Interactivity;
 
+using Microsoft.Xaml.Behaviors;
 
 namespace WizBulb.Controls
 {
     public class FocusReceiverTextBox : TextBox
     {
-
         private static bool ValidateTarget(object value)
         {
             if (value == null) return true;
@@ -53,11 +52,5 @@ namespace WizBulb.Controls
                 SetValue(ReturnFocusReceiverProperty, value);
             }
         }
-
-
-
-
-
-
     }
 }

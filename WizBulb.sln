@@ -27,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Desktop.WPF", "da
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Desktop.Network", "datatools-windows\WPF\DataTools.Desktop.Network\DataTools.Desktop.Network.csproj", "{59D8E04F-38E3-408D-9156-7B25098AD205}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WiZHome", "WiZHome\WiZHome.csproj", "{2FE1698F-404D-4930-96FE-177F16A3821A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WiZHome", "WiZHome\WiZHome.csproj", "{2FE1698F-404D-4930-96FE-177F16A3821A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -74,8 +74,8 @@ Global
 		{ABA7002F-5C9D-4D78-B167-EBB25706B3AB}.Release|ARM.Build.0 = Release|Any CPU
 		{ABA7002F-5C9D-4D78-B167-EBB25706B3AB}.Release|ARM64.ActiveCfg = Release|Any CPU
 		{ABA7002F-5C9D-4D78-B167-EBB25706B3AB}.Release|ARM64.Build.0 = Release|Any CPU
-		{ABA7002F-5C9D-4D78-B167-EBB25706B3AB}.Release|x64.ActiveCfg = Release|Any CPU
-		{ABA7002F-5C9D-4D78-B167-EBB25706B3AB}.Release|x64.Build.0 = Release|Any CPU
+		{ABA7002F-5C9D-4D78-B167-EBB25706B3AB}.Release|x64.ActiveCfg = Release|x64
+		{ABA7002F-5C9D-4D78-B167-EBB25706B3AB}.Release|x64.Build.0 = Release|x64
 		{ABA7002F-5C9D-4D78-B167-EBB25706B3AB}.Release|x86.ActiveCfg = Release|Any CPU
 		{ABA7002F-5C9D-4D78-B167-EBB25706B3AB}.Release|x86.Build.0 = Release|Any CPU
 		{BF3D0026-AB4D-4D9A-ABFA-338E0212481C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
