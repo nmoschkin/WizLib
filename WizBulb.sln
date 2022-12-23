@@ -11,21 +11,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Wiz", "Wiz", "{8504AAF8-EB4
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WiZ", "WiZ\WiZ.csproj", "{BF3D0026-AB4D-4D9A-ABFA-338E0212481C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools", "datatools-common\DataTools\DataTools.csproj", "{9E4C398C-9760-46BF-A321-6AABDD7F546C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools", "DataTools\Standard\DataTools\DataTools.csproj", "{9E4C398C-9760-46BF-A321-6AABDD7F546C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Graphics", "datatools-common\DataTools.Graphics\DataTools.Graphics.csproj", "{3A36AEDE-60C9-4521-BD51-FD8D8266FC68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Graphics", "DataTools\Standard\DataTools.Graphics\DataTools.Graphics.csproj", "{3A36AEDE-60C9-4521-BD51-FD8D8266FC68}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Win32", "datatools-win32\DataTools.Win32\DataTools.Win32.csproj", "{30FB0343-C524-4256-BD38-BFD5DD14BF42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Win32", "DataTools\Win32\DataTools.Win32\DataTools.Win32.csproj", "{30FB0343-C524-4256-BD38-BFD5DD14BF42}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Win32.Memory", "datatools-win32\DataTools.Win32.Memory\DataTools.Win32.Memory.csproj", "{FADC754B-ECE1-4AD0-AFE8-258271A8E754}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Win32.Memory", "DataTools\Win32\DataTools.Win32.Memory\DataTools.Win32.Memory.csproj", "{FADC754B-ECE1-4AD0-AFE8-258271A8E754}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Win32.Network", "datatools-win32\DataTools.Win32.Network\DataTools.Win32.Network.csproj", "{4372A04C-08C8-423B-9B88-C3F0E735FA3E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Win32.Network", "DataTools\Win32\DataTools.Win32.Network\DataTools.Win32.Network.csproj", "{4372A04C-08C8-423B-9B88-C3F0E735FA3E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.ColorControls", "datatools-windows\WPF\DataTools.ColorControls\DataTools.ColorControls.csproj", "{1F8CEA9C-9DA1-4AC5-9048-08C672AFDABF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.ColorControls", "DataTools\Windows\WPF\DataTools.ColorControls\DataTools.ColorControls.csproj", "{1F8CEA9C-9DA1-4AC5-9048-08C672AFDABF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Desktop.WPF", "datatools-windows\WPF\DataTools.Desktop.WPF\DataTools.Desktop.WPF.csproj", "{4CE1E286-A456-4B45-A1A8-1E7F0622A3B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Desktop.WPF", "DataTools\Windows\WPF\DataTools.Desktop.WPF\DataTools.Desktop.WPF.csproj", "{4CE1E286-A456-4B45-A1A8-1E7F0622A3B2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Desktop.Network", "datatools-windows\WPF\DataTools.Desktop.Network\DataTools.Desktop.Network.csproj", "{59D8E04F-38E3-408D-9156-7B25098AD205}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTools.Desktop.Network", "DataTools\Windows\WPF\DataTools.Desktop.Network\DataTools.Desktop.Network.csproj", "{59D8E04F-38E3-408D-9156-7B25098AD205}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WiZHome", "WiZHome\WiZHome.csproj", "{2FE1698F-404D-4930-96FE-177F16A3821A}"
 EndProject
