@@ -857,7 +857,7 @@ namespace WizBulb.ViewModels
 
             var disp = App.Current.Dispatcher;
 
-            var bulbs = await Bulb.ScanForBulbs(selAdapter.IPV4Address, (MACAddress)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetSystemConfig, Timeout * 1000,
+            var bulbs = await Bulb.ScanForBulbs(selAdapter.IPV4Address, (MACAddress)(PhysicalAddress)selAdapter.PhysicalAddress, ScanMode.GetPilot, Timeout * 1000,
             async (b) =>
             {
                 try
