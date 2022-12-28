@@ -796,6 +796,7 @@ namespace WiZ.Command
         /// Driver configuration.
         /// </summary>
         [JsonProperty("drvConf")]
+        [JsonConverter(typeof(TupleConverter))]
         public (int, int)? DrvConf
         {
             get => drvConf;

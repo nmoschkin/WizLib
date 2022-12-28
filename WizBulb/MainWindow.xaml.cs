@@ -12,7 +12,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 
 using WiZ;
-using WiZ.Helpers;
 using WiZ.Observable;
 
 using WizBulb.Converters;
@@ -228,7 +227,11 @@ namespace WizBulb
             Height = size.Height;
             mnuLoadLast.IsChecked = Settings.OpenLastOnStartup;
 
-            vm.RefreshAll().ContinueWith(async (t) =>
+            //var bulb = new Bulb("192.168.50.205");
+
+            //await bulb.GetSystemConfig();
+
+            _ = vm.RefreshAll().ContinueWith(async (t) =>
             {
                 await App.Current.Dispatcher.Invoke(async () =>
                 {
