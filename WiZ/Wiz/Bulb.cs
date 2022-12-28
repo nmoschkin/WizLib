@@ -1355,13 +1355,14 @@ namespace WiZ
             udpClient.DontFragment = true;
 
             var from = new IPEndPoint(0, 0);
-            var timeupVal = DateTime.Now.AddMilliseconds(timeout);
+            var timeupVal = DateTime.UtcNow.AddMilliseconds(timeout);
+            var straddr = addr.ToString();
 
             var t = Task.Run(async () =>
             {
                 int tdelc = 0;
 
-                while (timeupVal > DateTime.Now)
+                while (timeupVal > DateTime.UtcNow)
                 {
                     if (udpClient.Available > 0)
                     {
@@ -1385,13 +1386,13 @@ namespace WiZ
 
                     if (tdelc >= 50)
                     {
-                        udpClient.Send(buffer, buffer.Length, addr.ToString(), port);
+                        udpClient.Send(buffer, buffer.Length, straddr, port);
                         tdelc = 0;
                     }
                 }
             });
 
-            udpClient.Send(buffer, buffer.Length, addr.ToString(), port);
+            udpClient.Send(buffer, buffer.Length, straddr, port);
             await t;
 
             udpClient?.Close();
