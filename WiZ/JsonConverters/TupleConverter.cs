@@ -1,24 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+﻿using Newtonsoft.Json;
+
+using System;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-using Newtonsoft.Json;
+using WiZ.Command;
 
 namespace WiZ
 {
     /// <summary>
-    /// 2-element <see cref="int[]"/> to nullable tuple <see cref="JsonConverter{T}"/>.
+    /// 2-element <see cref="int[]"/> to nullable tuple <see cref="(int, int)?"/> (bidirectional)
     /// </summary>
+    /// <remarks>
+    /// Used exclusively for the <see cref="BulbParams.DriverConfig"/> property.
+    /// </remarks>
     internal sealed class TupleConverter : JsonConverter<(int, int)?>
     {
         public override (int, int)? ReadJson(JsonReader reader, Type objectType, (int, int)? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             if (reader is JsonTextReader jr)
             {
-
                 int x1 = 0;
                 int x2 = 0;
 
@@ -30,7 +31,6 @@ namespace WiZ
                     {
                         x2 = (int)j;
                     }
-
                 }
 
                 jr.Read();
