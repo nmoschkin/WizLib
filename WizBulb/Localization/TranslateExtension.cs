@@ -66,11 +66,11 @@ namespace WizBulb.Localization
 #else
                 try
                 {
-                    translation = ResMgr.Value.GetString(Text, new CultureInfo("en")); // default to english
+                    translation = ResMgr.Value.GetString(ResourceKey, new CultureInfo("en")); // default to english
                 }
                 catch
                 {
-                    translation = Text; // HACK: returns the key, which GETS DISPLAYED TO THE USER
+                    translation = ResourceKey; // HACK: returns the key, which GETS DISPLAYED TO THE USER
                 }
 #endif
             }

@@ -7,7 +7,7 @@
     xmlns:controls="clr-namespace:WizBulb.Controls"
     xmlns:conv="clr-namespace:WizBulb.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:i="clr-namespace:Microsoft.Xaml.Behaviors;assembly=Microsoft.Xaml.Behaviors"
     xmlns:i18n="clr-namespace:WizBulb.Localization"
     xmlns:local="clr-namespace:WizBulb"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -22,13 +22,9 @@
     <Window.Resources>
         <ResourceDictionary>
 
-            <conv:ProfilePartsConverter
-                x:Key="roomConv"
-                Part="Room" />
+            <conv:ProfilePartsConverter x:Key="roomConv" Part="Room" />
 
-            <conv:ProfilePartsConverter
-                x:Key="homeConv"
-                Part="Home" />
+            <conv:ProfilePartsConverter x:Key="homeConv" Part="Home" />
 
             <conv:SelectionConverter
                 x:Key="visConv"
@@ -50,9 +46,7 @@
 
             <conv:EmptyToVisibilityConverter x:Key="emptyVis" />
 
-            <conv:DistanceConverter
-                x:Key="distConv"
-                AsFeet="True" />
+            <conv:DistanceConverter x:Key="distConv" AsFeet="True" />
             <conv:MacAddrConverter x:Key="macConv" />
             <conv:EnumConverter x:Key="enumConv" />
             <conv:IntDisplayConverter
@@ -60,23 +54,17 @@
                 MaxValue="360"
                 MinValue="1" />
 
-            <Style
-                x:Key="BigStyle"
-                TargetType="Label">
+            <Style x:Key="BigStyle" TargetType="Label">
                 <Setter Property="FontSize" Value="14" />
             </Style>
 
-            <Style
-                x:Key="BigEditStyle"
-                TargetType="TextBox">
+            <Style x:Key="BigEditStyle" TargetType="TextBox">
                 <Setter Property="FontSize" Value="14" />
             </Style>
 
             <DataTemplate x:Key="HeaderTemplateArrowUp">
                 <DockPanel>
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        Text="{Binding}" />
+                    <TextBlock HorizontalAlignment="Center" Text="{Binding}" />
                     <Path
                         x:Name="arrow"
                         Data="M 5,10 L 15,10 L 10,5 L 5,10"
@@ -87,9 +75,7 @@
 
             <DataTemplate x:Key="HeaderTemplateArrowDown">
                 <DockPanel>
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        Text="{Binding}" />
+                    <TextBlock HorizontalAlignment="Center" Text="{Binding}" />
                     <Path
                         x:Name="arrow"
                         Data="M 5,5 L 15,5 L 10,10 L 5,5"
@@ -171,9 +157,7 @@
             Padding="4"
             Background="Transparent"
             FontSize="14">
-            <MenuItem
-                x:Name="mnuFile"
-                Header="_File">
+            <MenuItem x:Name="mnuFile" Header="_File">
                 <MenuItem
                     x:Name="mnuOpenProject"
                     Click="mnuOpenProject_Click"
@@ -188,9 +172,7 @@
 
                 <Separator />
 
-                <MenuItem
-                    x:Name="mnuRecents"
-                    Header="Recent Projects" />
+                <MenuItem x:Name="mnuRecents" Header="Recent Projects" />
 
                 <Separator />
 
@@ -275,9 +257,7 @@
 
                             <Separator />
 
-                            <MenuItem
-                                x:Name="mnuModes"
-                                Header="{i18n:Translate ResourceKey=LightModes}" />
+                            <MenuItem x:Name="mnuModes" Header="{i18n:Translate ResourceKey=LightModes}" />
 
                             <Separator />
 
@@ -460,9 +440,7 @@
 
                     <ListView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem
-                                x:Name="mnuRoomModes"
-                                Header="{i18n:Translate ResourceKey=LightModes}" />
+                            <MenuItem x:Name="mnuRoomModes" Header="{i18n:Translate ResourceKey=LightModes}" />
 
                             <Separator />
 
@@ -665,9 +643,7 @@
                         Margin="0,8,0,8"
                         VerticalAlignment="Center"
                         IsChecked="{Binding AutoWatch, Mode=TwoWay}">
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            Text="{i18n:Translate ResourceKey=LiveMonitor}" />
+                        <TextBlock VerticalAlignment="Center" Text="{i18n:Translate ResourceKey=LiveMonitor}" />
                     </CheckBox>
 
                     <TextBlock
@@ -687,9 +663,7 @@
                         Text="{Binding Interval, Mode=TwoWay, Converter={StaticResource intConv}}" />
                 </Grid>
 
-                <Grid
-                    Margin="0,8,0,0"
-                    Visibility="{Binding SelectedBulbs, Converter={StaticResource visConv}}">
+                <Grid Margin="0,8,0,0" Visibility="{Binding SelectedBulbs, Converter={StaticResource visConv}}">
 
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
@@ -717,9 +691,7 @@
                         Visibility="{Binding SelectedBulbs, Converter={StaticResource nameEdConv}}">
 
                         <i:Interaction.Behaviors>
-                            <behaviors:TextBoxEnterKeyUpdateBehavior
-                                CancelFocusReceiver="{x:Reference Name=BulbList}"
-                                ReturnFocusReceiver="{x:Reference Name=BulbList}" />
+                            <behaviors:TextBoxEnterKeyUpdateBehavior CancelFocusReceiver="{x:Reference Name=BulbList}" ReturnFocusReceiver="{x:Reference Name=BulbList}" />
                         </i:Interaction.Behaviors>
                     </TextBox>
 
@@ -838,9 +810,7 @@
                         Value="{Binding SelectedSpeed}" />
                 </Grid>
 
-                <Grid
-                    Margin="0,8,0,0"
-                    Visibility="{Binding SelectedBulbs, Converter={StaticResource visConv}}">
+                <Grid Margin="0,8,0,0" Visibility="{Binding SelectedBulbs, Converter={StaticResource visConv}}">
 
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
