@@ -11,7 +11,7 @@ The **WiZ** class library is implmented in .NET Standard and requires only the N
 
 The example program **WizBulb** is built for Windows Desktop in .NET 5.0, and requires the DataTools library. 
 
-When you clone the project, be sure to run __git submodule init__ and __git submodule update__ from the root project directory.
+The Submodules for DataTools are no longer present in this repo. You must clone the (https://github.com/nmoschkin/DataTools) repository and build NuGet packages, then create a local NuGet repository.
 
 Quick notes: When you select a bulb in the application, you can change the name by clicking into the text on the right-hand panel.  If you select all the bulbs in the room you can change the name of the room, and the name of the house.  
 
